@@ -47,20 +47,9 @@ export const BatchProcessingService = {
             allStructuredData.push(structuredData);
         }
 
-        // Merge results into a single consolidated JSON structure
-        return this._mergeStructuredData(allStructuredData);
+        // Merge results into a single consolidated JSON structure via LLM (Reduce Phase)
+        return LLMInferenceService.consolidateRecords(allStructuredData, (prog) => {
+            onProgress(100, total, total, 'structuring'); // Final progress push
+        });
     },
-
-    /**
-     * Helper to merge multiple JSON outputs from the LLM into one cohesive dataset.
-     */
-    _mergeStructuredData(datasets: any[]): Record<string, unknown> {
-        if (datasets.length === 1) return datasets[0];
-
-        // Simplistic merge: If the data is objects, we create a wrapper with an array.
-        // Or we just bundle them as an array under a `batchResults` key to avoid deep conflicts.
-        return {
-            batchResults: datasets
-        };
-    }
 };

@@ -16,8 +16,9 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
-import { useAppStore } from '../store/useAppStore';
+import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
+import { FieldManipulationSheet } from '../components/FieldManipulationSheet';
 
 interface PreviewScreenProps {
     onRetake: () => void;
@@ -25,8 +26,12 @@ interface PreviewScreenProps {
 }
 
 export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps) {
-    const { capture, validation } = useAppStore();
-    const uri = capture.preprocessedImageUri;
+    const { capture, validation, updateField, mergeFields, splitField, batchUpdateCategory } = useAppStore();
+    const uri = capture.preprocessedImageUris[0];
+
+    // Interactive correction state
+    const [selectedField, setSelectedField] = useState<ValidationField | null>(null);
+    const [showManipSheet, setShowManipSheet] = useState(false);
 
     // Real pixel dimensions of the source image
     const [imageDims, setImageDims] = useState<{ width: number; height: number } | null>(null);
@@ -99,6 +104,11 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
         ],
     }));
 
+    const handleFieldPress = useCallback((field: ValidationField) => {
+        setSelectedField(field);
+        setShowManipSheet(true);
+    }, []);
+
     if (!uri) {
         return (
             <View style={styles.loadingContainer}>
@@ -134,10 +144,27 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
                                 containerWidth={containerSize.width}
                                 containerHeight={containerSize.height}
                                 fields={validation.fields}
+                                selectedFieldId={selectedField?.id}
+                                onFieldPress={handleFieldPress}
                             />
                         )}
                     </Animated.View>
                 </GestureDetector>
+
+                {/* Field Manipulation Sheet */}
+                <FieldManipulationSheet
+                    visible={showManipSheet}
+                    targetField={selectedField}
+                    selectedIds={selectedField ? [selectedField.id] : []}
+                    allFields={validation.fields}
+                    onClose={() => setShowManipSheet(false)}
+                    onSplit={(id, idx) => splitField(id, idx)}
+                    onMerge={(src, tgt) => mergeFields(src, tgt)}
+                    onBatchCategory={(ids, cat) => {
+                        batchUpdateCategory(ids, cat);
+                        setSelectedField(null);
+                    }}
+                />
 
                 {/* Zoom hint badge */}
                 {imageDims && (
