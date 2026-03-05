@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
 import ExtractionScreen from './ExtractionScreen';
 import ValidationScreen from './ValidationScreen';
+import ColumnMappingScreen from './ColumnMappingScreen';
 import ExportScreen from './ExportScreen';
 import PrivacyGateScreen from './PrivacyGateScreen';
 import PermissionGate from '../components/PermissionGate';
@@ -13,8 +15,7 @@ import { DocumentScannerService } from '../services/DocumentScannerService';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
-// Light-weight conditional navigation for Phase 2
-type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'export';
+type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'columnMapping' | 'export';
 
 export default function AppNavigator() {
     const { setPreprocessedImage, resetSession, initializeValidation, isLocked } = useAppStore();
@@ -25,7 +26,6 @@ export default function AppNavigator() {
         mediaLibrary: 'undetermined',
     });
 
-    // Check permissions on mount
     useEffect(() => {
         PermissionService.getStatuses().then(setPermissions);
     }, []);
@@ -37,10 +37,9 @@ export default function AppNavigator() {
             setPreprocessedImage(result.images[0]);
             setScreen('preview');
         } else if (result.status === 'error') {
-            Alert.alert("Scanner Error", result.error || "Failed to scan document");
+            Alert.alert('Scanner Error', result.error || 'Failed to scan document');
             setScreen('home');
         } else {
-            // user cancelled the modal
             setScreen('home');
         }
     };
@@ -54,7 +53,6 @@ export default function AppNavigator() {
             setPermissions(current);
             setScreen('permission');
         } else {
-            // First time or soft-denied — request
             const result = await PermissionService.requestAll();
             setPermissions(result);
             if (PermissionService.allGranted(result)) {
@@ -78,9 +76,7 @@ export default function AppNavigator() {
         launchScanner();
     };
 
-    const handleAccept = () => {
-        setScreen('extraction');
-    };
+    const handleAccept = () => setScreen('extraction');
 
     const handleExtractionComplete = () => {
         const data = useAppStore.getState().extraction.extractedData;
@@ -98,7 +94,7 @@ export default function AppNavigator() {
     };
 
     return (
-        <View style={styles.root}>
+        <GestureHandlerRootView style={styles.root}>
             {isLocked && <PrivacyGateScreen />}
 
             {!isLocked && screen === 'home' && (
@@ -128,9 +124,17 @@ export default function AppNavigator() {
                     onExtractionError={handleExtractionError}
                 />
             )}
+
             {screen === 'validation' && (
                 <ValidationScreen
                     onBack={() => setScreen('home')}
+                    onContinue={() => setScreen('columnMapping')}
+                />
+            )}
+
+            {screen === 'columnMapping' && (
+                <ColumnMappingScreen
+                    onBack={() => setScreen('validation')}
                     onContinue={() => setScreen('export')}
                 />
             )}
@@ -143,7 +147,7 @@ export default function AppNavigator() {
                     }}
                 />
             )}
-        </View>
+        </GestureHandlerRootView>
     );
 }
 
