@@ -1,0 +1,59 @@
+FAIL __tests__/services/SecureStorageService.test.ts
+  ΓùÅ Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module expo-secure-store mapped as:
+    C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__mocks__\expo-secure-store.ts.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^expo-secure-store$/": "C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__mocks__\expo-secure-store.ts"
+      },
+      "resolver": undefined
+    }
+
+      3 | const mockStore: Record<string, string> = {};
+      4 |
+    > 5 | jest.mock('expo-secure-store', () => ({
+        |      ^
+      6 |     WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+      7 |     setItemAsync: jest.fn(async (key: string, value: string) => {
+      8 |         mockStore[key] = value;
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (__tests__/services/SecureStorageService.test.ts:5:6)
+
+FAIL __tests__/services/PermissionService.test.ts
+  ΓùÅ Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module expo-camera mapped as:
+    C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__mocks__\expo-camera.ts.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^expo-camera$/": "C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__mocks__\expo-camera.ts"
+      },
+      "resolver": undefined
+    }
+
+      3 | const mockMediaStatus = { status: 'undetermined' };
+      4 |
+    > 5 | jest.mock('expo-camera', () => ({
+        |      ^
+      6 |     Camera: {
+      7 |         getCameraPermissionsAsync: jest.fn(async () => mockCameraStatus),
+      8 |         requestCameraPermissionsAsync: jest.fn(async () => mockCameraStatus),
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (__tests__/services/PermissionService.test.ts:5:6)
+
+Test Suites: 2 failed, 2 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        6.245 s
+Ran all test suites.
