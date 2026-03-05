@@ -15,10 +15,11 @@ import SettingsScreen from './SettingsScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
+import UploadScreen from './UploadScreen';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
-type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings';
+type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
 
 export default function AppNavigator() {
     const { isLocked, setLocked, initializeValidation } = useAppStore();
@@ -95,6 +96,27 @@ export default function AppNavigator() {
         launchScanner(useAppStore.getState().capture.isBatchMode);
     };
 
+    // ── Upload handlers ──────────────────────────────────────────────────────
+    const handleUploadImagesReady = (uris: string[]) => {
+        useAppStore.getState().setPreprocessedImages(uris);
+        useAppStore.getState().setIsBatchMode(uris.length > 1);
+        setScreen(uris.length > 1 ? 'batchReview' : 'preview');
+    };
+
+    const handleUploadStructuredData = (data: Record<string, unknown>) => {
+        useAppStore.getState().initializeValidation(data);
+        setScreen('validation');
+    };
+
+    const handleUploadTextContent = (text: string) => {
+        // Treat extracted text as if it were a scanned image URI (special text URI)
+        // Store it as a preprocessed item that BatchProcessingService can consume
+        const textUri = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`;
+        useAppStore.getState().setPreprocessedImages([textUri]);
+        useAppStore.getState().setIsBatchMode(false);
+        setScreen('extraction');
+    };
+
     const handleAccept = () => setScreen('extraction');
 
     const handleExtractionComplete = () => {
@@ -127,6 +149,17 @@ export default function AppNavigator() {
                 return (
                     <Animated.View key="settings" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
                         <SettingsScreen onBack={() => setScreen('home')} />
+                    </Animated.View>
+                );
+            case 'upload':
+                return (
+                    <Animated.View key="upload" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <UploadScreen
+                            onBack={() => setScreen('home')}
+                            onImagesReady={handleUploadImagesReady}
+                            onStructuredData={handleUploadStructuredData}
+                            onTextContent={handleUploadTextContent}
+                        />
                     </Animated.View>
                 );
             case 'permission':

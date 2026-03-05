@@ -3,7 +3,7 @@ export interface UploadedFile {
     name: string;
     mimeType: string;
     size?: number;
-    // Raw content for non-image types
+    // Raw content for non-image types (ArrayBuffer on native, DataURL/ArrayBuffer on web)
     content?: string | ArrayBuffer;
 }
 
@@ -27,3 +27,15 @@ export const MIME_TYPES: Record<FileCategory, string[]> = {
         'application/msword',
     ],
 };
+
+/**
+ * pickFiles is implemented per-platform in UploadService.native.ts / UploadService.web.ts.
+ * This stub keeps TypeScript happy; Metro replaces it at bundle time.
+ */
+export async function pickFiles(
+    _categories: FileCategory[],
+    _multiple?: boolean,
+): Promise<UploadResult> {
+    return { status: 'error', error: 'pickFiles: no platform implementation found' };
+}
+
