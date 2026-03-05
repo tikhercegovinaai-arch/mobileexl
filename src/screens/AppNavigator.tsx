@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import HomeScreen from './HomeScreen';
@@ -9,16 +9,17 @@ import ValidationScreen from './ValidationScreen';
 import ColumnMappingScreen from './ColumnMappingScreen';
 import ExportScreen from './ExportScreen';
 import PrivacyGateScreen from './PrivacyGateScreen';
+import SettingsScreen from './SettingsScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
-type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'columnMapping' | 'export';
+type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings';
 
 export default function AppNavigator() {
-    const { setPreprocessedImage, resetSession, initializeValidation, isLocked } = useAppStore();
+    const { setPreprocessedImage, resetSession, initializeValidation, isLocked, setLocked } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -28,6 +29,17 @@ export default function AppNavigator() {
 
     useEffect(() => {
         PermissionService.getStatuses().then(setPermissions);
+
+        // Auto-lock when app goes to background
+        const subscription = AppState.addEventListener('change', (nextAppState) => {
+            if (nextAppState === 'background' || nextAppState === 'inactive') {
+                setLocked(true);
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
     }, []);
 
     const launchScanner = async () => {
@@ -100,8 +112,12 @@ export default function AppNavigator() {
             {!isLocked && screen === 'home' && (
                 <HomeScreen
                     onStartCapture={handleStartCapture}
-                    onOpenSettings={() => console.info('Settings available in Phase 6')}
+                    onOpenSettings={() => setScreen('settings')}
                 />
+            )}
+
+            {screen === 'settings' && (
+                <SettingsScreen onBack={() => setScreen('home')} />
             )}
 
             {screen === 'permission' && (

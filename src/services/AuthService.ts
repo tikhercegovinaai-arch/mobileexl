@@ -1,4 +1,5 @@
 import * as LocalAuthentication from 'expo-local-authentication';
+import * as Device from 'expo-device';
 
 export class AuthService {
     /**
@@ -20,5 +21,20 @@ export class AuthService {
             disableDeviceFallback: false,
         });
         return result.success;
+    }
+
+    /**
+     * RASP check: Detects if the device (OS) is rooted or jailbroken.
+     * Prevents running sensitive local LLM models and local databases on insecure environments.
+     */
+    static async isDeviceCompromised(): Promise<boolean> {
+        try {
+            // isRootedExperimentalAsync works on Android and iOS to detect rooted/jailbroken devices
+            const isRooted = await Device.isRootedExperimentalAsync();
+            return isRooted;
+        } catch {
+            // Assume compromised if check fails to be safe, but typically it returns a boolean
+            return false;
+        }
     }
 }

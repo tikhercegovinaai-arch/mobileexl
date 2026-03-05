@@ -15,11 +15,19 @@ export default function PrivacyGateScreen() {
     const { setLocked } = useAppStore();
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isCompromised, setIsCompromised] = useState(false);
 
     const handleAuthenticate = async () => {
         setIsAuthenticating(true);
         setError(null);
         try {
+            // RASP Check first
+            const compromised = await AuthService.isDeviceCompromised();
+            if (compromised) {
+                setIsCompromised(true);
+                return;
+            }
+
             const success = await AuthService.authenticate();
             if (success) {
                 setLocked(false);
@@ -45,14 +53,18 @@ export default function PrivacyGateScreen() {
                     <Text style={styles.icon}>🔒</Text>
                 </View>
 
-                <Text style={styles.title}>Secure Access</Text>
-                <Text style={styles.subtitle}>
-                    This application contains sensitive medical documents. Biometric authentication is required.
+                <Text style={styles.title}>
+                    {isCompromised ? 'Security Alert' : 'Secure Access'}
+                </Text>
+                <Text style={[styles.subtitle, isCompromised && { color: Colors.error }]}>
+                    {isCompromised
+                        ? 'This device appears to be rooted or jailbroken. To protect sensitive offline data and AI models, access is permanently disabled on compromised environments.'
+                        : 'This application contains sensitive medical documents. Biometric authentication is required.'}
                 </Text>
 
-                {error && <Text style={styles.errorText}>{error}</Text>}
+                {!isCompromised && error && <Text style={styles.errorText}>{error}</Text>}
 
-                {isAuthenticating ? (
+                {isCompromised ? null : isAuthenticating ? (
                     <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
                 ) : (
                     <TouchableOpacity style={styles.authButton} onPress={handleAuthenticate}>

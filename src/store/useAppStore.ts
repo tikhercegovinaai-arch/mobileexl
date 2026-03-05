@@ -56,8 +56,14 @@ export interface ExtractionJob {
     extractedData: Record<string, unknown> | null;
 }
 
+export interface AppSettings {
+    anonymousCrashReporting: boolean;
+    saveToCameraRoll: boolean;
+}
+
 export interface AppSessionState {
     isOnboardingDone: boolean;
+    settings: AppSettings;
     currentRoute: AppRoute;
     capture: CaptureSession;
     extraction: ExtractionJob;
@@ -87,6 +93,7 @@ export interface AppSessionState {
     removeColumnMapping: (columnKey: string) => void;
     setExportPath: (path: string | null) => void;
     setLocked: (locked: boolean) => void;
+    updateSettings: (newSettings: Partial<AppSettings>) => void;
     resetSession: () => void;
 }
 
@@ -117,6 +124,10 @@ const initialValidation: ValidationJob = {
 
 export const useAppStore = create<AppSessionState>((set) => ({
     isOnboardingDone: false,
+    settings: {
+        anonymousCrashReporting: false,
+        saveToCameraRoll: false,
+    },
     currentRoute: 'Onboarding',
     capture: initialCapture,
     extraction: initialExtraction,
@@ -325,4 +336,9 @@ export const useAppStore = create<AppSessionState>((set) => ({
             columnMappings: [],
             currentRoute: 'Home',
         }),
+
+    updateSettings: (newSettings) =>
+        set((state) => ({
+            settings: { ...state.settings, ...newSettings },
+        })),
 }));
