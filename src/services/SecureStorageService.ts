@@ -4,4 +4,4 @@
  * Metro resolves the correct platform file at bundle time.
  * This shim exists purely so TypeScript can find the type declarations.
  */
-export { SecureStorageService } from './SecureStorageService.native';
+export { SecureStorageService, STORAGE_KEYS } from './SecureStorageService.native';
