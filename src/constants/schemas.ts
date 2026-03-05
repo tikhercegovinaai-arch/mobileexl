@@ -22,6 +22,6 @@ const ExtractionSchemaZod = z.object({
     }).optional()
 });
 
-export const EXTRACTION_SCHEMA = zodToJsonSchema(ExtractionSchemaZod, { target: "jsonSchema7" });
+export const EXTRACTION_SCHEMA = zodToJsonSchema(ExtractionSchemaZod as any, { target: "jsonSchema7" });
 
 export type ExtractionData = z.infer<typeof ExtractionSchemaZod>;
