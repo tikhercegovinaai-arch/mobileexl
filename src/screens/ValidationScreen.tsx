@@ -32,7 +32,7 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                 { text: "Cancel", style: "cancel" },
                 {
                     text: "Save",
-                    onPress: (val) => val && updateField(field.id, val)
+                    onPress: (val: string | undefined) => val && updateField(field.id, val)
                 }
             ],
             "plain-text",
