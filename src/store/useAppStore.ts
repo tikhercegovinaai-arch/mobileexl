@@ -42,6 +42,11 @@ export interface ValidationJob {
     isDirty: boolean;
 }
 
+export interface ColumnMapping {
+    columnKey: string;
+    fieldIds: string[];
+}
+
 export interface ExtractionJob {
     jobId: string | null;
     status: 'idle' | 'running' | 'success' | 'error';
@@ -57,6 +62,7 @@ export interface AppSessionState {
     capture: CaptureSession;
     extraction: ExtractionJob;
     validation: ValidationJob;
+    columnMappings: ColumnMapping[];
     currentExportPath: string | null;
     isLocked: boolean;
 
@@ -73,6 +79,12 @@ export interface AppSessionState {
     updateField: (id: string, value: string) => void;
     setFieldCategory: (id: string, category: string) => void;
     mergeFields: (sourceId: string, targetId: string) => void;
+    /** Split a field value at the given character index into two new fields */
+    splitField: (id: string, splitIndex: number) => void;
+    /** Assign the same category to multiple fields at once */
+    batchUpdateCategory: (ids: string[], category: string) => void;
+    setColumnMappings: (mappings: ColumnMapping[]) => void;
+    removeColumnMapping: (columnKey: string) => void;
     setExportPath: (path: string | null) => void;
     setLocked: (locked: boolean) => void;
     resetSession: () => void;
@@ -109,6 +121,7 @@ export const useAppStore = create<AppSessionState>((set) => ({
     capture: initialCapture,
     extraction: initialExtraction,
     validation: initialValidation,
+    columnMappings: [],
     currentExportPath: null,
     isLocked: true,
 
@@ -249,6 +262,57 @@ export const useAppStore = create<AppSessionState>((set) => ({
             };
         }),
 
+    splitField: (id, splitIndex) =>
+        set((state) => {
+            const field = state.validation.fields.find((f) => f.id === id);
+            if (!field) return state;
+
+            const safeIndex = Math.max(1, Math.min(splitIndex, field.value.length - 1));
+            const partA = field.value.slice(0, safeIndex).trim();
+            const partB = field.value.slice(safeIndex).trim();
+            if (!partA || !partB) return state;
+
+            const fieldA: ValidationField = {
+                ...field,
+                id: `${field.id}_a`,
+                value: partA,
+            };
+            const fieldB: ValidationField = {
+                ...field,
+                id: `${field.id}_b`,
+                label: `${field.label} (2)`,
+                value: partB,
+            };
+
+            return {
+                validation: {
+                    ...state.validation,
+                    isDirty: true,
+                    fields: state.validation.fields.flatMap((f) =>
+                        f.id === id ? [fieldA, fieldB] : [f]
+                    ),
+                },
+            };
+        }),
+
+    batchUpdateCategory: (ids, category) =>
+        set((state) => ({
+            validation: {
+                ...state.validation,
+                isDirty: true,
+                fields: state.validation.fields.map((f) =>
+                    ids.includes(f.id) ? { ...f, category } : f
+                ),
+            },
+        })),
+
+    setColumnMappings: (mappings) => set({ columnMappings: mappings }),
+
+    removeColumnMapping: (columnKey) =>
+        set((state) => ({
+            columnMappings: state.columnMappings.filter((m) => m.columnKey !== columnKey),
+        })),
+
     setExportPath: (path) => set({ currentExportPath: path }),
 
     setLocked: (locked) => set({ isLocked: locked }),
@@ -258,6 +322,7 @@ export const useAppStore = create<AppSessionState>((set) => ({
             capture: initialCapture,
             extraction: initialExtraction,
             validation: initialValidation,
+            columnMappings: [],
             currentRoute: 'Home',
         }),
 }));
