@@ -16,14 +16,17 @@ import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
 import { ExcelExportService, ExportFormat } from '../services/ExcelExportService';
 import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelInjectorService';
+import { AnalyticsService } from '../services/AnalyticsService';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 
 interface ExportScreenProps {
     onDone: () => void;
 }
 
 export default function ExportScreen({ onDone }: ExportScreenProps) {
-    const { validation, columnMappings, setExportPath, currentExportPath } = useAppStore();
+    const { validation, columnMappings, setExportPath, currentExportPath, extraction } = useAppStore();
 
+    const [activeTab, setActiveTab] = useState<'export' | 'analytics'>('export');
     const [isExporting, setIsExporting] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('xlsx');
     const [customFilename, setCustomFilename] = useState('');
@@ -32,6 +35,10 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
     const avgConfidence = Math.round(
         (validation.fields.reduce((s, f) => s + f.confidence, 0) / (validation.fields.length || 1)) * 100,
     );
+
+    const aggregatedData = React.useMemo(() => {
+        return AnalyticsService.aggregateData(extraction.extractedData || {});
+    }, [extraction.extractedData]);
 
     /** Generate the xlsx using the injector (column-mapped) when mappings exist, otherwise fall back to ExcelExportService */
     const generateFile = async (): Promise<string> => {
@@ -91,94 +98,114 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Icon */}
-                <View style={[styles.iconContainer, { backgroundColor: Colors.success + '20' }]}>
-                    <Text style={styles.icon}>📊</Text>
-                </View>
+            {/* Tab navigation */}
+            <View style={styles.tabBar}>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'export' && styles.activeTab]}
+                    onPress={() => setActiveTab('export')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'export' && styles.activeTabText]}>Export Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'analytics' && styles.activeTab]}
+                    onPress={() => setActiveTab('analytics')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'analytics' && styles.activeTabText]}>Analytics</Text>
+                </TouchableOpacity>
+            </View>
 
-                <Text style={styles.title}>Export Ready</Text>
-                <Text style={styles.subtitle}>
-                    {validation.fields.length} fields validated.
-                    {columnMappings.length > 0
-                        ? ` ${columnMappings.length} columns mapped.`
-                        : ' No column mapping applied.'}
-                </Text>
+            {activeTab === 'analytics' ? (
+                <AnalyticsDashboard data={aggregatedData} />
+            ) : (
+                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                    {/* Icon */}
+                    <View style={[styles.iconContainer, { backgroundColor: Colors.success + '20' }]}>
+                        <Text style={styles.icon}>📊</Text>
+                    </View>
 
-                {/* Stats */}
-                <View style={styles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{validation.fields.length}</Text>
-                        <Text style={styles.statLabel}>Fields</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{avgConfidence}%</Text>
-                        <Text style={styles.statLabel}>Avg Conf.</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{columnMappings.length}</Text>
-                        <Text style={styles.statLabel}>Columns</Text>
-                    </View>
-                </View>
+                    <Text style={styles.title}>Export Ready</Text>
+                    <Text style={styles.subtitle}>
+                        {validation.fields.length} fields validated.
+                        {columnMappings.length > 0
+                            ? ` ${columnMappings.length} columns mapped.`
+                            : ' No column mapping applied.'}
+                    </Text>
 
-                {/* Format selector */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionLabel}>Export Format</Text>
-                    <View style={styles.formatRow}>
-                        {(['xlsx', 'csv'] as ExportFormat[]).map((f) => (
-                            <TouchableOpacity
-                                key={f}
-                                style={[styles.formatChip, format === f && styles.formatChipActive]}
-                                onPress={() => setFormat(f)}
-                            >
-                                <Text style={[styles.formatChipText, format === f && styles.formatChipTextActive]}>
-                                    .{f.toUpperCase()}
+                    {/* Stats */}
+                    <View style={styles.statsContainer}>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{validation.fields.length}</Text>
+                            <Text style={styles.statLabel}>Fields</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{avgConfidence}%</Text>
+                            <Text style={styles.statLabel}>Avg Conf.</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{columnMappings.length}</Text>
+                            <Text style={styles.statLabel}>Columns</Text>
+                        </View>
+                    </View>
+
+                    {/* Format selector */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionLabel}>Export Format</Text>
+                        <View style={styles.formatRow}>
+                            {(['xlsx', 'csv'] as ExportFormat[]).map((f) => (
+                                <TouchableOpacity
+                                    key={f}
+                                    style={[styles.formatChip, format === f && styles.formatChipActive]}
+                                    onPress={() => setFormat(f)}
+                                >
+                                    <Text style={[styles.formatChipText, format === f && styles.formatChipTextActive]}>
+                                        .{f.toUpperCase()}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Filename */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionLabel}>Filename (optional)</Text>
+                        <TextInput
+                            style={styles.filenameInput}
+                            placeholder={`Extraction_${Date.now()}`}
+                            placeholderTextColor={Colors.textMuted}
+                            value={customFilename}
+                            onChangeText={setCustomFilename}
+                            autoCapitalize="none"
+                        />
+                    </View>
+
+                    {isExporting ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={Colors.primary} />
+                            <Text style={styles.loadingText}>Generating File…</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.buttonStack}>
+                            <TouchableOpacity style={styles.primaryButton} onPress={handleShare}>
+                                <Text style={styles.primaryButtonText}>
+                                    ↗ Share / Save to Files
                                 </Text>
                             </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
 
-                {/* Filename */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionLabel}>Filename (optional)</Text>
-                    <TextInput
-                        style={styles.filenameInput}
-                        placeholder={`Extraction_${Date.now()}`}
-                        placeholderTextColor={Colors.textMuted}
-                        value={customFilename}
-                        onChangeText={setCustomFilename}
-                        autoCapitalize="none"
-                    />
-                </View>
+                            <TouchableOpacity style={styles.ghostButton} onPress={onDone}>
+                                <Text style={styles.ghostButtonText}>Finish Session</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
-                {isExporting ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={Colors.primary} />
-                        <Text style={styles.loadingText}>Generating File…</Text>
-                    </View>
-                ) : (
-                    <View style={styles.buttonStack}>
-                        <TouchableOpacity style={styles.primaryButton} onPress={handleShare}>
-                            <Text style={styles.primaryButtonText}>
-                                ↗ Share / Save to Files
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.ghostButton} onPress={onDone}>
-                            <Text style={styles.ghostButtonText}>Finish Session</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {savedPath && (
-                    <Text style={styles.savedPathText} numberOfLines={2}>
-                        ✓ Saved: {savedPath}
-                    </Text>
-                )}
-            </ScrollView>
+                    {savedPath && (
+                        <Text style={styles.savedPathText} numberOfLines={2}>
+                            ✓ Saved: {savedPath}
+                        </Text>
+                    )}
+                </ScrollView>
+            )}
         </SafeAreaView>
     );
 }
@@ -187,6 +214,30 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.background,
+    },
+    tabBar: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.border,
+        backgroundColor: Colors.surface,
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: Spacing.md,
+        alignItems: 'center',
+    },
+    activeTab: {
+        borderBottomWidth: 2,
+        borderBottomColor: Colors.primary,
+    },
+    tabText: {
+        color: Colors.textSecondary,
+        fontSize: Typography.fontSizeSM,
+        fontWeight: Typography.fontWeightMedium,
+    },
+    activeTabText: {
+        color: Colors.primary,
+        fontWeight: Typography.fontWeightBold,
     },
     content: {
         padding: Spacing.xl,
