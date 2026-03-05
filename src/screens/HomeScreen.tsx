@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -7,6 +7,7 @@ import {
     SafeAreaView,
     StatusBar,
     Switch,
+    Animated,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 
@@ -19,7 +20,7 @@ const FEATURES = [
     {
         icon: '📷',
         title: 'Smart Capture',
-        description: 'Auto-align and scan handwritten documents with precision',
+        description: 'Auto-align and scan handwritten documents',
     },
     {
         icon: '🤖',
@@ -29,75 +30,115 @@ const FEATURES = [
     {
         icon: '📊',
         title: 'Excel Export',
-        description: 'Structured data injected directly into .xlsx files',
+        description: 'Structured data into .xlsx files',
     },
 ];
 
 export default function HomeScreen({ onStartCapture, onOpenSettings }: HomeScreenProps) {
     const [isBatchMode, setIsBatchMode] = useState(false);
 
+    // Entrance animations
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(30)).current;
+    const buttonScale = useRef(new Animated.Value(0.95)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true,
+            }),
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 20,
+                friction: 7,
+                useNativeDriver: true,
+            }),
+            Animated.spring(buttonScale, {
+                toValue: 1,
+                tension: 50,
+                friction: 5,
+                delay: 400,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.background} />
 
             {/* ── Header ───────────────────────────────────────────── */}
-            <View style={styles.header}>
+            <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                 <View>
                     <Text style={styles.appName}>Exelent</Text>
                     <Text style={styles.tagline}>AI Handwriting → Excel</Text>
                 </View>
-                <TouchableOpacity style={styles.settingsButton} onPress={onOpenSettings}>
+                <TouchableOpacity style={styles.settingsButton} onPress={onOpenSettings} activeOpacity={0.7}>
                     <Text style={styles.settingsIcon}>⚙️</Text>
                 </TouchableOpacity>
-            </View>
+            </Animated.View>
 
             {/* ── Hero area ─────────────────────────────────────────── */}
-            <View style={styles.hero}>
+            <Animated.View style={[styles.hero, { opacity: fadeAnim, transform: [{ scale: fadeAnim }] }]}>
                 <View style={styles.heroIconWrapper}>
                     <Text style={styles.heroIcon}>✍️</Text>
+                    <View style={styles.glow} />
                 </View>
-                <Text style={styles.heroTitle}>Capture & Extract</Text>
+                <Text style={styles.heroTitle}>Transform Data</Text>
                 <Text style={styles.heroSubtitle}>
-                    Point your camera at any handwritten document and let on-device AI
-                    transform it into structured spreadsheet data — privately.
+                    Point your camera at handwritten documents and let AI
+                    convert them into structured tables — privately.
                 </Text>
-            </View>
+            </Animated.View>
 
             {/* ── Feature cards ─────────────────────────────────────── */}
             <View style={styles.featureRow}>
-                {FEATURES.map((f) => (
-                    <View key={f.title} style={styles.featureCard}>
+                {FEATURES.map((f, i) => (
+                    <Animated.View
+                        key={f.title}
+                        style={[
+                            styles.featureCard,
+                            {
+                                opacity: fadeAnim,
+                                transform: [{ translateY: Animated.multiply(slideAnim, (i + 1) * 0.5) }]
+                            }
+                        ]}
+                    >
                         <Text style={styles.featureIcon}>{f.icon}</Text>
                         <Text style={styles.featureTitle}>{f.title}</Text>
                         <Text style={styles.featureDesc}>{f.description}</Text>
-                    </View>
+                    </Animated.View>
                 ))}
             </View>
 
             {/* ── CTA ───────────────────────────────────────────────── */}
-            <View style={styles.batchToggleContainer}>
-                <Text style={styles.batchToggleLabel}>Batch Mode</Text>
-                <Switch
-                    value={isBatchMode}
-                    onValueChange={setIsBatchMode}
-                    trackColor={{ false: Colors.border, true: Colors.primary }}
-                    thumbColor={Colors.card}
-                />
-            </View>
+            <Animated.View style={[styles.ctaContainer, { opacity: fadeAnim, transform: [{ scale: buttonScale }] }]}>
+                <View style={styles.batchToggleContainer}>
+                    <Text style={styles.batchToggleLabel}>Batch Mode</Text>
+                    <Switch
+                        value={isBatchMode}
+                        onValueChange={setIsBatchMode}
+                        trackColor={{ false: Colors.border, true: Colors.primary }}
+                        thumbColor={Colors.textPrimary}
+                    />
+                </View>
 
-            <TouchableOpacity
-                style={styles.captureButton}
-                onPress={() => onStartCapture(isBatchMode)}
-                activeOpacity={0.85}
-            >
-                <Text style={styles.captureButtonIcon}>{isBatchMode ? '📑' : '📷'}</Text>
-                <Text style={styles.captureButtonText}>
-                    {isBatchMode ? 'Start Batch Capture' : 'Start Capture'}
-                </Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.captureButton, isBatchMode && styles.captureButtonBatch]}
+                    onPress={() => onStartCapture(isBatchMode)}
+                    activeOpacity={0.85}
+                >
+                    <Text style={styles.captureButtonIcon}>{isBatchMode ? '📑' : '📷'}</Text>
+                    <Text style={styles.captureButtonText}>
+                        {isBatchMode ? 'Start Batch Capture' : 'Start Capture'}
+                    </Text>
+                </TouchableOpacity>
+            </Animated.View>
 
             {/* ── Footer ───────────────────────────────────────────── */}
-            <Text style={styles.footer}>All data processed on-device · GDPR Ready</Text>
+            <Text style={styles.footer}>Local Neural Engine · GDPR Ready</Text>
         </SafeAreaView>
     );
 }
@@ -129,13 +170,15 @@ const styles = StyleSheet.create({
     settingsButton: {
         width: 44,
         height: 44,
-        borderRadius: BorderRadius.md,
-        backgroundColor: Colors.surfaceAlt,
+        borderRadius: 22,
+        backgroundColor: Colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: Colors.border,
     },
     settingsIcon: {
-        fontSize: 22,
+        fontSize: 20,
     },
 
     // Hero
@@ -144,15 +187,24 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     heroIconWrapper: {
-        width: 88,
-        height: 88,
-        borderRadius: BorderRadius.xl,
-        backgroundColor: `${Colors.primary}22`,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: Colors.card,
         borderWidth: 1,
-        borderColor: `${Colors.primary}55`,
+        borderColor: Colors.primary + '44',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: Spacing.md,
+        position: 'relative',
+    },
+    glow: {
+        position: 'absolute',
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: Colors.primary + '10',
+        zIndex: -1,
     },
     heroIcon: {
         fontSize: 44,
@@ -197,18 +249,21 @@ const styles = StyleSheet.create({
         color: Colors.textPrimary,
     },
     featureDesc: {
-        fontSize: Typography.fontSizeXS,
+        fontSize: 10,
         color: Colors.textMuted,
-        lineHeight: 16,
+        lineHeight: 14,
     },
 
     // CTA
+    ctaContainer: {
+        width: '100%',
+    },
     batchToggleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: Spacing.sm,
-        marginBottom: Spacing.md,
+        marginBottom: Spacing.lg,
     },
     batchToggleLabel: {
         fontSize: Typography.fontSizeSM,
@@ -222,22 +277,34 @@ const styles = StyleSheet.create({
         gap: Spacing.sm,
         backgroundColor: Colors.primary,
         borderRadius: BorderRadius.lg,
-        paddingVertical: Spacing.md + 2,
+        paddingVertical: Spacing.lg,
         marginBottom: Spacing.lg,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 6,
+    },
+    captureButtonBatch: {
+        backgroundColor: Colors.secondary,
+        shadowColor: Colors.secondary,
     },
     captureButtonIcon: {
         fontSize: Typography.fontSizeLG,
     },
     captureButtonText: {
         fontSize: Typography.fontSizeLG,
-        fontWeight: Typography.fontWeightSemiBold,
-        color: Colors.textPrimary,
+        fontWeight: Typography.fontWeightBold,
+        color: 'white',
     },
 
     footer: {
         textAlign: 'center',
-        fontSize: Typography.fontSizeXS,
+        fontSize: 10,
         color: Colors.textMuted,
-        marginBottom: Spacing.md,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: Spacing.lg,
     },
 });
+

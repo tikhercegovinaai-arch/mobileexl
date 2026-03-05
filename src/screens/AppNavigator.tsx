@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, Alert, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
@@ -111,71 +112,97 @@ export default function AppNavigator() {
         setScreen('home');
     };
 
+    const renderScreen = () => {
+        switch (screen) {
+            case 'home':
+                return (
+                    <Animated.View key="home" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <HomeScreen
+                            onStartCapture={handleStartCapture}
+                            onOpenSettings={() => setScreen('settings')}
+                        />
+                    </Animated.View>
+                );
+            case 'settings':
+                return (
+                    <Animated.View key="settings" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <SettingsScreen onBack={() => setScreen('home')} />
+                    </Animated.View>
+                );
+            case 'permission':
+                return (
+                    <Animated.View key="permission" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <PermissionGate
+                            status={permissions.camera === 'blocked' ? 'blocked' : 'denied'}
+                            onRequestPermission={handlePermissionRequest}
+                        />
+                    </Animated.View>
+                );
+            case 'preview':
+                return (
+                    <Animated.View key="preview" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <PreviewScreen
+                            onRetake={handleRetake}
+                            onAccept={handleAccept}
+                        />
+                    </Animated.View>
+                );
+            case 'batchReview':
+                return (
+                    <Animated.View key="batchReview" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <BatchReviewScreen
+                            onRetake={handleRetake}
+                            onAccept={handleAccept}
+                        />
+                    </Animated.View>
+                );
+            case 'extraction':
+                return (
+                    <Animated.View key="extraction" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <ExtractionScreen
+                            onExtractionComplete={handleExtractionComplete}
+                            onExtractionError={handleExtractionError}
+                        />
+                    </Animated.View>
+                );
+            case 'validation':
+                return (
+                    <Animated.View key="validation" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <ValidationScreen
+                            onBack={() => setScreen('home')}
+                            onContinue={() => setScreen('columnMapping')}
+                        />
+                    </Animated.View>
+                );
+            case 'columnMapping':
+                return (
+                    <Animated.View key="columnMapping" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <ColumnMappingScreen
+                            onBack={() => setScreen('validation')}
+                            onContinue={() => setScreen('export')}
+                        />
+                    </Animated.View>
+                );
+            case 'export':
+                return (
+                    <Animated.View key="export" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <ExportScreen
+                            onDone={() => {
+                                useAppStore.getState().resetSession();
+                                setScreen('home');
+                            }}
+                        />
+                    </Animated.View>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <GestureHandlerRootView style={styles.root}>
             {isLocked && <PrivacyGateScreen />}
-
-            {!isLocked && screen === 'home' && (
-                <HomeScreen
-                    onStartCapture={handleStartCapture}
-                    onOpenSettings={() => setScreen('settings')}
-                />
-            )}
-
-            {screen === 'settings' && (
-                <SettingsScreen onBack={() => setScreen('home')} />
-            )}
-
-            {screen === 'permission' && (
-                <PermissionGate
-                    status={permissions.camera === 'blocked' ? 'blocked' : 'denied'}
-                    onRequestPermission={handlePermissionRequest}
-                />
-            )}
-
-            {screen === 'preview' && (
-                <PreviewScreen
-                    onRetake={handleRetake}
-                    onAccept={handleAccept}
-                />
-            )}
-
-            {screen === 'batchReview' && (
-                <BatchReviewScreen
-                    onRetake={handleRetake}
-                    onAccept={handleAccept}
-                />
-            )}
-
-            {screen === 'extraction' && (
-                <ExtractionScreen
-                    onExtractionComplete={handleExtractionComplete}
-                    onExtractionError={handleExtractionError}
-                />
-            )}
-
-            {screen === 'validation' && (
-                <ValidationScreen
-                    onBack={() => setScreen('home')}
-                    onContinue={() => setScreen('columnMapping')}
-                />
-            )}
-
-            {screen === 'columnMapping' && (
-                <ColumnMappingScreen
-                    onBack={() => setScreen('validation')}
-                    onContinue={() => setScreen('export')}
-                />
-            )}
-
-            {screen === 'export' && (
-                <ExportScreen
-                    onDone={() => {
-                        useAppStore.getState().resetSession();
-                        setScreen('home');
-                    }}
-                />
-            )}
+            {!isLocked && renderScreen()}
         </GestureHandlerRootView>
     );
 }
@@ -185,4 +212,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.background,
     },
+    screen: {
+        flex: 1,
+    },
 });
+
