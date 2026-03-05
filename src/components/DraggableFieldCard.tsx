@@ -7,7 +7,7 @@ import Animated, {
     withSpring,
     runOnJS,
 } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 
 interface DraggableFieldCardProps {
@@ -171,8 +171,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: Colors.border,
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
+        ...shadow(Colors.primary, 4, 8, 0, 0),
     },
     cardSelected: {
         borderColor: Colors.primary,
