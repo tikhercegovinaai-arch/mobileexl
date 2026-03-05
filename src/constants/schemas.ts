@@ -1,58 +1,27 @@
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+
 /**
  * Extraction Schemas
- * Defined using JSON Schema format to be used with llama.cpp grammar
- * or local validation logic.
+ * Defined using Zod for type-safety and converted to JSON Schema format 
+ * to be used with llama.cpp grammar or local validation logic.
  */
 
-export const EXTRACTION_SCHEMA = {
-    type: "object",
-    properties: {
-        patientName: {
-            type: "string",
-            description: "Full name of the patient"
-        },
-        dateOfBirth: {
-            type: "string",
-            description: "DOB in YYYY-MM-DD or DD/MM/YYYY format"
-        },
-        socialSecurity: {
-            type: "string",
-            pattern: "^\\d{3}-\\d{2}-\\d{4}$",
-            description: "SSN in XXX-XX-XXXX format"
-        },
-        contactInfo: {
-            type: "object",
-            properties: {
-                email: { type: "string" },
-                phone: { type: "string" }
-            }
-        },
-        visitSummary: {
-            type: "object",
-            properties: {
-                reasonForVisit: { type: "string" },
-                diagnosis: { type: "string" },
-                prescriptions: {
-                    type: "array",
-                    items: { type: "string" }
-                }
-            }
-        }
-    },
-    required: ["patientName"]
-};
+const ExtractionSchemaZod = z.object({
+    patientName: z.string().describe("Full name of the patient"),
+    dateOfBirth: z.string().optional().describe("DOB in YYYY-MM-DD or DD/MM/YYYY format"),
+    socialSecurity: z.string().regex(/^\d{3}-\d{2}-\d{4}$/).optional().describe("SSN in XXX-XX-XXXX format"),
+    contactInfo: z.object({
+        email: z.string().email().optional(),
+        phone: z.string().optional()
+    }).optional(),
+    visitSummary: z.object({
+        reasonForVisit: z.string().optional(),
+        diagnosis: z.string().optional(),
+        prescriptions: z.array(z.string()).optional()
+    }).optional()
+});
 
-export type ExtractionData = {
-    patientName: string;
-    dateOfBirth?: string;
-    socialSecurity?: string;
-    contactInfo?: {
-        email?: string;
-        phone?: string;
-    };
-    visitSummary?: {
-        reasonForVisit?: string;
-        diagnosis?: string;
-        prescriptions?: string[];
-    };
-};
+export const EXTRACTION_SCHEMA = zodToJsonSchema(ExtractionSchemaZod, { target: "jsonSchema7" });
+
+export type ExtractionData = z.infer<typeof ExtractionSchemaZod>;
