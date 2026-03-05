@@ -1,21 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 
 import HomeScreen from './HomeScreen';
-import CameraScreen, { CaptureResult } from './CameraScreen';
+import PreviewScreen from './PreviewScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
+import { DocumentScannerService } from '../services/DocumentScannerService';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
-// ─── Navigator ────────────────────────────────────────────────────────────────
-// Lightweight conditional navigator for Phase 1.
-// Will be replaced with react-navigation stack once all screens are in place.
-
-type Screen = 'home' | 'permission' | 'camera';
+// Light-weight conditional navigation for Phase 2
+type Screen = 'home' | 'permission' | 'preview';
 
 export default function AppNavigator() {
-    const { setCapturedImage, resetSession } = useAppStore();
+    const { setPreprocessedImage, resetSession } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -28,12 +26,26 @@ export default function AppNavigator() {
         PermissionService.getStatuses().then(setPermissions);
     }, []);
 
-    // ── Navigate to camera (request permissions first) ──────────────────────────
+    const launchScanner = async () => {
+        const result = await DocumentScannerService.scanDocument();
+
+        if (result.status === 'success' && result.images && result.images.length > 0) {
+            setPreprocessedImage(result.images[0]);
+            setScreen('preview');
+        } else if (result.status === 'error') {
+            Alert.alert("Scanner Error", result.error || "Failed to scan document");
+            setScreen('home');
+        } else {
+            // user cancelled the modal
+            setScreen('home');
+        }
+    };
+
     const handleStartCapture = useCallback(async () => {
         const current = await PermissionService.getStatuses();
 
         if (PermissionService.allGranted(current)) {
-            setScreen('camera');
+            await launchScanner();
         } else if (current.camera === 'blocked') {
             setPermissions(current);
             setScreen('permission');
@@ -42,7 +54,7 @@ export default function AppNavigator() {
             const result = await PermissionService.requestAll();
             setPermissions(result);
             if (PermissionService.allGranted(result)) {
-                setScreen('camera');
+                await launchScanner();
             } else {
                 setScreen('permission');
             }
@@ -53,28 +65,28 @@ export default function AppNavigator() {
         const result = await PermissionService.requestAll();
         setPermissions(result);
         if (PermissionService.allGranted(result)) {
-            setScreen('camera');
+            await launchScanner();
         }
     }, []);
 
-    // ── Capture complete ─────────────────────────────────────────────────────────
-    const handleCapture = useCallback(
-        (result: CaptureResult) => {
-            setCapturedImage(result.uri);
-            // TODO Phase 2: route to PreviewScreen → Preprocessing pipeline
-            console.info('[Navigator] Capture complete, uri:', result.uri);
-            setScreen('home');
-        },
-        [setCapturedImage],
-    );
+    const handleRetake = () => {
+        setPreprocessedImage('');
+        launchScanner();
+    };
 
-    // ── Render ──────────────────────────────────────────────────────────────────
+    const handleAccept = () => {
+        // Phase 3 placeholder
+        Alert.alert("Phase 2 Complete", "Ready for AI Extraction in Phase 3!");
+        resetSession();
+        setScreen('home');
+    };
+
     return (
         <View style={styles.root}>
             {screen === 'home' && (
                 <HomeScreen
                     onStartCapture={handleStartCapture}
-                    onOpenSettings={() => console.info('Settings coming in Phase 6')}
+                    onOpenSettings={() => console.info('Settings available in Phase 6')}
                 />
             )}
 
@@ -85,10 +97,10 @@ export default function AppNavigator() {
                 />
             )}
 
-            {screen === 'camera' && (
-                <CameraScreen
-                    onCapture={handleCapture}
-                    onCancel={() => setScreen('home')}
+            {screen === 'preview' && (
+                <PreviewScreen
+                    onRetake={handleRetake}
+                    onAccept={handleAccept}
                 />
             )}
         </View>
