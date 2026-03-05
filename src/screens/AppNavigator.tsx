@@ -142,6 +142,7 @@ export default function AppNavigator() {
                         <HomeScreen
                             onStartCapture={handleStartCapture}
                             onOpenSettings={() => setScreen('settings')}
+                            onUpload={() => setScreen('upload')}
                         />
                     </Animated.View>
                 );
