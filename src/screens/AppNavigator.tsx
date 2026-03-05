@@ -5,6 +5,7 @@ import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
 import ExtractionScreen from './ExtractionScreen';
 import ValidationScreen from './ValidationScreen';
+import ExportScreen from './ExportScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
@@ -12,7 +13,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
 // Light-weight conditional navigation for Phase 2
-type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation';
+type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'export';
 
 export default function AppNavigator() {
     const { setPreprocessedImage, resetSession, initializeValidation } = useAppStore();
@@ -127,8 +128,13 @@ export default function AppNavigator() {
             {screen === 'validation' && (
                 <ValidationScreen
                     onBack={() => setScreen('home')}
-                    onContinue={() => {
-                        Alert.alert("Phase 4 Complete", "Validation finalized!");
+                    onContinue={() => setScreen('export')}
+                />
+            )}
+
+            {screen === 'export' && (
+                <ExportScreen
+                    onDone={() => {
                         resetSession();
                         setScreen('home');
                     }}
