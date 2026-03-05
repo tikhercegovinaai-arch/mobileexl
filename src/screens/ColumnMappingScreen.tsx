@@ -16,7 +16,7 @@ import Animated, {
     withSpring,
     runOnJS,
 } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { DropZoneColumn } from '../components/DropZoneColumn';
 
@@ -347,8 +347,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.border,
         overflow: 'hidden',
         alignItems: 'center',
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
+        ...shadow(Colors.primary, 4, 8, 0.2, 4),
     },
     sourceCardBar: {
         width: 4,

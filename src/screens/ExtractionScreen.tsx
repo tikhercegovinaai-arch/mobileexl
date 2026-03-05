@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { useAppStore, ExtractionPhase } from '../store/useAppStore';
 import { BatchProcessingService } from '../services/BatchProcessingService';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 
 interface ExtractionScreenProps {
     onExtractionComplete: () => void;
@@ -152,11 +152,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: Colors.border,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-        elevation: 10,
+        ...shadow('#000', 10, 20, 0.3, 10),
     },
     loaderContainer: {
         position: 'relative',
