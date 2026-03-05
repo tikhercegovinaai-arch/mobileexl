@@ -87,50 +87,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
         }
     };
 
-    /** Save directly to device using StorageAccessFramework */
-    const handleSaveToDevice = async () => {
-        if (!FileSystem.StorageAccessFramework) {
-            Alert.alert('Unavailable', 'Save to device is only supported on Android.');
-            return;
-        }
-        setIsExporting(true);
-        try {
-            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-            if (!permissions.granted) {
-                Alert.alert('Permission Denied', 'Storage permission is required to save files.');
-                return;
-            }
-
-            const fileUri = await generateFile();
-            const ext = format === 'csv' ? 'csv' : 'xlsx';
-            const mimeType =
-                format === 'csv'
-                    ? 'text/csv'
-                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
-            const filename = customFilename.trim() || `Extraction_${Date.now()}`;
-            const destUri = await FileSystem.StorageAccessFramework.createFileAsync(
-                permissions.directoryUri,
-                `${filename}.${ext}`,
-                mimeType,
-            );
-
-            const content = await FileSystem.readAsStringAsync(fileUri, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-            await FileSystem.writeAsStringAsync(destUri, content, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-
-            setSavedPath(destUri);
-            Alert.alert('Saved!', 'File has been saved to your device.');
-        } catch (e) {
-            console.error(e);
-            Alert.alert('Save Error', 'Failed to save file to device.');
-        } finally {
-            setIsExporting(false);
-        }
-    };
+    /** Save directly to device - not needed as Share handles this natively via OS share sheet */
 
     return (
         <SafeAreaView style={styles.container}>
@@ -206,13 +163,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     <View style={styles.buttonStack}>
                         <TouchableOpacity style={styles.primaryButton} onPress={handleShare}>
                             <Text style={styles.primaryButtonText}>
-                                ↗ Share / Open With
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.secondaryButton} onPress={handleSaveToDevice}>
-                            <Text style={styles.secondaryButtonText}>
-                                💾 Save to Device
+                                ↗ Share / Save to Files
                             </Text>
                         </TouchableOpacity>
 
