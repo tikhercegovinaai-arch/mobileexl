@@ -58,6 +58,7 @@ export interface AppSessionState {
     extraction: ExtractionJob;
     validation: ValidationJob;
     currentExportPath: string | null;
+    isLocked: boolean;
 
     // Actions
     setOnboardingDone: (done: boolean) => void;
@@ -73,6 +74,7 @@ export interface AppSessionState {
     setFieldCategory: (id: string, category: string) => void;
     mergeFields: (sourceId: string, targetId: string) => void;
     setExportPath: (path: string | null) => void;
+    setLocked: (locked: boolean) => void;
     resetSession: () => void;
 }
 
@@ -108,6 +110,7 @@ export const useAppStore = create<AppSessionState>((set) => ({
     extraction: initialExtraction,
     validation: initialValidation,
     currentExportPath: null,
+    isLocked: true,
 
     setOnboardingDone: (done) => set({ isOnboardingDone: done }),
 
@@ -247,6 +250,8 @@ export const useAppStore = create<AppSessionState>((set) => ({
         }),
 
     setExportPath: (path) => set({ currentExportPath: path }),
+
+    setLocked: (locked) => set({ isLocked: locked }),
 
     resetSession: () =>
         set({

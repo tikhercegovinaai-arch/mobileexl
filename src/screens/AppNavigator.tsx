@@ -6,6 +6,7 @@ import PreviewScreen from './PreviewScreen';
 import ExtractionScreen from './ExtractionScreen';
 import ValidationScreen from './ValidationScreen';
 import ExportScreen from './ExportScreen';
+import PrivacyGateScreen from './PrivacyGateScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
@@ -16,7 +17,7 @@ import { Colors } from '../constants/theme';
 type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'export';
 
 export default function AppNavigator() {
-    const { setPreprocessedImage, resetSession, initializeValidation } = useAppStore();
+    const { setPreprocessedImage, resetSession, initializeValidation, isLocked } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -98,7 +99,9 @@ export default function AppNavigator() {
 
     return (
         <View style={styles.root}>
-            {screen === 'home' && (
+            {isLocked && <PrivacyGateScreen />}
+
+            {!isLocked && screen === 'home' && (
                 <HomeScreen
                     onStartCapture={handleStartCapture}
                     onOpenSettings={() => console.info('Settings available in Phase 6')}
