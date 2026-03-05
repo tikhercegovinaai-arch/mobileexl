@@ -9,7 +9,7 @@ import {
     Switch,
     Animated,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
@@ -279,15 +279,11 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.lg,
         paddingVertical: Spacing.lg,
         marginBottom: Spacing.lg,
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 6,
+        ...shadow(Colors.primary, 4, 12, 0.3, 6),
     },
     captureButtonBatch: {
         backgroundColor: Colors.secondary,
-        shadowColor: Colors.secondary,
+        ...shadow(Colors.secondary, 4, 12, 0.3, 6),
     },
     captureButtonIcon: {
         fontSize: Typography.fontSizeLG,

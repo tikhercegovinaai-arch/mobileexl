@@ -1,4 +1,38 @@
 // Design system tokens — colours, typography, spacing
+import { Platform } from 'react-native';
+
+/**
+ * Cross-platform shadow utility.
+ * On native: returns shadowColor / shadowOffset / shadowOpacity / shadowRadius / elevation.
+ * On web:    returns boxShadow (avoids react-native-web's "shadow* is deprecated" warning).
+ *
+ * @param color  CSS/RN color string
+ * @param y      vertical offset in pixels (default 4)
+ * @param blur   blur radius in pixels (default 8)
+ * @param opacity  0–1 (default 0.25)
+ * @param elevation  Android elevation (default 4)
+ */
+export function shadow(
+    color: string,
+    y = 4,
+    blur = 8,
+    opacity = 0.25,
+    elevation = 4,
+) {
+    return Platform.select({
+        web: {
+            boxShadow: `0px ${y}px ${blur}px ${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`,
+        },
+        default: {
+            shadowColor: color,
+            shadowOffset: { width: 0, height: y },
+            shadowOpacity: opacity,
+            shadowRadius: blur,
+            elevation,
+        },
+    });
+}
+
 export const Colors = {
     // Backgrounds
     background: '#0A0F1E',
