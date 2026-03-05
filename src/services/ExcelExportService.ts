@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Paths, File, EncodingType } from 'expo-file-system';
+import { Paths, File } from 'expo-file-system';
 import { ValidationField } from '../store/useAppStore';
 
 /** Minimum column width in characters */
@@ -110,7 +110,7 @@ export class ExcelExportService {
 
         const file = new File(Paths.cache, name);
         await file.write(wbout, {
-            encoding: format === 'csv' ? EncodingType.UTF8 : EncodingType.Base64,
+            encoding: format === 'csv' ? 'utf8' : 'base64',
         });
 
         return file.uri;
