@@ -11,7 +11,7 @@ import {
     Animated,
 } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 
 interface BatchReviewScreenProps {
     onRetake: () => void;
@@ -194,11 +194,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.border,
         position: 'relative',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 4,
+        ...shadow('#000', 4, 8, 0.2, 4),
     },
     thumbnail: {
         width: '100%',
@@ -215,10 +211,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
+        ...shadow('#000', 2, 4, 0.3, 2),
     },
     orderBadgeText: {
         color: 'white',
@@ -287,10 +280,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
+        ...shadow(Colors.primary, 4, 8, 0.3, 6),
     },
     acceptButtonText: {
         color: 'white',
