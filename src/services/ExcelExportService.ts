@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import * as FileSystem from 'expo-file-system';
+import { Paths, File, EncodingType } from 'expo-file-system';
 import { ValidationField } from '../store/useAppStore';
 
 export class ExcelExportService {
@@ -9,9 +9,6 @@ export class ExcelExportService {
      */
     static async exportToExcel(fields: ValidationField[]): Promise<string> {
         // 1. Prepare data for Excel
-        // Convert the flat field list into rows
-        // If there are multiple fields with the same category, they should probably be in different columns or grouped by category.
-        // For now, let's create a simple key-value sheet
         const data = fields.map(field => ({
             Category: field.category || 'General',
             Label: field.label,
@@ -32,12 +29,15 @@ export class ExcelExportService {
 
         // 4. Save to temporary directory
         const filename = `Extraction_${Date.now()}.xlsx`;
-        const fileUri = `${FileSystem.cacheDirectory}${filename}`;
 
-        await FileSystem.writeAsStringAsync(fileUri, wbout, {
-            encoding: FileSystem.EncodingType.Base64
+        // Using new SDK 55+ API
+        const file = new File(Paths.cache, filename);
+
+        // Write the base64 content
+        await file.write(wbout, {
+            encoding: EncodingType.Base64
         });
 
-        return fileUri;
+        return file.uri;
     }
 }
