@@ -1,3 +1,4 @@
+// @ts-ignore - Missing type declarations for this native wrapper
 import { initLlama, LlamaContext } from 'react-native-llama';
 import { EXTRACTION_SCHEMA } from '../constants/schemas';
 
@@ -49,7 +50,7 @@ export class LLMInferenceService {
                 stop: ["###", "</s>"],
                 temperature: 0.2,
                 n_predict: 512,
-            }, (response) => {
+            }, (response: any) => {
                 // Approximate progress based on character count vs expected max tokens
                 if (onProgress) onProgress(Math.min(95, (response.text.length / 500) * 100));
             });
