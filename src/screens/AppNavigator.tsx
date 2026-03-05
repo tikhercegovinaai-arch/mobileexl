@@ -3,6 +3,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
+import ExtractionScreen from './ExtractionScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
@@ -10,7 +11,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
 // Light-weight conditional navigation for Phase 2
-type Screen = 'home' | 'permission' | 'preview';
+type Screen = 'home' | 'permission' | 'preview' | 'extraction';
 
 export default function AppNavigator() {
     const { setPreprocessedImage, resetSession } = useAppStore();
@@ -75,8 +76,18 @@ export default function AppNavigator() {
     };
 
     const handleAccept = () => {
-        // Phase 3 placeholder
-        Alert.alert("Phase 2 Complete", "Ready for AI Extraction in Phase 3!");
+        setScreen('extraction');
+    };
+
+    const handleExtractionComplete = () => {
+        // Just demonstrating the extracted data for Phase 3 completion
+        const data = useAppStore.getState().extraction.extractedData;
+        Alert.alert("Phase 3 Complete", `Extracted Data:\n\n${JSON.stringify(data, null, 2)}`);
+        resetSession();
+        setScreen('home');
+    };
+
+    const handleExtractionError = () => {
         resetSession();
         setScreen('home');
     };
@@ -101,6 +112,13 @@ export default function AppNavigator() {
                 <PreviewScreen
                     onRetake={handleRetake}
                     onAccept={handleAccept}
+                />
+            )}
+
+            {screen === 'extraction' && (
+                <ExtractionScreen
+                    onExtractionComplete={handleExtractionComplete}
+                    onExtractionError={handleExtractionError}
                 />
             )}
         </View>

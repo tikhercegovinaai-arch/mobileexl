@@ -19,9 +19,12 @@ export interface CaptureSession {
     capturedAt: Date | null;
 }
 
+export type ExtractionPhase = 'idle' | 'recognizing' | 'redacting' | 'structuring' | 'completed' | 'failed';
+
 export interface ExtractionJob {
     jobId: string | null;
     status: 'idle' | 'running' | 'success' | 'error';
+    phase: ExtractionPhase;
     progress: number; // 0–100
     errorMessage: string | null;
     extractedData: Record<string, unknown> | null;
@@ -39,7 +42,7 @@ export interface AppSessionState {
     setCapturedImage: (uri: string) => void;
     setPreprocessedImage: (uri: string) => void;
     startExtractionJob: (jobId: string) => void;
-    updateExtractionProgress: (progress: number) => void;
+    updateExtractionProgress: (progress: number, phase?: ExtractionPhase) => void;
     completeExtractionJob: (data: Record<string, unknown>) => void;
     failExtractionJob: (message: string) => void;
     resetSession: () => void;
@@ -57,6 +60,7 @@ const initialCapture: CaptureSession = {
 const initialExtraction: ExtractionJob = {
     jobId: null,
     status: 'idle',
+    phase: 'idle',
     progress: 0,
     errorMessage: null,
     extractedData: null,
@@ -95,13 +99,18 @@ export const useAppStore = create<AppSessionState>((set) => ({
                 ...initialExtraction,
                 jobId,
                 status: 'running',
+                phase: 'recognizing',
                 progress: 0,
             },
         }),
 
-    updateExtractionProgress: (progress) =>
+    updateExtractionProgress: (progress, phase) =>
         set((state) => ({
-            extraction: { ...state.extraction, progress },
+            extraction: {
+                ...state.extraction,
+                progress,
+                ...(phase ? { phase } : {}),
+            },
         })),
 
     completeExtractionJob: (data) =>
@@ -109,6 +118,7 @@ export const useAppStore = create<AppSessionState>((set) => ({
             extraction: {
                 ...state.extraction,
                 status: 'success',
+                phase: 'completed',
                 progress: 100,
                 extractedData: data,
             },
