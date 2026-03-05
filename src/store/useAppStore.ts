@@ -14,8 +14,9 @@ export type AppRoute =
 
 export interface CaptureSession {
     sessionId: string;
-    capturedImageUri: string | null;
-    preprocessedImageUri: string | null;
+    capturedImageUris: string[];
+    preprocessedImageUris: string[];
+    isBatchMode: boolean;
     capturedAt: Date | null;
 }
 
@@ -75,8 +76,9 @@ export interface AppSessionState {
     // Actions
     setOnboardingDone: (done: boolean) => void;
     setRoute: (route: AppRoute) => void;
-    setCapturedImage: (uri: string) => void;
-    setPreprocessedImage: (uri: string) => void;
+    setCapturedImages: (uris: string[]) => void;
+    setPreprocessedImages: (uris: string[]) => void;
+    setIsBatchMode: (isBatch: boolean) => void;
     startExtractionJob: (jobId: string) => void;
     updateExtractionProgress: (progress: number, phase?: ExtractionPhase) => void;
     completeExtractionJob: (data: Record<string, unknown>) => void;
@@ -101,8 +103,9 @@ export interface AppSessionState {
 
 const initialCapture: CaptureSession = {
     sessionId: '',
-    capturedImageUri: null,
-    preprocessedImageUri: null,
+    capturedImageUris: [],
+    preprocessedImageUris: [],
+    isBatchMode: false,
     capturedAt: null,
 };
 
@@ -140,19 +143,24 @@ export const useAppStore = create<AppSessionState>((set) => ({
 
     setRoute: (route) => set({ currentRoute: route }),
 
-    setCapturedImage: (uri) =>
+    setCapturedImages: (uris) =>
         set((state) => ({
             capture: {
                 ...state.capture,
-                capturedImageUri: uri,
+                capturedImageUris: uris,
                 capturedAt: new Date(),
                 sessionId: `session_${Date.now()}`,
             },
         })),
 
-    setPreprocessedImage: (uri) =>
+    setPreprocessedImages: (uris) =>
         set((state) => ({
-            capture: { ...state.capture, preprocessedImageUri: uri },
+            capture: { ...state.capture, preprocessedImageUris: uris },
+        })),
+
+    setIsBatchMode: (isBatch) =>
+        set((state) => ({
+            capture: { ...state.capture, isBatchMode: isBatch },
         })),
 
     startExtractionJob: (jobId) =>

@@ -14,10 +14,10 @@ export const DocumentScannerService = {
      * This MVP relies on react-native-document-scanner-plugin.
      * Later this can be swapped with Scanbot without refactoring UI.
      */
-    async scanDocument(): Promise<ScannerResult> {
+    async scanDocument(options?: { isBatch?: boolean }): Promise<ScannerResult> {
         try {
             const { scannedImages } = await DocumentScanner.scanDocument({
-                maxNumDocuments: 1, // MVP limit to one handwritten page
+                maxNumDocuments: options?.isBatch ? 50 : 1, // Allow multiple documents in batch mode
                 responseType: ResponseType.ImageFilePath, // Keep memory low by using file URIs rather than Base64
             });
 

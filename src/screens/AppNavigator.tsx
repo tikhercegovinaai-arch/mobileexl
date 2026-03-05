@@ -16,10 +16,10 @@ import { DocumentScannerService } from '../services/DocumentScannerService';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
-type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings';
+type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings';
 
 export default function AppNavigator() {
-    const { setPreprocessedImage, resetSession, initializeValidation, isLocked, setLocked } = useAppStore();
+    const { isLocked, setLocked } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -42,12 +42,17 @@ export default function AppNavigator() {
         };
     }, []);
 
-    const launchScanner = async () => {
-        const result = await DocumentScannerService.scanDocument();
+    const launchScanner = async (isBatch: boolean = false) => {
+        const result = await DocumentScannerService.scanDocument({ isBatch });
 
         if (result.status === 'success' && result.images && result.images.length > 0) {
-            setPreprocessedImage(result.images[0]);
-            setScreen('preview');
+            useAppStore.getState().setIsBatchMode(isBatch);
+            useAppStore.getState().setPreprocessedImages(result.images);
+            if (isBatch || result.images.length > 1) {
+                setScreen('batchReview' as Screen);
+            } else {
+                setScreen('preview');
+            }
         } else if (result.status === 'error') {
             Alert.alert('Scanner Error', result.error || 'Failed to scan document');
             setScreen('home');
@@ -56,11 +61,11 @@ export default function AppNavigator() {
         }
     };
 
-    const handleStartCapture = useCallback(async () => {
+    const handleStartCapture = useCallback(async (isBatch: boolean = false) => {
         const current = await PermissionService.getStatuses();
 
         if (PermissionService.allGranted(current)) {
-            await launchScanner();
+            await launchScanner(isBatch);
         } else if (current.camera === 'blocked') {
             setPermissions(current);
             setScreen('permission');
@@ -68,7 +73,7 @@ export default function AppNavigator() {
             const result = await PermissionService.requestAll();
             setPermissions(result);
             if (PermissionService.allGranted(result)) {
-                await launchScanner();
+                await launchScanner(isBatch);
             } else {
                 setScreen('permission');
             }
@@ -79,13 +84,13 @@ export default function AppNavigator() {
         const result = await PermissionService.requestAll();
         setPermissions(result);
         if (PermissionService.allGranted(result)) {
-            await launchScanner();
+            await launchScanner(useAppStore.getState().capture.isBatchMode);
         }
     }, []);
 
     const handleRetake = () => {
-        setPreprocessedImage('');
-        launchScanner();
+        useAppStore.getState().setPreprocessedImages([]);
+        launchScanner(useAppStore.getState().capture.isBatchMode);
     };
 
     const handleAccept = () => setScreen('extraction');
@@ -101,7 +106,7 @@ export default function AppNavigator() {
     };
 
     const handleExtractionError = () => {
-        resetSession();
+        useAppStore.getState().resetSession();
         setScreen('home');
     };
 
@@ -134,6 +139,14 @@ export default function AppNavigator() {
                 />
             )}
 
+            {screen === 'batchReview' && (
+                // Temporarily going back to home until BatchReviewScreen is built
+                <HomeScreen
+                    onStartCapture={handleStartCapture}
+                    onOpenSettings={() => setScreen('settings')}
+                />
+            )}
+
             {screen === 'extraction' && (
                 <ExtractionScreen
                     onExtractionComplete={handleExtractionComplete}
@@ -158,7 +171,7 @@ export default function AppNavigator() {
             {screen === 'export' && (
                 <ExportScreen
                     onDone={() => {
-                        resetSession();
+                        useAppStore.getState().resetSession();
                         setScreen('home');
                     }}
                 />
