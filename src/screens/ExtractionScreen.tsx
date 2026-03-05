@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { OCRService } from '../services/OCRService';
-import { PIIRedactionService } from '../services/PIIRedactionService';
-import { LLMInferenceService } from '../services/LLMInferenceService';
+import { useAppStore, ExtractionPhase } from '../store/useAppStore';
+import { BatchProcessingService } from '../services/BatchProcessingService';
 import { Colors, Spacing, Typography } from '../constants/theme';
 
 interface ExtractionScreenProps {
@@ -12,6 +10,7 @@ interface ExtractionScreenProps {
 }
 
 export default function ExtractionScreen({ onExtractionComplete, onExtractionError }: ExtractionScreenProps) {
+    const [currentDocStr, setCurrentDocStr] = React.useState('');
     const {
         capture,
         extraction,
@@ -26,30 +25,24 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         if (extraction.status !== 'idle') return;
 
         const runPipeline = async () => {
-            if (!capture.preprocessedImageUri) {
-                failExtractionJob("No image available");
+            if (!capture.preprocessedImageUris || capture.preprocessedImageUris.length === 0) {
+                failExtractionJob("No images available");
                 onExtractionError();
                 return;
             }
 
             try {
-                // Initialize the job with a random ID
                 startExtractionJob(`job_${Date.now()}`);
 
-                // Phase 1: OCR
-                const text = await OCRService.extractText(capture.preprocessedImageUri, (prog) => {
-                    updateExtractionProgress(prog, 'recognizing');
-                });
-
-                // Phase 2: PII Redaction
-                const redactedText = await PIIRedactionService.redact(text, (prog) => {
-                    updateExtractionProgress(prog, 'redacting');
-                });
-
-                // Phase 3: LLM Structuring
-                const structuredData = await LLMInferenceService.structureData(redactedText, (prog) => {
-                    updateExtractionProgress(prog, 'structuring');
-                });
+                const structuredData: any = await BatchProcessingService.processBatch(
+                    capture.preprocessedImageUris,
+                    (overallProgress: number, currentIndex: number, total: number, phase: ExtractionPhase) => {
+                        updateExtractionProgress(overallProgress, phase);
+                        if (total > 1) {
+                            setCurrentDocStr(`Document ${currentIndex + 1} of ${total}`);
+                        }
+                    }
+                );
 
                 completeExtractionJob(structuredData);
                 onExtractionComplete();
@@ -61,7 +54,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         };
 
         runPipeline();
-    }, [capture, extraction.status, startExtractionJob, updateExtractionProgress, completeExtractionJob, failExtractionJob, onExtractionComplete, onExtractionError]);
+    }, [capture.preprocessedImageUris, extraction.status, startExtractionJob, updateExtractionProgress, completeExtractionJob, failExtractionJob, onExtractionComplete, onExtractionError]);
 
     const getPhaseMessage = () => {
         switch (extraction.phase) {
@@ -79,6 +72,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.title}>AI Extraction Engine</Text>
             <Text style={styles.subtitle}>{getPhaseMessage()}</Text>
+            {currentDocStr ? <Text style={styles.docText}>{currentDocStr}</Text> : null}
             {extraction.phase !== 'idle' && extraction.phase !== 'failed' && extraction.phase !== 'completed' && (
                 <Text style={styles.progressText}>{Math.round(extraction.progress)}%</Text>
             )}
@@ -108,6 +102,12 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: Typography.fontSizeMD,
         color: Colors.textSecondary,
+        textAlign: 'center',
+        marginBottom: Spacing.xs,
+    },
+    docText: {
+        fontSize: Typography.fontSizeSM,
+        color: Colors.textMuted,
         textAlign: 'center',
         marginBottom: Spacing.md,
     },
