@@ -57,6 +57,7 @@ export interface AppSessionState {
     capture: CaptureSession;
     extraction: ExtractionJob;
     validation: ValidationJob;
+    currentExportPath: string | null;
 
     // Actions
     setOnboardingDone: (done: boolean) => void;
@@ -71,6 +72,7 @@ export interface AppSessionState {
     updateField: (id: string, value: string) => void;
     setFieldCategory: (id: string, category: string) => void;
     mergeFields: (sourceId: string, targetId: string) => void;
+    setExportPath: (path: string | null) => void;
     resetSession: () => void;
 }
 
@@ -105,6 +107,7 @@ export const useAppStore = create<AppSessionState>((set) => ({
     capture: initialCapture,
     extraction: initialExtraction,
     validation: initialValidation,
+    currentExportPath: null,
 
     setOnboardingDone: (done) => set({ isOnboardingDone: done }),
 
@@ -242,6 +245,8 @@ export const useAppStore = create<AppSessionState>((set) => ({
                 },
             };
         }),
+
+    setExportPath: (path) => set({ currentExportPath: path }),
 
     resetSession: () =>
         set({
