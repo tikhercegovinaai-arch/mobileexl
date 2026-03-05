@@ -11,8 +11,10 @@ describe('LLMInferenceService', () => {
                 email: '[REDACTED_EMAIL]',
                 phone: '[REDACTED_PHONE]',
             },
-            socialSecurity: '[REDACTED_SSN]',
-            notes: text,
+            visitSummary: {
+                diagnosis: 'No diagnosis found',
+                prescriptions: []
+            }
         });
     });
 
