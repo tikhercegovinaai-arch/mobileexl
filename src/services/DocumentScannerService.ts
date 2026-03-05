@@ -18,7 +18,6 @@ export const DocumentScannerService = {
         try {
             const { scannedImages } = await DocumentScanner.scanDocument({
                 maxNumDocuments: 1, // MVP limit to one handwritten page
-                letUserAdjustCrop: true,
                 responseType: ResponseType.ImageFilePath, // Keep memory low by using file URIs rather than Base64
             });
 
