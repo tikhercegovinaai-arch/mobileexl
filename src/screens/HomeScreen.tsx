@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,11 +6,12 @@ import {
     TouchableOpacity,
     SafeAreaView,
     StatusBar,
+    Switch,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 
 interface HomeScreenProps {
-    onStartCapture: () => void;
+    onStartCapture: (isBatch: boolean) => void;
     onOpenSettings: () => void;
 }
 
@@ -33,6 +34,8 @@ const FEATURES = [
 ];
 
 export default function HomeScreen({ onStartCapture, onOpenSettings }: HomeScreenProps) {
+    const [isBatchMode, setIsBatchMode] = useState(false);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.background} />
@@ -72,13 +75,25 @@ export default function HomeScreen({ onStartCapture, onOpenSettings }: HomeScree
             </View>
 
             {/* ── CTA ───────────────────────────────────────────────── */}
+            <View style={styles.batchToggleContainer}>
+                <Text style={styles.batchToggleLabel}>Batch Mode</Text>
+                <Switch
+                    value={isBatchMode}
+                    onValueChange={setIsBatchMode}
+                    trackColor={{ false: Colors.border, true: Colors.primary }}
+                    thumbColor={Colors.card}
+                />
+            </View>
+
             <TouchableOpacity
                 style={styles.captureButton}
-                onPress={onStartCapture}
+                onPress={() => onStartCapture(isBatchMode)}
                 activeOpacity={0.85}
             >
-                <Text style={styles.captureButtonIcon}>📷</Text>
-                <Text style={styles.captureButtonText}>Start Capture</Text>
+                <Text style={styles.captureButtonIcon}>{isBatchMode ? '📑' : '📷'}</Text>
+                <Text style={styles.captureButtonText}>
+                    {isBatchMode ? 'Start Batch Capture' : 'Start Capture'}
+                </Text>
             </TouchableOpacity>
 
             {/* ── Footer ───────────────────────────────────────────── */}
@@ -188,6 +203,18 @@ const styles = StyleSheet.create({
     },
 
     // CTA
+    batchToggleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.sm,
+        marginBottom: Spacing.md,
+    },
+    batchToggleLabel: {
+        fontSize: Typography.fontSizeSM,
+        color: Colors.textSecondary,
+        fontWeight: Typography.fontWeightMedium,
+    },
     captureButton: {
         flexDirection: 'row',
         alignItems: 'center',

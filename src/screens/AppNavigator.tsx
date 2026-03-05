@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
+import BatchReviewScreen from './BatchReviewScreen';
 import ExtractionScreen from './ExtractionScreen';
 import ValidationScreen from './ValidationScreen';
 import ColumnMappingScreen from './ColumnMappingScreen';
@@ -19,7 +20,7 @@ import { Colors } from '../constants/theme';
 type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings';
 
 export default function AppNavigator() {
-    const { isLocked, setLocked } = useAppStore();
+    const { isLocked, setLocked, initializeValidation } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -140,10 +141,9 @@ export default function AppNavigator() {
             )}
 
             {screen === 'batchReview' && (
-                // Temporarily going back to home until BatchReviewScreen is built
-                <HomeScreen
-                    onStartCapture={handleStartCapture}
-                    onOpenSettings={() => setScreen('settings')}
+                <BatchReviewScreen
+                    onRetake={handleRetake}
+                    onAccept={handleAccept}
                 />
             )}
 
