@@ -16,7 +16,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 
 type ManipulationMode = 'split' | 'merge' | 'batch';
@@ -258,11 +258,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: BorderRadius.xl,
         paddingBottom: Spacing.xl,
         maxHeight: '75%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 20,
+        ...shadow('#000', -4, 12, 0.3, 20),
     },
     handle: {
         width: 40,

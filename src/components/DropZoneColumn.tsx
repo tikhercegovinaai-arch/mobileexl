@@ -8,7 +8,7 @@ import {
     LayoutChangeEvent,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 
 export interface DropZoneColumnProps {
@@ -95,10 +95,6 @@ const styles = StyleSheet.create({
         marginHorizontal: Spacing.xs,
         minHeight: 160,
         overflow: 'hidden',
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 8,
-        shadowOpacity: 0,
     },
     header: {
         flexDirection: 'row',
