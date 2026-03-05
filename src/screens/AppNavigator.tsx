@@ -4,6 +4,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
 import ExtractionScreen from './ExtractionScreen';
+import ValidationScreen from './ValidationScreen';
 import PermissionGate from '../components/PermissionGate';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
@@ -11,10 +12,10 @@ import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 
 // Light-weight conditional navigation for Phase 2
-type Screen = 'home' | 'permission' | 'preview' | 'extraction';
+type Screen = 'home' | 'permission' | 'preview' | 'extraction' | 'validation';
 
 export default function AppNavigator() {
-    const { setPreprocessedImage, resetSession } = useAppStore();
+    const { setPreprocessedImage, resetSession, initializeValidation } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>('home');
     const [permissions, setPermissions] = useState<PermissionState>({
@@ -80,11 +81,13 @@ export default function AppNavigator() {
     };
 
     const handleExtractionComplete = () => {
-        // Just demonstrating the extracted data for Phase 3 completion
         const data = useAppStore.getState().extraction.extractedData;
-        Alert.alert("Phase 3 Complete", `Extracted Data:\n\n${JSON.stringify(data, null, 2)}`);
-        resetSession();
-        setScreen('home');
+        if (data) {
+            initializeValidation(data);
+            setScreen('validation');
+        } else {
+            handleExtractionError();
+        }
     };
 
     const handleExtractionError = () => {
@@ -119,6 +122,16 @@ export default function AppNavigator() {
                 <ExtractionScreen
                     onExtractionComplete={handleExtractionComplete}
                     onExtractionError={handleExtractionError}
+                />
+            )}
+            {screen === 'validation' && (
+                <ValidationScreen
+                    onBack={() => setScreen('home')}
+                    onContinue={() => {
+                        Alert.alert("Phase 4 Complete", "Validation finalized!");
+                        resetSession();
+                        setScreen('home');
+                    }}
                 />
             )}
         </View>
