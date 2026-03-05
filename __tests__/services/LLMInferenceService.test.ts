@@ -1,5 +1,12 @@
 import { LLMInferenceService } from '../../src/services/LLMInferenceService';
 
+jest.mock('react-native-llama', () => ({
+    initLlama: jest.fn().mockResolvedValue({
+        completion: jest.fn(),
+        release: jest.fn()
+    })
+}), { virtual: true });
+
 describe('LLMInferenceService', () => {
     it('structures data correctly', async () => {
         const text = "Patient Name: John Doe\nContact: [REDACTED_EMAIL] / [REDACTED_PHONE]\nSSN: [REDACTED_SSN]";

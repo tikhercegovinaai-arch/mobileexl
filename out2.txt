@@ -1,0 +1,25 @@
+FAIL __tests__/services/LLMInferenceService.test.ts
+  ΓùÅ Test suite failed to run
+
+    Cannot find module 'react-native-llama' from 'src/services/LLMInferenceService.ts'
+
+    Require stack:
+      src/services/LLMInferenceService.ts
+      __tests__/services/LLMInferenceService.test.ts
+
+      1 | // @ts-ignore - Missing type declarations for this native wrapper
+    > 2 | import { initLlama, LlamaContext } from 'react-native-llama';
+        | ^
+      3 | import { EXTRACTION_SCHEMA } from '../constants/schemas';
+      4 |
+      5 | /**
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (src/services/LLMInferenceService.ts:2:1)
+      at Object.<anonymous> (__tests__/services/LLMInferenceService.test.ts:1:1)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        5.635 s
+Ran all test suites matching /__tests__\\services\\LLMInferenceService.test.ts/i.
