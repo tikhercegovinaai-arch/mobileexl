@@ -303,6 +303,26 @@ const styles = StyleSheet.create({
         fontWeight: Typography.fontWeightBold,
         color: 'white',
     },
+    uploadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.sm,
+        backgroundColor: Colors.surfaceAlt,
+        borderRadius: BorderRadius.lg,
+        paddingVertical: Spacing.md,
+        borderWidth: 1.5,
+        borderColor: Colors.border,
+        ...shadow('#000', 2, 8, 0.15, 3),
+    },
+    uploadButtonIcon: {
+        fontSize: Typography.fontSizeLG,
+    },
+    uploadButtonText: {
+        color: Colors.textSecondary,
+        fontSize: Typography.fontSizeMD,
+        fontWeight: Typography.fontWeightBold,
+    },
 
     footer: {
         textAlign: 'center',
