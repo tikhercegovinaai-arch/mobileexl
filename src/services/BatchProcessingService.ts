@@ -30,17 +30,17 @@ export const BatchProcessingService = {
             const docWeight = 100 / total;
 
             // Phase 1: OCR
-            const text = await OCRService.extractText(uri, (prog) => {
+            const text = await OCRService.extractText(uri, (prog: number) => {
                 onProgress(baseProgress + (prog / 100) * docWeight * 0.33, i, total, 'recognizing');
             });
 
             // Phase 2: PII Redaction
-            const redactedText = await PIIRedactionService.redact(text, (prog) => {
+            const redactedText = await PIIRedactionService.redact(text, (prog: number) => {
                 onProgress(baseProgress + docWeight * 0.33 + (prog / 100) * docWeight * 0.33, i, total, 'redacting');
             });
 
             // Phase 3: LLM Structuring
-            const structuredData = await LLMInferenceService.structureData(redactedText, (prog) => {
+            const structuredData = await LLMInferenceService.structureData(redactedText, (prog: number) => {
                 onProgress(baseProgress + docWeight * 0.66 + (prog / 100) * docWeight * 0.34, i, total, 'structuring');
             });
 
@@ -48,7 +48,7 @@ export const BatchProcessingService = {
         }
 
         // Merge results into a single consolidated JSON structure via LLM (Reduce Phase)
-        return LLMInferenceService.consolidateRecords(allStructuredData, (prog) => {
+        return LLMInferenceService.consolidateRecords(allStructuredData, (prog: number) => {
             onProgress(100, total, total, 'structuring'); // Final progress push
         });
     },

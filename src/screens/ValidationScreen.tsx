@@ -45,10 +45,10 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
 
     // Resolve image dimensions
     React.useEffect(() => {
-        const uri = capture.preprocessedImageUri;
+        const uri = capture.preprocessedImageUris?.[0];
         if (!uri) return;
         Image.getSize(uri, (w, h) => setImageDims({ w, h }), () => setImageDims({ w: 1000, h: 1400 }));
-    }, [capture.preprocessedImageUri]);
+    }, [capture.preprocessedImageUris]);
 
     const handleContainerLayout = useCallback((e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
@@ -119,10 +119,10 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
 
             {/* Image preview with bounding box overlay */}
             <View style={styles.imagePreview} onLayout={handleContainerLayout}>
-                {capture.preprocessedImageUri ? (
+                {capture.preprocessedImageUris?.[0] ? (
                     <>
                         <Image
-                            source={{ uri: capture.preprocessedImageUri }}
+                            source={{ uri: capture.preprocessedImageUris[0] }}
                             style={StyleSheet.absoluteFill}
                             resizeMode="contain"
                         />
