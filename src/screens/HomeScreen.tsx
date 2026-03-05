@@ -14,6 +14,7 @@ import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
     onOpenSettings: () => void;
+    onUpload: () => void;
 }
 
 const FEATURES = [
@@ -34,7 +35,7 @@ const FEATURES = [
     },
 ];
 
-export default function HomeScreen({ onStartCapture, onOpenSettings }: HomeScreenProps) {
+export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }: HomeScreenProps) {
     const [isBatchMode, setIsBatchMode] = useState(false);
 
     // Entrance animations
@@ -134,6 +135,15 @@ export default function HomeScreen({ onStartCapture, onOpenSettings }: HomeScree
                     <Text style={styles.captureButtonText}>
                         {isBatchMode ? 'Start Batch Capture' : 'Start Capture'}
                     </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.uploadButton}
+                    onPress={onUpload}
+                    activeOpacity={0.8}
+                >
+                    <Text style={styles.uploadButtonIcon}>☁️</Text>
+                    <Text style={styles.uploadButtonText}>Upload File</Text>
                 </TouchableOpacity>
             </Animated.View>
 
