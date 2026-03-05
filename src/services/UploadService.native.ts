@@ -21,7 +21,7 @@ export async function pickFiles(
 
             if (result.canceled) return { status: 'cancelled' };
 
-            const files: UploadedFile[] = result.assets.map((a) => ({
+            const files: UploadedFile[] = result.assets.map((a: ImagePicker.ImagePickerAsset) => ({
                 uri: a.uri,
                 name: a.fileName ?? `image_${Date.now()}.jpg`,
                 mimeType: a.mimeType ?? 'image/jpeg',
