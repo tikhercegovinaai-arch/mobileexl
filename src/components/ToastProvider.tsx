@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useRef, useEff
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Typography, Spacing, BorderRadius } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
+import { hapticSuccess, hapticError, hapticWarning, hapticLight } from '../utils/haptics';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const show = useCallback((message: string, type: ToastType = 'info', duration = 3000) => {
         const id = `toast_${++idRef.current}`;
         setToasts((prev) => [...prev, { id, type, message, duration }].slice(-MAX_VISIBLE));
+
+        switch (type) {
+            case 'success':
+                hapticSuccess();
+                break;
+            case 'error':
+                hapticError();
+                break;
+            case 'warning':
+                hapticWarning();
+                break;
+            case 'info':
+                hapticLight();
+                break;
+        }
     }, []);
 
     const remove = useCallback((id: string) => {

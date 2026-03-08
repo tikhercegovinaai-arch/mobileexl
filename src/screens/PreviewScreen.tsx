@@ -19,6 +19,7 @@ import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
 import { FieldManipulationSheet } from '../components/FieldManipulationSheet';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface PreviewScreenProps {
     onRetake: () => void;
@@ -180,12 +181,18 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
             <View style={styles.actionsContainer}>
                 <TouchableOpacity
                     style={[styles.button, styles.retakeButton]}
-                    onPress={onRetake}
+                    onPress={() => {
+                        hapticLight();
+                        onRetake();
+                    }}
                 >
                     <Text style={[styles.buttonText, styles.retakeButtonText]}>Retake</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button} onPress={onAccept}>
+                <TouchableOpacity style={styles.button} onPress={() => {
+                    hapticMedium();
+                    onAccept();
+                }}>
                     <Text style={styles.buttonText}>Accept & Extract</Text>
                 </TouchableOpacity>
             </View>

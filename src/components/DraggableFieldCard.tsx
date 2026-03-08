@@ -102,7 +102,12 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
 
                 <View style={styles.content}>
                     <View style={styles.topRow}>
-                        <Text style={styles.label}>{field.label}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={styles.label}>{field.label}</Text>
+                            {field.confidence < 0.7 && (
+                                <Text style={{ marginLeft: 4, fontSize: 14 }}>⚠️</Text>
+                            )}
+                        </View>
                         <View style={{ width: 60 }}>
                             <ConfidenceBar confidence={field.confidence} />
                         </View>

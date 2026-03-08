@@ -4,12 +4,13 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
-    ScrollView,
     Animated,
     ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 import { useToast } from '../components/ToastProvider';
 import { pickFiles } from '../services/UploadService';
 import { FileParserService, ParsedResult } from '../services/FileParserService';
@@ -134,7 +135,7 @@ export default function UploadScreen({
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                <TouchableOpacity onPress={() => { hapticLight(); onBack(); }} style={styles.backButton}>
                     <Text style={styles.backText}>← Back</Text>
                 </TouchableOpacity>
                 <Text style={styles.title}>Upload File</Text>
@@ -230,7 +231,10 @@ export default function UploadScreen({
                 <View style={styles.footer}>
                     <TouchableOpacity
                         style={styles.analyzeButton}
-                        onPress={handleAnalyze}
+                        onPress={() => {
+                            hapticMedium();
+                            handleAnalyze();
+                        }}
                         activeOpacity={0.85}
                     >
                         <Text style={styles.analyzeIcon}>🧠</Text>
