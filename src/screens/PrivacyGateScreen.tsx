@@ -47,7 +47,7 @@ export default function PrivacyGateScreen() {
     }, []);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="privacy-gate-container">
             <View style={styles.content}>
                 <View style={[styles.iconContainer, { backgroundColor: Colors.primary + '20' }]}>
                     <Text style={styles.icon}>🔒</Text>
@@ -67,7 +67,7 @@ export default function PrivacyGateScreen() {
                 {isCompromised ? null : isAuthenticating ? (
                     <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
                 ) : (
-                    <TouchableOpacity style={styles.authButton} onPress={handleAuthenticate}>
+                    <TouchableOpacity style={styles.authButton} onPress={handleAuthenticate} testID="privacy-gate-auth-button">
                         <Text style={styles.authButtonText}>Try Again</Text>
                     </TouchableOpacity>
                 )}

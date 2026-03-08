@@ -4,6 +4,15 @@ test.describe('Exelent Core Journey', () => {
   test('should complete onboarding and reach home screen', async ({ page }) => {
     // 1. Navigate to the app
     await page.goto('/');
+    
+    // Potentially wait for auto-unlock
+    await page.waitForTimeout(1000);
+
+    // If still on privacy gate, click unlock (though it should be auto)
+    const unlockButton = page.getByTestId('privacy-gate-auth-button');
+    if (await unlockButton.isVisible()) {
+        await unlockButton.click();
+    }
 
     // 2. Initial Onboarding Screen
     await expect(page.getByTestId('onboarding-continue-button')).toBeVisible();
