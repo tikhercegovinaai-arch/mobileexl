@@ -169,8 +169,9 @@ function AppNavigationInner() {
                     <Animated.View key="home" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
                         <HomeScreen
                             onStartCapture={handleStartCapture}
-                            onOpenSettings={() => setSettingsVisible(true)}
+                            onOpenSettings={() => setScreen('settings')}
                             onUpload={() => setScreen('upload')}
+                            onViewAnalytics={() => setScreen('analytics')}
                         />
                         <SettingsScreen
                             visible={isSettingsVisible}

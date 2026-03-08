@@ -16,6 +16,7 @@ import { hapticMedium, hapticLight } from '../utils/haptics';
 import { enforceSecurityPolicy } from '../utils/security';
 import { TechnicalButton } from '../components/TechnicalButton';
 
+
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
     onOpenSettings: () => void;
