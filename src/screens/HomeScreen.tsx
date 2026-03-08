@@ -14,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
 import { hapticMedium, hapticLight } from '../utils/haptics';
 import { enforceSecurityPolicy } from '../utils/security';
+import { TechnicalButton } from '../components/TechnicalButton';
 
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
@@ -133,36 +134,23 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                     />
                 </View>
 
-                <TouchableOpacity
-                    style={[
-                        styles.captureButton, 
-                        { backgroundColor: theme.primary },
-                        isBatchMode && { backgroundColor: theme.secondary }
-                    ]}
+                <TechnicalButton
+                    label={isBatchMode ? '> EXECUTE_BATCH_SCAN' : '> EXECUTE_SCAN'}
+                    variant="primary"
                     onPress={async () => {
-                        hapticMedium();
                         const isSecure = await enforceSecurityPolicy();
                         if (isSecure) {
                             onStartCapture(isBatchMode);
                         }
                     }}
-                    activeOpacity={0.85}
-                >
-                    <Text style={[styles.captureButtonText, styles.monoText]}>
-                        {isBatchMode ? '> EXECUTE_BATCH_SCAN' : '> EXECUTE_SCAN'}
-                    </Text>
-                </TouchableOpacity>
+                    style={{ marginBottom: Spacing.lg }}
+                />
 
-                <TouchableOpacity
-                    style={[styles.uploadButton, { backgroundColor: 'transparent', borderColor: theme.border }]}
-                    onPress={() => {
-                        hapticMedium();
-                        onUpload();
-                    }}
-                    activeOpacity={0.8}
-                >
-                    <Text style={[styles.uploadButtonText, styles.monoText, { color: theme.textSecondary }]}>[IMPORT_EXTERNAL_DATA]</Text>
-                </TouchableOpacity>
+                <TechnicalButton
+                    label="[IMPORT_EXTERNAL_DATA]"
+                    variant="outline"
+                    onPress={onUpload}
+                />
             </Animated.View>
 
             {/* ── Footer ───────────────────────────────────────────── */}
