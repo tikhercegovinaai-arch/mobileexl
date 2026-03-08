@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 
 test.describe('Exelent Core Journey', () => {
+  test('should complete onboarding and reach home screen', async ({ page }) => {
     page.on('console', msg => {
         console.log(`BROWSER ${msg.type().toUpperCase()}: ${msg.text()}`);
     });
