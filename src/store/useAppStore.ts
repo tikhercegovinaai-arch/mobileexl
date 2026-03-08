@@ -59,6 +59,18 @@ export interface ExtractionJob {
     extractedData: Record<string, unknown> | null;
 }
 
+export interface DailyDataPoint {
+    date: string;
+    value: number;
+}
+
+export interface AggregatedData {
+    totalDocuments: number;
+    totalFields: number;
+    categoryBreakdown: Record<string, number>;
+    dailySeries: DailyDataPoint[];
+}
+
 export type ThemeMode = 'dark' | 'light' | 'system';
 export type ExportFormat = 'xlsx' | 'csv' | 'json' | 'pdf';
 
