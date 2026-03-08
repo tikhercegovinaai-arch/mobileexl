@@ -12,7 +12,10 @@ import ColumnMappingScreen from './ColumnMappingScreen';
 import ExportScreen from './ExportScreen';
 import PrivacyGateScreen from './PrivacyGateScreen';
 import SettingsScreen from './SettingsScreen';
+import OnboardingScreen from './OnboardingScreen';
 import PermissionGate from '../components/PermissionGate';
+import ErrorBoundary from '../components/ErrorBoundary';
+import { ToastProvider } from '../components/ToastProvider';
 import { PermissionService, PermissionState } from '../services/PermissionService';
 import { DocumentScannerService } from '../services/DocumentScannerService';
 import UploadScreen from './UploadScreen';
@@ -20,12 +23,12 @@ import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
-type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
+type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
 
 export default function AppNavigator() {
-    const { isLocked, setLocked, initializeValidation } = useAppStore();
+    const { isLocked, setLocked, initializeValidation, isOnboardingDone, setOnboardingDone } = useAppStore();
 
-    const [screen, setScreen] = useState<Screen>('home');
+    const [screen, setScreen] = useState<Screen>(isOnboardingDone ? 'home' : 'onboarding');
     const [permissions, setPermissions] = useState<PermissionState>({
         camera: 'undetermined',
         mediaLibrary: 'undetermined',
@@ -137,6 +140,17 @@ export default function AppNavigator() {
 
     const renderScreen = () => {
         switch (screen) {
+            case 'onboarding':
+                return (
+                    <Animated.View key="onboarding" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <OnboardingScreen
+                            onComplete={() => {
+                                setOnboardingDone(true);
+                                setScreen('home');
+                            }}
+                        />
+                    </Animated.View>
+                );
             case 'home':
                 return (
                     <Animated.View key="home" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
@@ -255,10 +269,14 @@ function AppContent({
     const { theme } = useTheme();
 
     return (
-        <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.background }]}>
-            {isLocked && <PrivacyGateScreen />}
-            {!isLocked && renderScreen()}
-        </GestureHandlerRootView>
+        <ErrorBoundary>
+            <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.background }]}>
+                <ToastProvider>
+                    {isLocked && <PrivacyGateScreen />}
+                    {!isLocked && renderScreen()}
+                </ToastProvider>
+            </GestureHandlerRootView>
+        </ErrorBoundary>
     );
 }
 
