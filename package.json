@@ -41,6 +41,7 @@
     "expo-local-authentication": "^55.0.8",
     "expo-media-library": "~55.0.9",
     "expo-permissions": "^14.4.0",
+    "expo-print": "^55.0.8",
     "expo-secure-store": "~55.0.8",
     "expo-sharing": "^55.0.11",
     "expo-status-bar": "~55.0.4",
