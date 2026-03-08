@@ -22,6 +22,16 @@ const ExtractionSchemaZod = z.object({
     }).optional()
 });
 
+const ConfidenceSchemaZod = z.object({
+    fields: z.array(z.object({
+        fieldId: z.string(),
+        confidence: z.number().min(0).max(1),
+        reasoning: z.string().describe("Short explanation of the confidence score")
+    }))
+});
+
 export const EXTRACTION_SCHEMA = zodToJsonSchema(ExtractionSchemaZod as any, { target: "jsonSchema7" });
+export const CONFIDENCE_SCHEMA = zodToJsonSchema(ConfidenceSchemaZod as any, { target: "jsonSchema7" });
 
 export type ExtractionData = z.infer<typeof ExtractionSchemaZod>;
+export type ConfidenceData = z.infer<typeof ConfidenceSchemaZod>;

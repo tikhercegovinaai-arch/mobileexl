@@ -60,6 +60,9 @@ export const DocumentScannerService = {
             // to optimize the image for OCR extraction.
             const filters: ImageManipulator.Action[] = [
                 { resize: { width: 2480 } }, // Normalize to A4 @ 300 DPI width
+                // Note: Expo ImageManipulator has limited filters. 
+                // For production, we'd use a native module with Open CV.
+                // We'll use multiple passes or specific compression settings to simulate enhancement.
             ];
 
             const result = await ImageManipulator.manipulateAsync(
@@ -68,7 +71,7 @@ export const DocumentScannerService = {
                     ...geometricActions,
                     ...filters,
                 ],
-                { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
+                { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG } // Higher compression can sometimes help edge detection if done carefully
             );
 
             // 3. Resolution Normalization & DPI Validation

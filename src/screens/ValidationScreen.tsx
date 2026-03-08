@@ -116,9 +116,18 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                 </TouchableOpacity>
                 <View>
                     <Text style={[styles.title, { color: theme.textPrimary }]}>Validate Data</Text>
-                    {lowConfCount > 0 && (
-                        <Text style={[styles.warningSubtitle, { color: theme.error }]}>{lowConfCount} low-confidence field(s)</Text>
-                    )}
+                    <View style={styles.healthRow}>
+                        <View style={[
+                            styles.healthPulse, 
+                            { backgroundColor: lowConfCount > 0 ? theme.error : theme.success }
+                        ]} />
+                        <Text style={[
+                            styles.warningSubtitle, 
+                            { color: lowConfCount > 0 ? theme.error : theme.success }
+                        ]}>
+                            {lowConfCount > 0 ? `${lowConfCount} issues found` : 'Document Health: Excellent'}
+                        </Text>
+                    </View>
                 </View>
                 <TouchableOpacity 
                     onPress={() => {
@@ -345,6 +354,17 @@ const styles = StyleSheet.create({
     fieldsList: {
         flex: 1,
         padding: Spacing.md,
+    },
+    healthRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 2,
+    },
+    healthPulse: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 6,
     },
     sectionTitle: {
         fontSize: Typography.fontSizeXS,

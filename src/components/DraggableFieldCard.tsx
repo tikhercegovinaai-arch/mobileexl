@@ -95,6 +95,10 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
                     styles.card,
                     animatedStyle,
                     isSelected && styles.cardSelected,
+                    field.confidence < 0.7 && { 
+                        backgroundColor: Colors.error + '08', 
+                        borderColor: Colors.error + '44' 
+                    },
                 ]}
             >
                 {/* Confidence bar */}

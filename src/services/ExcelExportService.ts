@@ -34,7 +34,7 @@ function applyColWidths(ws: XLSX.WorkSheet, widths: Record<string, number>): voi
     ws['!cols'] = Object.values(widths).map((wch) => ({ wch: Math.min(wch, 60) }));
 }
 
-export type ExportFormat = 'xlsx' | 'csv' | 'pdf';
+export type ExportFormat = 'xlsx' | 'csv' | 'pdf' | 'json';
 
 export class ExcelExportService {
     /**
@@ -104,19 +104,28 @@ export class ExcelExportService {
         XLSX.utils.book_append_sheet(wb, metaWs, 'Metadata');
 
         // ── Write to file ───────────────────────────────────────────────────────
-        const ext = format === 'csv' ? 'csv' : 'xlsx';
+        const ext = format === 'csv' ? 'csv' : format === 'json' ? 'json' : 'xlsx';
         const name = filename
             ? `${filename}.${ext}`
             : `Extraction_${Date.now()}.${ext}`;
 
-        const wbout =
-            format === 'csv'
-                ? XLSX.utils.sheet_to_csv(summaryWs)
-                : XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+        let wbout: string | string[];
+        let encoding: 'utf8' | 'base64' = 'base64';
+
+        if (format === 'json') {
+            wbout = JSON.stringify(fields, null, 2);
+            encoding = 'utf8';
+        } else if (format === 'csv') {
+            wbout = XLSX.utils.sheet_to_csv(summaryWs);
+            encoding = 'utf8';
+        } else {
+            wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+            encoding = 'base64';
+        }
 
         const file = new File(Paths.cache, name);
-        await file.write(wbout, {
-            encoding: format === 'csv' ? 'utf8' : 'base64',
+        await file.write(wbout as string, {
+            encoding,
         });
 
         return file.uri;

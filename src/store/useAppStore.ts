@@ -284,21 +284,26 @@ export const useAppStore = create<AppSessionState>()(
             initializeValidation: (data) => {
                 // Transform structured data into validation fields
                 const fields: ValidationField[] = [];
+                const confidenceMap = (data._confidence as Record<string, any>) || {};
                 let index = 0;
 
                 const processObject = (obj: any, prefix = '') => {
                     for (const key in obj) {
+                        // Skip internal metadata
+                        if (key === '_confidence') continue;
+
                         const value = obj[key];
                         const label = prefix ? `${prefix}.${key}` : key;
 
                         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                             processObject(value, label);
                         } else if (value !== null) {
+                            const conf = confidenceMap[label];
                             fields.push({
                                 id: `field_${index++}`,
                                 label,
                                 value: String(value),
-                                confidence: 0.7 + Math.random() * 0.3,
+                                confidence: conf?.score ?? 0.85, // Default if not found
                                 boundingBox: {
                                     x: 50 + Math.random() * 200,
                                     y: 100 + index * 50,
