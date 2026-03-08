@@ -119,13 +119,19 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
             <View style={styles.tabBar}>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'export' && styles.activeTab]}
-                    onPress={() => setActiveTab('export')}
+                    onPress={() => {
+                        hapticLight();
+                        setActiveTab('export');
+                    }}
                 >
                     <Text style={[styles.tabText, activeTab === 'export' && styles.activeTabText]}>Export Data</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'analytics' && styles.activeTab]}
-                    onPress={() => setActiveTab('analytics')}
+                    onPress={() => {
+                        hapticLight();
+                        setActiveTab('analytics');
+                    }}
                 >
                     <Text style={[styles.tabText, activeTab === 'analytics' && styles.activeTabText]}>Analytics</Text>
                 </TouchableOpacity>
@@ -207,13 +213,19 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                         </View>
                     ) : (
                         <View style={styles.buttonStack}>
-                            <TouchableOpacity style={styles.primaryButton} onPress={handleShare}>
+                            <TouchableOpacity style={styles.primaryButton} onPress={() => {
+                                hapticSuccess();
+                                handleShare();
+                            }}>
                                 <Text style={styles.primaryButtonText}>
                                     ↗ Share / Save to Files
                                 </Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.ghostButton} onPress={onDone}>
+                            <TouchableOpacity style={styles.ghostButton} onPress={() => {
+                                hapticLight();
+                                onDone();
+                            }}>
                                 <Text style={styles.ghostButtonText}>Finish Session</Text>
                             </TouchableOpacity>
                         </View>

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import SkeletonBox from '../components/SkeletonBox';
 
 interface BatchReviewScreenProps {
     onRetake: () => void;
@@ -110,6 +111,21 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
                         </View>
                     </Animated.View>
                 ))}
+
+                {images.length === 0 && (
+                    <>
+                        <View style={styles.thumbnailWrapper}>
+                            <View style={styles.thumbnailContainer}>
+                                <SkeletonBox width="100%" height={250} style={styles.thumbnail} />
+                            </View>
+                        </View>
+                        <View style={styles.thumbnailWrapper}>
+                            <View style={styles.thumbnailContainer}>
+                                <SkeletonBox width="100%" height={250} style={styles.thumbnail} />
+                            </View>
+                        </View>
+                    </>
+                )}
 
                 {/* Placeholder for adding more */}
                 <TouchableOpacity

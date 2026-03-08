@@ -19,6 +19,7 @@ import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { DropZoneColumn } from '../components/DropZoneColumn';
 import { useToast } from '../components/ToastProvider';
+import { hapticLight, hapticMedium, hapticSuccess } from '../utils/haptics';
 
 /** Predefined structural columns that users can map fields into. */
 const COLUMN_DEFINITIONS: { key: string; label: string }[] = [
@@ -48,13 +49,17 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
     const dragging = useSharedValue(false);
 
     const gesture = Gesture.Pan()
-        .onStart(() => { dragging.value = true; })
+        .onStart(() => {
+            dragging.value = true;
+            runOnJS(hapticLight)();
+        })
         .onUpdate((e) => {
             tx.value = e.translationX;
             ty.value = e.translationY;
         })
         .onEnd((e) => {
             dragging.value = false;
+            runOnJS(hapticMedium)();
             runOnJS(onDropped)(field, e.absoluteX, e.absoluteY);
             tx.value = withSpring(0);
             ty.value = withSpring(0);

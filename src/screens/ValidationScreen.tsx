@@ -14,6 +14,7 @@ import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
 import { DraggableFieldCard } from '../components/DraggableFieldCard';
 import { FieldManipulationSheet } from '../components/FieldManipulationSheet';
+import SkeletonFieldRow from '../components/SkeletonFieldRow';
 import { useToast } from '../components/ToastProvider';
 import { hapticMedium, hapticSuccess } from '../utils/haptics';
 
@@ -200,17 +201,26 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {sortedFields.map((field) => (
-                        <DraggableFieldCard
-                            key={field.id}
-                            field={field}
-                            isSelected={selectedIds.includes(field.id)}
-                            onEdit={handleFieldEdit}
-                            onDrop={handleDrop}
-                            onLongPress={handleLongPress}
-                            onToggleSelect={handleToggleSelect}
-                        />
-                    ))}
+                    {sortedFields.length > 0 ? (
+                        sortedFields.map((field) => (
+                            <DraggableFieldCard
+                                key={field.id}
+                                field={field}
+                                isSelected={selectedIds.includes(field.id)}
+                                onEdit={handleFieldEdit}
+                                onDrop={handleDrop}
+                                onLongPress={handleLongPress}
+                                onToggleSelect={handleToggleSelect}
+                            />
+                        ))
+                    ) : (
+                        <View style={{ marginTop: Spacing.md, gap: Spacing.md }}>
+                            <SkeletonFieldRow />
+                            <SkeletonFieldRow />
+                            <SkeletonFieldRow />
+                            <SkeletonFieldRow />
+                        </View>
+                    )}
                 </ScrollView>
             </View>
 

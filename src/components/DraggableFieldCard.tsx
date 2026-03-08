@@ -10,6 +10,7 @@ import Animated, {
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 import ConfidenceBar from './ConfidenceBar';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface DraggableFieldCardProps {
     field: ValidationField;
@@ -44,6 +45,7 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
     const gesture = Gesture.Pan()
         .onStart(() => {
             isDragging.value = true;
+            runOnJS(hapticLight)();
         })
         .onUpdate((event) => {
             translationX.value = event.translationX;
@@ -51,6 +53,7 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
         })
         .onEnd((event) => {
             isDragging.value = false;
+            runOnJS(hapticMedium)();
             if (onDrop) {
                 runOnJS(onDrop)(field, event.absoluteX, event.absoluteY);
             }
