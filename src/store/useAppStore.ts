@@ -119,6 +119,7 @@ export interface AppSessionState {
     updateModelDownload: (update: Partial<ModelDownloadState>) => void;
     resetModelDownload: () => void;
     resetSession: () => void;
+    lowConfidenceFields: () => ValidationField[];
 }
 
 // ─── Initial State ────────────────────────────────────────────────────────────
@@ -168,7 +169,7 @@ const initialSettings: AppSettings = {
 
 export const useAppStore = create<AppSessionState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             isOnboardingDone: false,
             settings: initialSettings,
             currentRoute: 'Onboarding',
@@ -396,6 +397,8 @@ export const useAppStore = create<AppSessionState>()(
                     columnMappings: [],
                     currentRoute: 'Home',
                 }),
+
+            lowConfidenceFields: () => get().validation.fields.filter((f) => f.confidence < 0.7),
         }),
         {
             name: 'exelent-app-store',
