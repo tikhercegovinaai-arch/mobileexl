@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
-import { hapticMedium } from '../utils/haptics';
+import { hapticMedium, hapticLight } from '../utils/haptics';
 
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
@@ -78,7 +78,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                     <Text style={styles.appName}>Exelent</Text>
                     <Text style={styles.tagline}>AI Handwriting → Excel</Text>
                 </View>
-                <TouchableOpacity style={styles.settingsButton} onPress={onOpenSettings} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.settingsButton} onPress={() => { hapticLight(); onOpenSettings(); }} activeOpacity={0.7}>
                     <Text style={styles.settingsIcon}>⚙️</Text>
                 </TouchableOpacity>
             </Animated.View>
