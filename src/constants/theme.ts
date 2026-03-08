@@ -33,34 +33,92 @@ export function shadow(
     });
 }
 
-export const Colors = {
+// ─── Semantic Theme Token Interface ───────────────────────────────────────────
+
+export interface ThemeTokens {
     // Backgrounds
+    background: string;
+    surface: string;
+    surfaceAlt: string;
+    card: string;
+
+    // Brand
+    primary: string;
+    primaryDark: string;
+    secondary: string;
+
+    // Text
+    textPrimary: string;
+    textSecondary: string;
+    textMuted: string;
+
+    // States
+    success: string;
+    warning: string;
+    error: string;
+    info: string;
+
+    // UI
+    border: string;
+    overlay: string;
+    cameraBoundary: string;
+}
+
+// ─── Dark Theme (current / default) ──────────────────────────────────────────
+
+export const darkTheme: ThemeTokens = {
     background: '#0A0F1E',
     surface: '#111827',
     surfaceAlt: '#1F2937',
     card: '#1A2236',
 
-    // Brand
-    primary: '#3B82F6',       // Electric Blue
+    primary: '#3B82F6',
     primaryDark: '#1D4ED8',
-    secondary: '#8B5CF6',     // Violet
+    secondary: '#8B5CF6',
 
-    // Text
     textPrimary: '#F9FAFB',
     textSecondary: '#9CA3AF',
     textMuted: '#6B7280',
 
-    // States
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
     info: '#3B82F6',
 
-    // UI
     border: '#374151',
     overlay: 'rgba(0,0,0,0.6)',
     cameraBoundary: 'rgba(59,130,246,0.7)',
 };
+
+// ─── Light Theme ─────────────────────────────────────────────────────────────
+
+export const lightTheme: ThemeTokens = {
+    background: '#F3F4F6',
+    surface: '#FFFFFF',
+    surfaceAlt: '#E5E7EB',
+    card: '#FFFFFF',
+
+    primary: '#2563EB',
+    primaryDark: '#1D4ED8',
+    secondary: '#7C3AED',
+
+    textPrimary: '#111827',
+    textSecondary: '#4B5563',
+    textMuted: '#6B7280',
+
+    success: '#059669',
+    warning: '#D97706',
+    error: '#DC2626',
+    info: '#2563EB',
+
+    border: '#D1D5DB',
+    overlay: 'rgba(0,0,0,0.3)',
+    cameraBoundary: 'rgba(37,99,235,0.7)',
+};
+
+// ─── Legacy Colors export (backward-compatible with existing code) ───────────
+
+export const Colors = darkTheme;
 
 export const Typography = {
     fontSizeXS: 11,
