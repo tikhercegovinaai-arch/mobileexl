@@ -10,6 +10,8 @@ import {
     Animated,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useAppStore } from '../store/useAppStore';
+import { hapticMedium } from '../utils/haptics';
 
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
@@ -128,7 +130,10 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
 
                 <TouchableOpacity
                     style={[styles.captureButton, isBatchMode && styles.captureButtonBatch]}
-                    onPress={() => onStartCapture(isBatchMode)}
+                    onPress={() => {
+                        hapticMedium();
+                        onStartCapture(isBatchMode);
+                    }}
                     activeOpacity={0.85}
                 >
                     <Text style={styles.captureButtonIcon}>{isBatchMode ? '📑' : '📷'}</Text>
@@ -139,7 +144,10 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
 
                 <TouchableOpacity
                     style={styles.uploadButton}
-                    onPress={onUpload}
+                    onPress={() => {
+                        hapticMedium();
+                        onUpload();
+                    }}
                     activeOpacity={0.8}
                 >
                     <Text style={styles.uploadButtonIcon}>☁️</Text>

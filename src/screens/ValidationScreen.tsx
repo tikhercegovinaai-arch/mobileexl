@@ -14,6 +14,8 @@ import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
 import { DraggableFieldCard } from '../components/DraggableFieldCard';
 import { FieldManipulationSheet } from '../components/FieldManipulationSheet';
+import { useToast } from '../components/ToastProvider';
+import { hapticMedium, hapticSuccess } from '../utils/haptics';
 
 interface ValidationScreenProps {
     onBack: () => void;
@@ -29,6 +31,7 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
         splitField,
         batchUpdateCategory,
     } = useAppStore();
+    const { show: showToast } = useToast();
 
     // Image pixel dimensions
     const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null);
@@ -112,7 +115,13 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                         <Text style={styles.warningSubtitle}>{lowConfCount} low-confidence field(s)</Text>
                     )}
                 </View>
-                <TouchableOpacity onPress={onContinue} style={styles.continueBtn}>
+                <TouchableOpacity 
+                    onPress={() => {
+                        hapticMedium();
+                        onContinue();
+                    }} 
+                    style={styles.continueBtn}
+                >
                     <Text style={styles.continueBtnText}>Map →</Text>
                 </TouchableOpacity>
             </View>
@@ -217,6 +226,8 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                 onBatchCategory={(ids, cat) => {
                     batchUpdateCategory(ids, cat);
                     setSelectedIds([]);
+                    hapticSuccess();
+                    showToast(`Updated category for ${ids.length} field(s)`, 'success');
                 }}
             />
         </SafeAreaView>

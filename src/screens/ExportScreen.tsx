@@ -17,6 +17,9 @@ import { useAppStore } from '../store/useAppStore';
 import { ExcelExportService, ExportFormat } from '../services/ExcelExportService';
 import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelInjectorService';
 import { AnalyticsService } from '../services/AnalyticsService';
+import { BiometricService } from '../services/BiometricService';
+import { useToast } from '../components/ToastProvider';
+import { hapticSuccess, hapticError, hapticLight } from '../utils/haptics';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 
 interface ExportScreenProps {
@@ -24,10 +27,11 @@ interface ExportScreenProps {
 }
 
 export default function ExportScreen({ onDone }: ExportScreenProps) {
-    const { validation, columnMappings, setExportPath, currentExportPath, extraction } = useAppStore();
+    const { validation, columnMappings, setExportPath, currentExportPath, extraction, settings } = useAppStore();
 
     const [activeTab, setActiveTab] = useState<'export' | 'analytics'>('export');
     const [isExporting, setIsExporting] = useState(false);
+    const { show: showToast } = useToast();
     const [format, setFormat] = useState<ExportFormat>('xlsx');
     const [customFilename, setCustomFilename] = useState('');
     const [savedPath, setSavedPath] = useState<string | null>(null);
@@ -68,6 +72,16 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
 
     /** Share via OS share sheet */
     const handleShare = async () => {
+        // Biometric gate
+        if (settings.requireBiometricOnExport) {
+            const isAuth = await BiometricService.authenticate('Authenticate to export data');
+            if (!isAuth) {
+                hapticError();
+                showToast('Export cancelled: Authentication failed', 'error');
+                return;
+            }
+        }
+
         setIsExporting(true);
         try {
             const fileUri = await generateFile();
@@ -83,12 +97,15 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     dialogTitle: 'Export Extracted Data',
                     ...(format === 'xlsx' && { UTI: 'com.microsoft.excel.xlsx' }),
                 });
+                hapticSuccess();
             } else {
-                Alert.alert('Saved', `File stored at:\n${fileUri}`);
+                hapticSuccess();
+                showToast(`File stored at: ${fileUri}`, 'success');
             }
         } catch (e) {
             console.error(e);
-            Alert.alert('Export Error', 'Failed to generate file.');
+            hapticError();
+            showToast('Failed to generate file.', 'error');
         } finally {
             setIsExporting(false);
         }
@@ -157,7 +174,10 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                                 <TouchableOpacity
                                     key={f}
                                     style={[styles.formatChip, format === f && styles.formatChipActive]}
-                                    onPress={() => setFormat(f)}
+                                    onPress={() => {
+                                        hapticLight();
+                                        setFormat(f);
+                                    }}
                                 >
                                     <Text style={[styles.formatChipText, format === f && styles.formatChipTextActive]}>
                                         .{f.toUpperCase()}

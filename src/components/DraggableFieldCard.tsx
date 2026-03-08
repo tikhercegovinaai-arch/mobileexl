@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
+import ConfidenceBar from './ConfidenceBar';
 
 interface DraggableFieldCardProps {
     field: ValidationField;
@@ -99,11 +100,8 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
                 <View style={styles.content}>
                     <View style={styles.topRow}>
                         <Text style={styles.label}>{field.label}</Text>
-                        <View style={styles.confidencePill}>
-                            <View style={[styles.pillDot, { backgroundColor: confidenceColor }]} />
-                            <Text style={[styles.pillText, { color: confidenceColor }]}>
-                                {Math.round(field.confidence * 100)}%
-                            </Text>
+                        <View style={{ width: 60 }}>
+                            <ConfidenceBar confidence={field.confidence} />
                         </View>
                     </View>
 
@@ -197,20 +195,6 @@ const styles = StyleSheet.create({
         color: Colors.textSecondary,
         textTransform: 'uppercase',
         flex: 1,
-    },
-    confidencePill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 3,
-    },
-    pillDot: {
-        width: 5,
-        height: 5,
-        borderRadius: 3,
-    },
-    pillText: {
-        fontSize: 10,
-        fontWeight: Typography.fontWeightBold,
     },
     value: {
         fontSize: Typography.fontSizeMD,

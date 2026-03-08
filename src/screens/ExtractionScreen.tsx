@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Animated } from 'react-nativ
 import { useAppStore, ExtractionPhase } from '../store/useAppStore';
 import { BatchProcessingService } from '../services/BatchProcessingService';
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import SkeletonCard from '../components/SkeletonCard';
 
 interface ExtractionScreenProps {
     onExtractionComplete: () => void;
@@ -79,12 +80,14 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
-                <View style={styles.loaderContainer}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
-                    <View style={styles.percentageCircle}>
-                        <Text style={styles.percentageText}>{Math.round(extraction.progress)}%</Text>
+                {extraction.status === 'running' && (
+                    <View style={{ width: '100%', marginBottom: Spacing.lg, alignItems: 'center' }}>
+                        <SkeletonCard />
+                        <Text style={[styles.title, { marginTop: Spacing.md }]}>
+                            {Math.round(extraction.progress)}%
+                        </Text>
                     </View>
-                </View>
+                )}
 
                 <Text style={styles.title}>AI Intelligence Engine</Text>
                 <Text style={styles.statusText}>
