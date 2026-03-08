@@ -15,7 +15,8 @@ import Animated, {
     withSpring,
     runOnJS,
 } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { DropZoneColumn } from '../components/DropZoneColumn';
 import { useToast } from '../components/ToastProvider';
@@ -44,6 +45,7 @@ interface DraggableSourceCardProps {
 }
 
 function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
+    const { theme } = useTheme();
     const tx = useSharedValue(0);
     const ty = useSharedValue(0);
     const dragging = useSharedValue(false);
@@ -78,19 +80,19 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
     }));
 
     const confidenceColor =
-        field.confidence >= 0.9 ? Colors.success
-            : field.confidence >= 0.7 ? Colors.warning
-                : Colors.error;
+        field.confidence >= 0.9 ? theme.success
+            : field.confidence >= 0.7 ? theme.warning
+                : theme.error;
 
     return (
         <GestureDetector gesture={gesture}>
-            <Animated.View style={[styles.sourceCard, animStyle]}>
+            <Animated.View style={[styles.sourceCard, animStyle, { backgroundColor: theme.surfaceAlt, borderColor: theme.border }, shadow(theme.primary, 4, 8, 0.2, 4)]}>
                 <View style={[styles.sourceCardBar, { backgroundColor: confidenceColor }]} />
                 <View style={styles.sourceCardBody}>
-                    <Text style={styles.sourceCardLabel} numberOfLines={1}>
+                    <Text style={[styles.sourceCardLabel, { color: theme.textSecondary }]} numberOfLines={1}>
                         {field.label}
                     </Text>
-                    <Text style={styles.sourceCardValue} numberOfLines={1}>
+                    <Text style={[styles.sourceCardValue, { color: theme.textPrimary }]} numberOfLines={1}>
                         {field.value}
                     </Text>
                 </View>
@@ -108,6 +110,7 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
 
 export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappingScreenProps) {
     const { validation, setFieldCategory } = useAppStore();
+    const { theme } = useTheme();
     const { show: showToast } = useToast();
 
     // Track layout of each drop zone for hit-testing
@@ -176,39 +179,39 @@ export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappin
     ).length;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={onBack} style={styles.headerButton}>
-                    <Text style={styles.headerButtonText}>← Back</Text>
+                    <Text style={[styles.headerButtonText, { color: theme.textSecondary }]}>← Back</Text>
                 </TouchableOpacity>
-                <Text style={styles.title}>Map Columns</Text>
-                <TouchableOpacity onPress={onContinue} style={styles.continueButton}>
+                <Text style={[styles.title, { color: theme.textPrimary }]}>Map Columns</Text>
+                <TouchableOpacity onPress={onContinue} style={[styles.continueButton, { backgroundColor: theme.primary }]}>
                     <Text style={styles.continueText}>Export →</Text>
                 </TouchableOpacity>
             </View>
 
             {/* Progress strip */}
-            <View style={styles.progressStrip}>
-                <Text style={styles.progressText}>
+            <View style={[styles.progressStrip, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+                <Text style={[styles.progressText, { color: theme.textSecondary }]}>
                     {assignedCount} / {validation.fields.length} fields assigned
                 </Text>
-                <TouchableOpacity onPress={handleAutoMap} style={styles.autoMapButton}>
-                    <Text style={styles.autoMapText}>Auto-Map</Text>
+                <TouchableOpacity onPress={handleAutoMap} style={[styles.autoMapButton, { backgroundColor: theme.secondary + '33', borderColor: theme.secondary }]}>
+                    <Text style={[styles.autoMapText, { color: theme.secondary }]}>Auto-Map</Text>
                 </TouchableOpacity>
             </View>
 
             <View style={styles.body}>
                 {/* Left pane — unassigned source cards */}
                 <View style={styles.leftPane}>
-                    <Text style={styles.paneLabel}>UNASSIGNED</Text>
+                    <Text style={[styles.paneLabel, { color: theme.textMuted }]}>UNASSIGNED</Text>
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.sourceList}
                     >
                         {unassignedFields.length === 0 ? (
                             <View style={styles.allDoneHint}>
-                                <Text style={styles.allDoneText}>✓ All mapped!</Text>
+                                <Text style={[styles.allDoneText, { color: theme.success }]}>✓ All mapped!</Text>
                             </View>
                         ) : (
                             unassignedFields.map((f) => (
@@ -223,11 +226,11 @@ export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappin
                 </View>
 
                 {/* Divider */}
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
                 {/* Right pane — column drop zones */}
                 <View style={styles.rightPane}>
-                    <Text style={styles.paneLabel}>COLUMNS</Text>
+                    <Text style={[styles.paneLabel, { color: theme.textMuted }]}>COLUMNS</Text>
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.zoneList}
@@ -252,7 +255,6 @@ export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappin
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -260,22 +262,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: Spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
     },
     headerButton: {
         padding: Spacing.xs,
     },
     headerButtonText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
     },
     title: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeLG,
         fontWeight: Typography.fontWeightBold,
     },
     continueButton: {
-        backgroundColor: Colors.primary,
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.xs,
         borderRadius: BorderRadius.sm,
@@ -289,26 +287,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: Colors.surface,
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.sm,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
     },
     progressText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeSM,
     },
     autoMapButton: {
-        backgroundColor: Colors.secondary + '33',
         paddingHorizontal: Spacing.sm,
         paddingVertical: 4,
         borderRadius: BorderRadius.sm,
         borderWidth: 1,
-        borderColor: Colors.secondary,
     },
     autoMapText: {
-        color: Colors.secondary,
         fontSize: Typography.fontSizeXS,
         fontWeight: Typography.fontWeightSemiBold,
     },
@@ -322,7 +314,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         width: 1,
-        backgroundColor: Colors.border,
         marginVertical: Spacing.sm,
     },
     rightPane: {
@@ -330,7 +321,6 @@ const styles = StyleSheet.create({
         padding: Spacing.sm,
     },
     paneLabel: {
-        color: Colors.textMuted,
         fontSize: 10,
         fontWeight: Typography.fontWeightBold,
         letterSpacing: 1.2,
@@ -347,13 +337,10 @@ const styles = StyleSheet.create({
     // Source card styles
     sourceCard: {
         flexDirection: 'row',
-        backgroundColor: Colors.surfaceAlt,
         borderRadius: BorderRadius.sm,
         borderWidth: 1,
-        borderColor: Colors.border,
         overflow: 'hidden',
         alignItems: 'center',
-        ...shadow(Colors.primary, 4, 8, 0.2, 4),
     },
     sourceCardBar: {
         width: 4,
@@ -365,12 +352,10 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.xs,
     },
     sourceCardLabel: {
-        color: Colors.textSecondary,
         fontSize: 10,
         textTransform: 'uppercase',
     },
     sourceCardValue: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightMedium,
     },
@@ -387,7 +372,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     allDoneText: {
-        color: Colors.success,
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightSemiBold,
     },

@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { useAppStore, ExtractionPhase } from '../store/useAppStore';
 import { BatchProcessingService } from '../services/BatchProcessingService';
-import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import SkeletonCard from '../components/SkeletonCard';
 
 interface ExtractionScreenProps {
@@ -26,6 +27,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         completeExtractionJob,
         failExtractionJob
     } = useAppStore();
+    const { theme } = useTheme();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -78,19 +80,19 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
     }, [extraction.phase]);
 
     return (
-        <View style={styles.container}>
-            <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: theme.surface, borderColor: theme.border }, shadow(theme.isDark ? '#000' : '#000', 10, 20, 0.3, 10)]}>
                 {extraction.status === 'running' && (
                     <View style={{ width: '100%', marginBottom: Spacing.lg, alignItems: 'center' }}>
                         <SkeletonCard />
-                        <Text style={[styles.title, { marginTop: Spacing.md }]}>
+                        <Text style={[styles.title, { marginTop: Spacing.md, color: theme.textPrimary }]}>
                             {Math.round(extraction.progress)}%
                         </Text>
                     </View>
                 )}
 
-                <Text style={styles.title}>AI Intelligence Engine</Text>
-                <Text style={styles.statusText}>
+                <Text style={[styles.title, { color: theme.textPrimary }]}>AI Intelligence Engine</Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]}>
                     {currentDocStr || "Initializing Pipeline..."}
                 </Text>
 
@@ -104,23 +106,25 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                                 <View style={styles.lineWrapper}>
                                     <View style={[
                                         styles.dot,
-                                        isDone && styles.dotDone,
-                                        isActive && styles.dotActive
+                                        { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+                                        isDone && { backgroundColor: '#4ade80', borderColor: '#4ade80' },
+                                        isActive && { backgroundColor: theme.background, borderColor: theme.primary }
                                     ]}>
                                         {isDone && <Text style={styles.check}>✓</Text>}
                                     </View>
                                     {idx < PHASES.length - 1 && (
-                                        <View style={[styles.line, isDone && styles.lineDone]} />
+                                        <View style={[styles.line, { backgroundColor: theme.border }, isDone && { backgroundColor: '#4ade80' }]} />
                                     )}
                                 </View>
                                 <View style={styles.phaseInfo}>
                                     <Text style={[
                                         styles.phaseLabel,
-                                        (isActive || isDone) && styles.phaseLabelActive
+                                        { color: theme.textMuted },
+                                        (isActive || isDone) && { color: theme.textPrimary }
                                     ]}>
                                         {phase.icon} {phase.label}
                                     </Text>
-                                    {isActive && <Text style={styles.phaseSub}>Active...</Text>}
+                                    {isActive && <Text style={[styles.phaseSub, { color: theme.primary }]}>Active...</Text>}
                                 </View>
                             </View>
                         );
@@ -128,13 +132,13 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                 </View>
 
                 {extraction.status === 'error' && (
-                    <View style={styles.errorBox}>
-                        <Text style={styles.errorText}>⚠️ {extraction.errorMessage}</Text>
+                    <View style={[styles.errorBox, { backgroundColor: theme.error + '22' }]}>
+                        <Text style={[styles.errorText, { color: theme.error }]}>⚠️ {extraction.errorMessage}</Text>
                     </View>
                 )}
             </Animated.View>
 
-            <Text style={styles.footerText}>On-Device Neural Processing Enabled</Text>
+            <Text style={[styles.footerText, { color: theme.textMuted }]}>On-Device Neural Processing Enabled</Text>
         </View>
     );
 }
@@ -144,18 +148,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.background,
         padding: Spacing.xl,
     },
     card: {
-        backgroundColor: Colors.card,
         borderRadius: BorderRadius.xl,
         padding: Spacing.xl,
         width: '100%',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: Colors.border,
-        ...shadow('#000', 10, 20, 0.3, 10),
     },
     loaderContainer: {
         position: 'relative',
@@ -173,17 +173,14 @@ const styles = StyleSheet.create({
     percentageText: {
         fontSize: Typography.fontSizeXL,
         fontWeight: Typography.fontWeightBold,
-        color: Colors.primary,
     },
     title: {
         fontSize: Typography.fontSize2XL,
         fontWeight: Typography.fontWeightBold as any,
-        color: Colors.textPrimary,
         marginBottom: 8,
     },
     statusText: {
         fontSize: Typography.fontSizeSM,
-        color: Colors.textSecondary,
         marginBottom: Spacing.xl,
         textAlign: 'center',
     },
@@ -204,21 +201,8 @@ const styles = StyleSheet.create({
         width: 16,
         height: 16,
         borderRadius: 8,
-        backgroundColor: Colors.surfaceAlt,
         borderWidth: 2,
-        borderColor: Colors.border,
         zIndex: 1,
-    },
-    dotActive: {
-        borderColor: Colors.primary,
-        backgroundColor: Colors.background,
-        transform: [{ scale: 1.2 }],
-    },
-    dotDone: {
-        borderColor: Colors.success,
-        backgroundColor: Colors.success,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     check: {
         color: 'white',
@@ -228,26 +212,17 @@ const styles = StyleSheet.create({
     line: {
         width: 2,
         flex: 1,
-        backgroundColor: Colors.border,
         marginVertical: 2,
-    },
-    lineDone: {
-        backgroundColor: Colors.success,
     },
     phaseInfo: {
         flex: 1,
     },
     phaseLabel: {
         fontSize: Typography.fontSizeMD,
-        color: Colors.textMuted,
         fontWeight: Typography.fontWeightMedium,
-    },
-    phaseLabelActive: {
-        color: Colors.textPrimary,
     },
     phaseSub: {
         fontSize: 10,
-        color: Colors.primary,
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginTop: 2,
@@ -255,12 +230,10 @@ const styles = StyleSheet.create({
     errorBox: {
         marginTop: Spacing.xl,
         padding: Spacing.md,
-        backgroundColor: Colors.error + '22',
         borderRadius: BorderRadius.md,
         width: '100%',
     },
     errorText: {
-        color: Colors.error,
         fontSize: Typography.fontSizeSM,
         textAlign: 'center',
     },
@@ -268,7 +241,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: Spacing.xxl,
         fontSize: Typography.fontSizeXS,
-        color: Colors.textMuted,
         textTransform: 'uppercase',
         letterSpacing: 1.5,
     },
