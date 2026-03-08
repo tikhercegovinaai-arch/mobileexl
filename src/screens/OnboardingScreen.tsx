@@ -184,7 +184,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             <View style={styles.header}>
                 <Text style={[styles.headerLogo, { color: theme.textPrimary }]}>EXELENT // 2026</Text>
                 {!isLastSlide && (
-                    <TouchableOpacity onPress={handleSkip}>
+                    <TouchableOpacity onPress={handleSkip} testID="onboarding-skip-button">
                         <Text style={[styles.skipText, { color: theme.textMuted }]}>SKIP_LGC</Text>
                     </TouchableOpacity>
                 )}
@@ -213,6 +213,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                     style={[styles.ctaBtn, { backgroundColor: theme.primary }]}
                     onPress={handleNext}
                     activeOpacity={0.8}
+                    testID="onboarding-continue-button"
                 >
                     <Text style={[styles.ctaText, { color: theme.textInverse }]}>
                         {isLastSlide ? 'INITIALIZE_SYSTEM' : 'CONTINUE_NAV'}

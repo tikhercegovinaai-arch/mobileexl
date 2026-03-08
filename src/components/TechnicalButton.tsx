@@ -17,6 +17,7 @@ interface TechnicalButtonProps {
     style?: ViewStyle;
     textStyle?: TextStyle;
     disabled?: boolean;
+    testID?: string;
 }
 
 export const TechnicalButton = ({
@@ -26,6 +27,7 @@ export const TechnicalButton = ({
     style,
     textStyle,
     disabled = false,
+    testID,
 }: TechnicalButtonProps) => {
     const { theme } = useTheme();
 
@@ -41,6 +43,7 @@ export const TechnicalButton = ({
             onPress={handlePress}
             disabled={disabled}
             activeOpacity={0.8}
+            testID={testID}
             style={[
                 styles.container,
                 {

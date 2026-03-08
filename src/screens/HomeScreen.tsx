@@ -90,7 +90,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                     <Text style={[styles.appName, styles.monoText, { color: theme.textPrimary }]}>EXELENT_OS_1.0</Text>
                     <Text style={[styles.tagline, styles.monoText, { color: theme.textMuted }]}>NEURAL_HANDWRITING_EXTRACTOR</Text>
                 </View>
-                <TouchableOpacity style={[styles.settingsButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => { hapticLight(); onOpenSettings(); }} activeOpacity={0.7}>
+                <TouchableOpacity style={[styles.settingsButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => { hapticLight(); onOpenSettings(); }} activeOpacity={0.7} testID="home-settings-button">
                     <Text style={[styles.settingsIcon, { color: theme.textPrimary }]}>[CONFIG]</Text>
                 </TouchableOpacity>
             </Animated.View>
@@ -139,6 +139,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                         onValueChange={setIsBatchMode}
                         trackColor={{ false: theme.border, true: theme.primary }}
                         thumbColor={theme.textPrimary}
+                        testID="home-batch-mode-switch"
                     />
                 </View>
 
@@ -152,6 +153,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                         }
                     }}
                     style={{ marginBottom: Spacing.lg }}
+                    testID="home-execute-scan-button"
                 />
 
                 <TechnicalButton
@@ -159,6 +161,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                     variant="outline"
                     onPress={onUpload}
                     style={{ marginBottom: Spacing.md }}
+                    testID="home-import-button"
                 />
 
                 <TechnicalButton
