@@ -20,6 +20,7 @@ interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
     onOpenSettings: () => void;
     onUpload: () => void;
+    onViewAnalytics: () => void;
 }
 
 const FEATURES = [
@@ -40,7 +41,7 @@ const FEATURES = [
     },
 ];
 
-export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }: HomeScreenProps) {
+export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, onViewAnalytics }: HomeScreenProps) {
     const [isBatchMode, setIsBatchMode] = useState(false);
     const { theme, isDark } = useTheme();
 
@@ -150,6 +151,13 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                     label="[IMPORT_EXTERNAL_DATA]"
                     variant="outline"
                     onPress={onUpload}
+                    style={{ marginBottom: Spacing.md }}
+                />
+
+                <TechnicalButton
+                    label="[VIEW_SYSTEM_ANALYTICS]"
+                    variant="outline"
+                    onPress={onViewAnalytics}
                 />
             </Animated.View>
 

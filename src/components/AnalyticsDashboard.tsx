@@ -1,29 +1,36 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { PieChart, BarChart } from 'react-native-chart-kit';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Typography, Spacing } from '../constants/theme';
 import { AggregatedData } from '../services/AnalyticsService';
+import { useTheme } from '../context/ThemeContext';
 
 interface AnalyticsDashboardProps {
     data: AggregatedData;
 }
 
 const screenWidth = Dimensions.get('window').width;
-const chartConfig = {
-    backgroundGradientFrom: Colors.card,
-    backgroundGradientTo: Colors.card,
-    color: (opacity = 1) => `rgba(10, 132, 255, ${opacity})`, // iOS blue
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    strokeWidth: 2,
-    barPercentage: 0.5,
-    useShadowColorFromDataset: false,
-};
 
 export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
+    const { theme, isDark } = useTheme();
     const hasData = data.totalSum > 0 || Object.keys(data.categoryTotals).length > 0;
 
+    const chartConfig = useMemo(() => ({
+        backgroundGradientFrom: theme.surface,
+        backgroundGradientTo: theme.surface,
+        color: (opacity = 1) => `rgba(${parseInt(theme.primary.slice(1,3), 16)}, ${parseInt(theme.primary.slice(3,5), 16)}, ${parseInt(theme.primary.slice(5,7), 16)}, ${opacity})`,
+        labelColor: (opacity = 1) => theme.textSecondary,
+        strokeWidth: 2,
+        barPercentage: 0.5,
+        useShadowColorFromDataset: false,
+        propsForLabels: {
+            fontFamily: 'Courier',
+            fontSize: 10,
+        }
+    }), [theme]);
+
     const pieChartData = useMemo(() => {
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+        const colors = [theme.primary, theme.success, theme.warning, '#FF6384', '#36A2EB', '#FFCE56'];
         let colorIndex = 0;
 
         return Object.entries(data.categoryTotals).map(([name, value]) => {
@@ -33,18 +40,18 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                 name,
                 value,
                 color,
-                legendFontColor: Colors.textSecondary,
-                legendFontSize: 12,
+                legendFontColor: theme.textSecondary,
+                legendFontSize: 10,
             };
         });
-    }, [data.categoryTotals]);
+    }, [data.categoryTotals, theme]);
 
     const barChartData = useMemo(() => {
-        const labels = Object.keys(data.categoryTotals).map(cat => cat.substring(0, 10)); // Truncate long labels
+        const labels = Object.keys(data.categoryTotals).map(cat => cat.substring(0, 8).toUpperCase());
         const datasetValues = Object.values(data.categoryTotals);
 
         return {
-            labels: labels.length > 0 ? labels : ['None'],
+            labels: labels.length > 0 ? labels : ['NONE'],
             datasets: [
                 {
                     data: datasetValues.length > 0 ? datasetValues : [0],
@@ -55,46 +62,49 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
 
     if (!hasData) {
         return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>Not enough numerical data to generate analytics.</Text>
+            <View style={[styles.emptyContainer, { backgroundColor: theme.background }]}>
+                <Text style={[styles.emptyText, styles.monoText, { color: theme.textMuted }]}>
+                    [SYSTEM_ERR]: DATA_INSUFFICIENT_FOR_ANALYSIS
+                </Text>
             </View>
         );
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.scrollContent}>
+
+            {/* Total Metric Card */}
+            <View style={[styles.metricCard, { backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}>
+                <View style={[styles.marker, { backgroundColor: theme.primary }]} />
+                <Text style={[styles.metricTitle, styles.monoText, { color: theme.textSecondary }]}>AGGREGATED_TOTAL_VALUE</Text>
+                <Text style={[styles.metricValue, styles.monoText, { color: theme.textPrimary }]}>
+                    {data.totalSum.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}
+                </Text>
+            </View>
 
             {/* Insights Section */}
             {data.insights.length > 0 && (
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Key Insights</Text>
+                    <Text style={[styles.sectionTitle, styles.monoText, { color: theme.textPrimary }]}>PROCESS_INSIGHTS</Text>
                     {data.insights.map((insight, idx) => (
-                        <View key={idx} style={styles.insightCard}>
-                            <Text style={styles.insightIcon}>
-                                {insight.type === 'summary' ? '📝' : insight.type === 'trend' ? '📈' : '⚠️'}
+                        <View key={idx} style={[styles.insightCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                            <View style={[styles.insightIndicator, { backgroundColor: insight.type === 'anomaly' ? theme.error : theme.primary }]} />
+                            <Text style={[styles.insightText, { color: theme.textPrimary }]}>
+                                <Text style={[styles.monoText, { fontWeight: 'bold' }]}>[{insight.type.toUpperCase()}]</Text> {insight.text}
                             </Text>
-                            <Text style={styles.insightText}>{insight.text}</Text>
                         </View>
                     ))}
                 </View>
             )}
 
-            {/* Total Metric Card */}
-            <View style={styles.metricCard}>
-                <Text style={styles.metricTitle}>Total Value</Text>
-                <Text style={styles.metricValue}>
-                    {data.totalSum.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}
-                </Text>
-            </View>
-
-            {/* Pie Chart */}
+            {/* Distribution Card */}
             {pieChartData.length > 0 && (
-                <View style={styles.chartCard}>
-                    <Text style={styles.cardTitle}>Distribution</Text>
+                <View style={[styles.chartCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                    <Text style={[styles.cardTitle, styles.monoText, { color: theme.textPrimary }]}>CATEGORY_DISTRIBUTION</Text>
                     <PieChart
                         data={pieChartData}
-                        width={screenWidth - Spacing.lg * 2 - Spacing.md * 2} // container width
-                        height={220}
+                        width={screenWidth - Spacing.lg * 2}
+                        height={200}
                         chartConfig={chartConfig}
                         accessor={"value"}
                         backgroundColor={"transparent"}
@@ -104,19 +114,20 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                 </View>
             )}
 
-            {/* Bar Chart */}
+            {/* Comparison Card */}
             {pieChartData.length > 0 && (
-                <View style={styles.chartCard}>
-                    <Text style={styles.cardTitle}>Category Comparison</Text>
+                <View style={[styles.chartCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                    <Text style={[styles.cardTitle, styles.monoText, { color: theme.textPrimary }]}>LINEAR_COMPARISON</Text>
                     <BarChart
                         data={barChartData}
-                        width={screenWidth - Spacing.lg * 2 - Spacing.md * 2}
+                        width={screenWidth - Spacing.lg * 2}
                         height={220}
                         yAxisLabel="$"
                         yAxisSuffix=""
                         chartConfig={chartConfig}
-                        verticalLabelRotation={30}
+                        verticalLabelRotation={0}
                         style={styles.barChartStyle}
+                        fromZero
                     />
                 </View>
             )}
@@ -128,7 +139,6 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     scrollContent: {
         padding: Spacing.md,
@@ -141,73 +151,75 @@ const styles = StyleSheet.create({
         padding: Spacing.xl,
     },
     emptyText: {
-        color: Colors.textMuted,
-        fontSize: Typography.fontSizeMD,
+        fontSize: Typography.fontSizeSM,
         textAlign: 'center',
     },
     section: {
         marginBottom: Spacing.sm,
     },
     sectionTitle: {
-        fontSize: Typography.fontSizeLG,
-        fontWeight: Typography.fontWeightBold,
-        color: Colors.textPrimary,
+        fontSize: 12,
+        fontWeight: '900',
         marginBottom: Spacing.md,
+        letterSpacing: 1,
     },
     insightCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.surface,
         padding: Spacing.md,
-        borderRadius: BorderRadius.md,
         marginBottom: Spacing.sm,
         borderWidth: 1,
-        borderColor: Colors.border,
     },
-    insightIcon: {
-        fontSize: 20,
-        marginRight: Spacing.sm,
+    insightIndicator: {
+        width: 3,
+        height: '100%',
+        marginRight: Spacing.md,
     },
     insightText: {
         flex: 1,
-        color: Colors.textPrimary,
-        fontSize: Typography.fontSizeSM,
-        lineHeight: 20,
+        fontSize: 11,
+        lineHeight: 16,
     },
     metricCard: {
-        backgroundColor: Colors.card,
         padding: Spacing.lg,
-        borderRadius: BorderRadius.lg,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: Colors.border,
+        position: 'relative',
+        overflow: 'hidden',
+    },
+    marker: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        height: 4,
+        width: 40,
     },
     metricTitle: {
-        color: Colors.textSecondary,
-        fontSize: Typography.fontSizeMD,
+        fontSize: 10,
         marginBottom: Spacing.xs,
+        letterSpacing: 1,
     },
     metricValue: {
-        color: Colors.primary,
-        fontSize: Typography.fontSize3XL,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: Typography.fontSize2XL,
+        fontWeight: '900',
     },
     chartCard: {
-        backgroundColor: Colors.card,
         padding: Spacing.md,
-        borderRadius: BorderRadius.lg,
         borderWidth: 1,
-        borderColor: Colors.border,
         alignItems: 'center',
     },
     cardTitle: {
         alignSelf: 'flex-start',
-        color: Colors.textPrimary,
-        fontSize: Typography.fontSizeMD,
-        fontWeight: Typography.fontWeightSemiBold,
+        fontSize: 11,
+        fontWeight: '800',
         marginBottom: Spacing.md,
+        letterSpacing: 1,
     },
     barChartStyle: {
-        borderRadius: BorderRadius.md,
-    }
+        marginTop: Spacing.sm,
+        paddingRight: 0,
+    },
+    monoText: {
+        fontFamily: 'Courier',
+    },
 });

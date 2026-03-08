@@ -1,129 +1,98 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import { View, Text, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { useTheme } from '../context/ThemeContext';
-import { Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Typography, Spacing, shadow } from '../constants/theme';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
+import { TechnicalButton } from '../components/TechnicalButton';
+import { AnalyticsService } from '../services/AnalyticsService';
 
-export default function AnalyticsScreen() {
-    const { validation } = useAppStore();
-    const { theme } = useTheme();
+interface AnalyticsScreenProps {
+    onBack: () => void;
+}
 
-    const screenWidth = Dimensions.get('window').width - Spacing.md * 2;
+export default function AnalyticsScreen({ onBack }: AnalyticsScreenProps) {
+    const extraction = useAppStore((state) => state.extraction);
+    
+    // Injected context is better for theme
+    const { theme: currentTheme, isDark: currentIsDark } = useTheme();
 
     const aggregatedData = useMemo(() => {
-        const catCounts: Record<string, number> = {};
-        let totalVal = 0;
-        validation.fields.forEach((f) => {
-            const cat = f.category || 'Uncategorized';
-            catCounts[cat] = (catCounts[cat] || 0) + 1;
-            totalVal++;
-        });
-
-        // Mock daily series data based on total fields extracted today
-        const mockDailySeries = [
-            { date: 'Mon', value: Math.max(0, totalVal - 10) },
-            { date: 'Tue', value: Math.max(0, totalVal - 5) },
-            { date: 'Wed', value: Math.max(0, totalVal - 2) },
-            { date: 'Thu', value: Math.max(0, totalVal) },
-            { date: 'Fri', value: totalVal + 2 },
-        ];
-
-        return {
-            totalFields: totalVal,
-            categoryBreakdown: catCounts,
-            dailySeries: mockDailySeries,
-        };
-    }, [validation.fields]);
-
-    const pieData = Object.entries(aggregatedData.categoryBreakdown).map(([name, val], i) => ({
-        name,
-        population: val,
-        color: i % 2 === 0 ? theme.primary : theme.success,
-        legendFontColor: theme.textSecondary,
-        legendFontSize: 12,
-    }));
-
-    const lineData = {
-        labels: aggregatedData.dailySeries.map(d => d.date),
-        datasets: [{ data: aggregatedData.dailySeries.map(d => d.value) }],
-    };
-
-    const chartConfig = {
-        backgroundGradientFrom: theme.surface,
-        backgroundGradientTo: theme.surfaceAlt,
-        color: (opacity = 1) => `rgba(${parseInt(theme.primary.slice(1,3), 16)}, ${parseInt(theme.primary.slice(3,5), 16)}, ${parseInt(theme.primary.slice(5,7), 16)}, ${opacity})`,
-        labelColor: (opacity = 1) => theme.textSecondary,
-        strokeWidth: 2,
-        propsForDots: {
-            r: '4',
-            strokeWidth: '2',
-            stroke: theme.primary,
-        },
-    };
+        // Use live extracted data if available, otherwise fallback to empty structure
+        const data = extraction.extractedData || {};
+        return AnalyticsService.aggregateData(data);
+    }, [extraction.extractedData]);
 
     return (
-        <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-            <Text style={[styles.header, { color: theme.textPrimary }]}>Analytics Dashboard</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+            <StatusBar barStyle={currentIsDark ? 'light-content' : 'dark-content'} />
             
-            <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Total Extracted Fields: {aggregatedData.totalFields}</Text>
-            </View>
-
-            <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>Extraction Trend (This Week)</Text>
-                <LineChart
-                    data={lineData}
-                    width={screenWidth - Spacing.md * 2}
-                    height={220}
-                    chartConfig={chartConfig}
-                    bezier
-                    style={styles.chart}
+            {/* Header */}
+            <View style={[styles.header, { borderColor: currentTheme.border }]}>
+                <View>
+                    <Text style={[styles.title, styles.monoText, { color: currentTheme.textPrimary }]}>ANALYTICS_CORE_v1</Text>
+                    <Text style={[styles.subtitle, styles.monoText, { color: currentTheme.textMuted }]}>DATA_INSIGHTS_ENGINE</Text>
+                </View>
+                <TechnicalButton
+                    label="Back"
+                    variant="outline"
+                    onPress={onBack}
+                    style={styles.backButton}
                 />
             </View>
 
-            {pieData.length > 0 && (
-                <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>Categories Breakdown</Text>
-                    <PieChart
-                        data={pieData}
-                        width={screenWidth - Spacing.md * 2}
-                        height={200}
-                        chartConfig={chartConfig}
-                        accessor={"population"}
-                        backgroundColor={"transparent"}
-                        paddingLeft={"15"}
-                        center={[0, 0]}
-                    />
-                </View>
-            )}
-        </ScrollView>
+            <View style={styles.content}>
+                <AnalyticsDashboard data={aggregatedData} />
+            </View>
+
+            {/* Status Footer */}
+            <View style={[styles.footer, { borderTopColor: currentTheme.border }]}>
+                <Text style={[styles.footerText, styles.monoText, { color: currentTheme.textMuted }]}>
+                    STATUS: {extraction.status.toUpperCase()} | ENGINE: NEURAL_AGGREGATOR_V2
+                </Text>
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: Spacing.md,
     },
     header: {
-        fontSize: Typography.fontSizeXL,
-        fontWeight: Typography.fontWeightBold,
-        marginBottom: Spacing.lg,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.md,
+        borderBottomWidth: 1,
     },
-    card: {
-        borderRadius: BorderRadius.md,
-        padding: Spacing.md,
-        marginBottom: Spacing.md,
-        borderWidth: 1,
+    title: {
+        fontSize: Typography.fontSizeLG,
+        fontWeight: '900',
+        letterSpacing: 1,
     },
-    cardTitle: {
-        fontSize: Typography.fontSizeMD,
-        fontWeight: Typography.fontWeightBold,
-        marginBottom: Spacing.md,
+    subtitle: {
+        fontSize: 9,
+        fontWeight: '600',
     },
-    chart: {
-        borderRadius: BorderRadius.sm,
-        marginTop: Spacing.sm,
+    backButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    content: {
+        flex: 1,
+    },
+    footer: {
+        padding: Spacing.sm,
+        borderTopWidth: 1,
+        alignItems: 'center',
+    },
+    footerText: {
+        fontSize: 8,
+        letterSpacing: 0.5,
+    },
+    monoText: {
+        fontFamily: 'Courier',
     },
 });

@@ -14,6 +14,7 @@ import ExportScreen from './ExportScreen';
 import PrivacyGateScreen from './PrivacyGateScreen';
 import SettingsScreen from './SettingsScreen';
 import OnboardingScreen from './OnboardingScreen';
+import AnalyticsScreen from './AnalyticsScreen';
 import ModelDownloadOverlay from '../components/ModelDownloadOverlay';
 import PermissionGate from '../components/PermissionGate';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -25,7 +26,7 @@ import { useAppStore } from '../store/useAppStore';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ThemeTokens } from '../constants/theme';
 
-type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
+type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload' | 'analytics';
 
 export default function AppNavigator() {
     return (
@@ -250,6 +251,14 @@ function AppNavigationInner() {
                                 useAppStore.getState().resetSession();
                                 setScreen('home');
                             }}
+                        />
+                    </Animated.View>
+                );
+            case 'analytics':
+                return (
+                    <Animated.View key="analytics" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <AnalyticsScreen
+                            onBack={() => setScreen('home')}
                         />
                     </Animated.View>
                 );
