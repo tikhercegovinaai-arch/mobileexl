@@ -133,17 +133,26 @@ export class ExcelInjectorService {
         }
 
         // Write
-        const ext = format === 'csv' ? 'csv' : 'xlsx';
+        const ext = format === 'csv' ? 'csv' : format === 'json' ? 'json' : 'xlsx';
         const name = filename ? `${filename}.${ext}` : `Structured_${Date.now()}.${ext}`;
 
-        const content =
-            format === 'csv'
-                ? XLSX.utils.sheet_to_csv(ws)
-                : XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+        let content: string | string[];
+        let encoding: 'utf8' | 'base64' = 'base64';
+
+        if (format === 'json') {
+            content = JSON.stringify(normRows, null, 2);
+            encoding = 'utf8';
+        } else if (format === 'csv') {
+            content = XLSX.utils.sheet_to_csv(ws);
+            encoding = 'utf8';
+        } else {
+            content = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+            encoding = 'base64';
+        }
 
         const file = new File(Paths.cache, name);
-        await file.write(content, {
-            encoding: format === 'csv' ? 'utf8' : 'base64',
+        await file.write(content as string, {
+            encoding,
         });
 
         return file.uri;

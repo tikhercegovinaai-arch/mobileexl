@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
+import * as Clipboard from 'expo-clipboard';
 import { Spacing, Typography, BorderRadius } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
@@ -117,6 +118,18 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
         }
     };
 
+    /** Copy JSON representation to clipboard */
+    const handleCopyToClipboard = async () => {
+        hapticLight();
+        try {
+            const rawData = extraction.extractedData || {};
+            await Clipboard.setStringAsync(JSON.stringify(rawData, null, 2));
+            showToast('Copied to clipboard!', 'success');
+        } catch (e) {
+            showToast('Failed to copy', 'error');
+        }
+    };
+
     /** Save directly to device - not needed as Share handles this natively via OS share sheet */
 
     return (
@@ -182,7 +195,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     <View style={styles.section}>
                         <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Export Format</Text>
                         <View style={styles.formatRow}>
-                            {(['xlsx', 'csv', 'pdf'] as ExportFormat[]).map((f) => (
+                            {(['xlsx', 'csv', 'pdf', 'json'] as ExportFormat[]).map((f) => (
                                 <TouchableOpacity
                                     key={f}
                                     style={[
@@ -264,6 +277,15 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                             }}>
                                 <Text style={styles.primaryButtonText}>
                                     ↗ Share / Save to Files
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                style={[styles.secondaryButton, { borderColor: theme.border, backgroundColor: theme.surface }]} 
+                                onPress={handleCopyToClipboard}
+                            >
+                                <Text style={[styles.secondaryButtonText, { color: theme.textPrimary }]}>
+                                    📋 Copy Raw JSON
                                 </Text>
                             </TouchableOpacity>
 
