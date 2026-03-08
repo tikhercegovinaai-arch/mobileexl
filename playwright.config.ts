@@ -20,6 +20,14 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  /* Configure your web server. */
+  webServer: {
+    command: 'npx serve -s dist -l 8082',
+    url: 'http://localhost:8082',
+    reuseExistingServer: false,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
