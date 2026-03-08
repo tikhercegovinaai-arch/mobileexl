@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, Alert, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import HomeScreen from './HomeScreen';
 import PreviewScreen from './PreviewScreen';
@@ -271,10 +272,12 @@ function AppContent({
     return (
         <ErrorBoundary>
             <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.background }]}>
-                <ToastProvider>
-                    {isLocked && <PrivacyGateScreen />}
-                    {!isLocked && renderScreen()}
-                </ToastProvider>
+                <BottomSheetModalProvider>
+                    <ToastProvider>
+                        {isLocked && <PrivacyGateScreen />}
+                        {!isLocked && renderScreen()}
+                    </ToastProvider>
+                </BottomSheetModalProvider>
             </GestureHandlerRootView>
         </ErrorBoundary>
     );

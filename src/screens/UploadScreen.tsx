@@ -8,9 +8,9 @@ import {
     ScrollView,
     Animated,
     ActivityIndicator,
-    Alert,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useToast } from '../components/ToastProvider';
 import { pickFiles } from '../services/UploadService';
 import { FileParserService, ParsedResult } from '../services/FileParserService';
 import { UploadedFile, FileCategory } from '../services/UploadService';
@@ -72,6 +72,7 @@ export default function UploadScreen({
     const [isParsing, setIsParsing] = useState(false);
     const [parseStatus, setParseStatus] = useState('');
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const { show: showToast } = useToast();
 
     React.useEffect(() => {
         Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
@@ -83,7 +84,7 @@ export default function UploadScreen({
         if (result.status === 'success' && result.files) {
             setPickedFiles(result.files);
         } else if (result.status === 'error') {
-            Alert.alert('Upload Error', result.error ?? 'Could not pick files');
+            showToast(result.error ?? 'Could not pick files', 'error');
         }
     };
 
@@ -121,7 +122,7 @@ export default function UploadScreen({
             }
         } catch (e: any) {
             setIsParsing(false);
-            Alert.alert('Parse Error', e?.message ?? 'Failed to process the file(s)');
+            showToast(e?.message ?? 'Failed to process the file(s)', 'error');
         }
     };
 

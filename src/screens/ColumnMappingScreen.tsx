@@ -6,7 +6,6 @@ import {
     SafeAreaView,
     ScrollView,
     TouchableOpacity,
-    Alert,
     LayoutRectangle,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -19,6 +18,7 @@ import Animated, {
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { DropZoneColumn } from '../components/DropZoneColumn';
+import { useToast } from '../components/ToastProvider';
 
 /** Predefined structural columns that users can map fields into. */
 const COLUMN_DEFINITIONS: { key: string; label: string }[] = [
@@ -103,6 +103,7 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
 
 export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappingScreenProps) {
     const { validation, setFieldCategory } = useAppStore();
+    const { show: showToast } = useToast();
 
     // Track layout of each drop zone for hit-testing
     const zoneRects = useRef<Map<string, LayoutRectangle>>(new Map());
@@ -162,8 +163,8 @@ export default function ColumnMappingScreen({ onBack, onContinue }: ColumnMappin
                 count++;
             }
         });
-        Alert.alert('Auto-Map Complete', `${count} field(s) were automatically assigned.`);
-    }, [validation.fields, setFieldCategory]);
+        showToast(`Auto-Map Complete: ${count} field(s) were assigned.`, 'success');
+    }, [validation.fields, setFieldCategory, showToast]);
 
     const assignedCount = validation.fields.filter(
         (f) => COLUMN_DEFINITIONS.some((col) => col.key === f.category),
