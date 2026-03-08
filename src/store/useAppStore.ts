@@ -88,10 +88,12 @@ export interface ModelDownloadState {
     isDownloading: boolean;
     isPaused: boolean;
     progress: number;       // 0–100
+    resumeData: string | null;
     bytesWritten: number;
     contentLength: number;
     error: string | null;
 }
+
 
 export interface AppSessionState {
     isOnboardingDone: boolean;
@@ -162,10 +164,12 @@ const initialModelDownload: ModelDownloadState = {
     isDownloading: false,
     isPaused: false,
     progress: 0,
+    resumeData: null,
     bytesWritten: 0,
     contentLength: 0,
     error: null,
 };
+
 
 const initialSettings: AppSettings = {
     anonymousCrashReporting: false,

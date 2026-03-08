@@ -26,48 +26,69 @@ export const BatchProcessingService = {
         const { settings } = useAppStore.getState();
         const concurrency = settings.maxConcurrency || 2;
         const docProgresses = new Array(total).fill(0);
+        const docPhases = new Array<ExtractionPhase>(total).fill('idle');
 
-        const updateProgress = (index: number, progress: number, phase: ExtractionPhase) => {
+        const reportOverall = (index: number, progress: number, phase: ExtractionPhase) => {
             docProgresses[index] = progress;
+            docPhases[index] = phase;
+            
+            // Overall progress is average of all docs
             const overall = docProgresses.reduce((sum, curr) => sum + curr, 0) / total;
+            
+            // For the callback, we "estimate" the most relevant index-phase pair, 
+            // or we could change the callback signature. For now, keep it compatible.
             onProgress(overall, index, total, phase);
         };
 
         const allStructuredData = await runPool(
-            uris.map((uri, i) => async () => {
+            uris.map((uri, i) => async (onItemProgress) => {
                 // Phase 1: Security Audit (Mock)
-                updateProgress(i, 0, 'initializing');
+                reportOverall(i, 0, 'initializing');
                 await new Promise(r => setTimeout(r, 600)); // Mock security scan
-                updateProgress(i, 10, 'initializing');
+                onItemProgress(10);
+                reportOverall(i, 10, 'initializing');
 
                 // Phase 2: OCR
                 const text = await OCRService.extractText(uri, (prog: number) => {
-                    updateProgress(i, 10 + (prog * 0.3), 'recognizing');
+                    const localProg = 10 + (prog * 0.3);
+                    onItemProgress(localProg);
+                    reportOverall(i, localProg, 'recognizing');
                 });
 
                 // Phase 3: PII Redaction
                 const redactedText = await PIIRedactionService.redact(text, (prog: number) => {
-                    updateProgress(i, 40 + (prog * 0.2), 'redacting');
+                    const localProg = 40 + (prog * 0.2);
+                    onItemProgress(localProg);
+                    reportOverall(i, localProg, 'redacting');
                 });
 
                 // Phase 4: LLM Structuring
                 const structuredData = await LLMInferenceService.structureData(redactedText, (prog: number) => {
-                    updateProgress(i, 60 + (prog * 0.3), 'structuring');
+                    const localProg = 60 + (prog * 0.3);
+                    onItemProgress(localProg);
+                    reportOverall(i, localProg, 'structuring');
                 });
 
                 // Phase 5: Finalizing (Digital Signature Mock)
-                updateProgress(i, 90, 'finalizing');
+                reportOverall(i, 90, 'finalizing');
                 await new Promise(r => setTimeout(r, 400)); // Mock signing
-                updateProgress(i, 100, 'finalizing');
+                onItemProgress(100);
+                reportOverall(i, 100, 'finalizing');
 
                 return structuredData;
             }),
             concurrency
         );
 
-        // Merge results into a single consolidated JSON structure via LLM (Reduce Phase)
-        return LLMInferenceService.consolidateRecords(allStructuredData, (prog: number) => {
-            onProgress(100, total, total, 'structuring'); // Final progress push
+        // Merge results into a single consolidated JSON structure
+        onProgress(99, total, total, 'structuring');
+        const consolidated = await LLMInferenceService.consolidateRecords(allStructuredData, (prog: number) => {
+            // Consolidation is the last 1%
+            onProgress(99 + (prog * 0.01), total, total, 'structuring');
         });
+        
+        onProgress(100, total, total, 'completed');
+        return consolidated;
     },
+
 };

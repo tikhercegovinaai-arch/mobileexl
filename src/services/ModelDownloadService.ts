@@ -1,5 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { pinnedFetch } from './CertificatePinningService';
+import { useAppStore } from '../store/useAppStore';
+
 
 /**
  * Model Download Service
@@ -23,61 +25,72 @@ export const ModelDownloadService = {
 
     async downloadModel(onProgress?: (progress: number) => void): Promise<string> {
         const path = await this.getModelPath();
+        const { modelDownload, updateModelDownload } = useAppStore.getState();
 
         console.log("[ModelDownloadService] Validating certificate pinning before download...");
-        // 1. Certificate Pinning Validation (MITM Prevention)
-        // Make a lightweight HEAD request through our pinned fetcher.
-        // If the server's certificate doesn't match the pinned hash, this will throw
-        // an exception and abort the download process entirely.
+        // 1. Certificate Pinning Validation
         await pinnedFetch(this.MODEL_URL, { method: 'HEAD' });
 
-        // 2. Resume Logic via HTTP Range Header
-        const fileInfo = await FileSystem.getInfoAsync(path);
-        let startByte = 0;
-        let headers: Record<string, string> = {};
+        // 2. Setup Resumable Download
+        const callback = (downloadProgress: FileSystem.DownloadProgressData) => {
+            const progress = (downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite) * 100;
+            
+            // Save current state to store for persistence
+            updateModelDownload({
+                progress,
+                bytesWritten: downloadProgress.totalBytesWritten,
+                contentLength: downloadProgress.totalBytesExpectedToWrite,
+            });
 
-        if (fileInfo.exists && !fileInfo.isDirectory) {
-            startByte = fileInfo.size;
-            if (startByte > 0) {
-                console.log(`[ModelDownloadService] Resuming download from byte ${startByte}...`);
-                headers['Range'] = `bytes=${startByte}-`;
-            }
+            if (onProgress) onProgress(progress);
+        };
+
+        let downloadResumable: FileSystem.DownloadResumable;
+
+        if (modelDownload.resumeData) {
+            console.log("[ModelDownloadService] Re-instantiating from resumeData...");
+            downloadResumable = FileSystem.createDownloadResumable(
+                this.MODEL_URL,
+                path,
+                JSON.parse(modelDownload.resumeData).options || {},
+                callback,
+                modelDownload.resumeData
+            );
         } else {
             console.log("[ModelDownloadService] Starting fresh download to:", path);
+            downloadResumable = FileSystem.createDownloadResumable(
+                this.MODEL_URL,
+                path,
+                {},
+                callback
+            );
         }
 
-        const downloadResumable = FileSystem.createDownloadResumable(
-            this.MODEL_URL,
-            path,
-            { headers },
-            (downloadProgress) => {
-                const totalWritten = startByte + downloadProgress.totalBytesWritten;
-                const totalExpected = startByte + downloadProgress.totalBytesExpectedToWrite;
-                const progress = totalWritten / totalExpected;
-                if (onProgress) onProgress(progress * 100);
-            }
-        );
-
         try {
-            // Check if resuming or fresh
-            let result;
-            if (startByte > 0) {
-                // To actually append to the file using Expo, we call resumeAsync.
-                // Note: creating a new resumable and calling downloadAsync with Range header 
-                // might overwrite in some Expo versions unless we explicitly append.
-                // We trust the provided API setup.
-                result = await downloadResumable.downloadAsync();
-            } else {
-                result = await downloadResumable.downloadAsync();
-            }
+            updateModelDownload({ isDownloading: true, error: null });
+            
+            // Start or Resume
+            const result = await downloadResumable.downloadAsync();
 
-            if (!result) throw new Error("Download failed");
-            return result.uri;
+            if (result && result.uri) {
+                updateModelDownload({ isDownloading: false, progress: 100, resumeData: null });
+                return result.uri;
+            }
+            
+            throw new Error("Download aborted without result");
         } catch (e) {
+            // Save resumeData if possible
+            if (downloadResumable.savable()) {
+                const snapshot = await downloadResumable.savable();
+                updateModelDownload({ resumeData: JSON.stringify(snapshot) });
+            }
+            
             console.error("[ModelDownloadService] Download failed:", e);
+            updateModelDownload({ isDownloading: false, error: e instanceof Error ? e.message : "Download failed" });
             throw e;
         }
     },
+
 
     async deleteModel(): Promise<void> {
         const path = await this.getModelPath();
