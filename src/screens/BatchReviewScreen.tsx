@@ -25,7 +25,7 @@ const THUMBNAIL_WIDTH = (width - Spacing.lg * 2 - Spacing.md) / 2;
 
 export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScreenProps) {
     const { capture, setPreprocessedImages } = useAppStore();
-    const { theme } = useTheme();
+    const { theme, isDark } = useTheme();
     const images = capture.preprocessedImageUris || [];
 
     // Animation values for each thumbnail
@@ -87,7 +87,6 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
                             {
                                 opacity: animValues.current[index] || 1,
                                 transform: [
-                                    { scale: animValues.current[index] || 1 },
                                     {
                                         translateY: (animValues.current[index] || 1).interpolate({
                                             inputRange: [0, 1],

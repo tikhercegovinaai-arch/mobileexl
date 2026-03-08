@@ -27,7 +27,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         completeExtractionJob,
         failExtractionJob
     } = useAppStore();
-    const { theme } = useTheme();
+    const { theme, isDark } = useTheme();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -81,7 +81,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
-            <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: theme.surface, borderColor: theme.border }, shadow(theme.isDark ? '#000' : '#000', 10, 20, 0.3, 10)]}>
+            <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: theme.surface, borderColor: theme.border }, shadow(isDark ? '#000' : '#000', 10, 20, 0.3, 10)]}>
                 {extraction.status === 'running' && (
                     <View style={{ width: '100%', marginBottom: Spacing.lg, alignItems: 'center' }}>
                         <SkeletonCard />

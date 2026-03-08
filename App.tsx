@@ -49,7 +49,6 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" backgroundColor={Colors.background} />
       <AppNavigator />
     </SafeAreaProvider>
   );
