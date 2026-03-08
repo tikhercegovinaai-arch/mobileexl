@@ -24,7 +24,7 @@ export default defineConfig({
   webServer: {
     command: 'npx serve -s dist -l 8082',
     url: 'http://localhost:8082',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     stdout: 'ignore',
     stderr: 'pipe',
   },

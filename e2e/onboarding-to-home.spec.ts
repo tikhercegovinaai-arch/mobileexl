@@ -1,14 +1,26 @@
 import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
 
 test.describe('Exelent Core Journey', () => {
   test('should complete onboarding and reach home screen', async ({ page }) => {
+    page.on('console', msg => console.log(`BROWSER ${msg.type().toUpperCase()}: ${msg.text()}`));
+    page.on('requestfailed', request => console.log(`REQUEST FAILED: ${request.url()} - ${request.failure()?.errorText}`));
+    page.on('response', response => {
+        if (response.status() >= 400) console.log(`BAD RESPONSE: ${response.status()} ${response.url()}`);
+    });
+
     // 1. Navigate to the app
     await page.goto('/');
     
     // 2. Wait for the app to mount
+    console.log('Waiting for #root to mount...');
     await expect(page.locator('#root > *')).toBeVisible({ timeout: 15000 });
+    console.log('#root mounted.');
 
-    // 3. Complete Onboarding
+    // DEBUG: Capture HTML
+    const html = await page.content();
+    console.log(`HTML Length: ${html.length}`);
+    fs.writeFileSync('e2e_debug_final.html', html);
     // The Onboarding screen has 3 slides. We look for the CONTINUE button.
     const onboardingButton = page.getByTestId('onboarding-continue-button');
     
