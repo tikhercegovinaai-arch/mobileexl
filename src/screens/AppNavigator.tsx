@@ -22,11 +22,21 @@ import { DocumentScannerService } from '../services/DocumentScannerService';
 import UploadScreen from './UploadScreen';
 import { useAppStore } from '../store/useAppStore';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { ThemeTokens } from '../constants/theme';
 
 type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
 
 export default function AppNavigator() {
+    return (
+        <ThemeProvider>
+            <AppNavigationInner />
+        </ThemeProvider>
+    );
+}
+
+function AppNavigationInner() {
     const { isLocked, setLocked, initializeValidation, isOnboardingDone, setOnboardingDone } = useAppStore();
+    const { theme, isDark } = useTheme();
 
     const [screen, setScreen] = useState<Screen>(isOnboardingDone ? 'home' : 'onboarding');
     const [isSettingsVisible, setSettingsVisible] = useState(false);
@@ -250,6 +260,8 @@ export default function AppNavigator() {
     return (
         <AppContent
             isLocked={isLocked}
+            isDark={isDark}
+            theme={theme}
             renderScreen={renderScreen}
         />
     );
@@ -258,13 +270,15 @@ export default function AppNavigator() {
 /** Inner component that consumes theme context for dynamic styling */
 function AppContent({
     isLocked,
+    isDark,
+    theme,
     renderScreen,
 }: {
     isLocked: boolean;
+    isDark: boolean;
+    theme: ThemeTokens;
     renderScreen: () => React.ReactNode;
 }) {
-    const { theme, isDark } = useTheme();
-
     return (
         <ErrorBoundary>
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />

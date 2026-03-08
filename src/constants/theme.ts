@@ -41,16 +41,19 @@ export interface ThemeTokens {
     surface: string;
     surfaceAlt: string;
     card: string;
+    headerBackground: string;
 
     // Brand
     primary: string;
     primaryDark: string;
     secondary: string;
+    accent: string; // Industrial Orange
 
     // Text
     textPrimary: string;
     textSecondary: string;
     textMuted: string;
+    textInverse: string;
 
     // States
     success: string;
@@ -60,60 +63,72 @@ export interface ThemeTokens {
 
     // UI
     border: string;
+    gridLine: string;
+    crosshairColor: string;
     overlay: string;
     cameraBoundary: string;
 }
 
-// ─── Dark Theme (current / default) ──────────────────────────────────────────
+// ─── Dark Theme (Industrial Utilitarian) ─────────────────────────────────────
 
 export const darkTheme: ThemeTokens = {
-    background: '#0A0F1E',
-    surface: '#111827',
-    surfaceAlt: '#1F2937',
-    card: '#1A2236',
+    background: '#0A0A0A', // Deeper Black
+    surface: '#121212',
+    surfaceAlt: '#1A1A1A',
+    card: '#141414',
+    headerBackground: '#000000',
 
-    primary: '#3B82F6',
-    primaryDark: '#1D4ED8',
-    secondary: '#8B5CF6',
+    primary: '#2196F3', // Blueprint Blue
+    primaryDark: '#1976D2',
+    secondary: '#3F51B5',
+    accent: '#FF5722', // Industrial Orange
 
-    textPrimary: '#F9FAFB',
-    textSecondary: '#9CA3AF',
-    textMuted: '#6B7280',
+    textPrimary: '#E0E0E0',
+    textSecondary: '#A0A0A0',
+    textMuted: '#606060',
+    textInverse: '#121212',
 
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    info: '#3B82F6',
+    success: '#4CAF50',
+    warning: '#FF9800',
+    error: '#F44336',
+    info: '#2196F3',
 
-    border: '#374151',
-    overlay: 'rgba(0,0,0,0.6)',
-    cameraBoundary: 'rgba(59,130,246,0.7)',
+    border: '#2A2A2A',
+    gridLine: 'rgba(255, 255, 255, 0.03)',
+    crosshairColor: 'rgba(33, 150, 243, 0.5)',
+    overlay: 'rgba(0,0,0,0.8)',
+    cameraBoundary: 'rgba(33, 150, 243, 0.7)',
 };
 
 // ─── Light Theme ─────────────────────────────────────────────────────────────
 
 export const lightTheme: ThemeTokens = {
-    background: '#F3F4F6',
+    background: '#F5F5F5',
     surface: '#FFFFFF',
-    surfaceAlt: '#E5E7EB',
+    surfaceAlt: '#EEEEEE',
     card: '#FFFFFF',
+    headerBackground: '#E0E0E0',
 
-    primary: '#2563EB',
-    primaryDark: '#1D4ED8',
-    secondary: '#7C3AED',
+    primary: '#1D4ED8',
+    primaryDark: '#1E3A8A',
+    secondary: '#4338CA',
+    accent: '#EA580C',
 
-    textPrimary: '#111827',
-    textSecondary: '#4B5563',
-    textMuted: '#6B7280',
+    textPrimary: '#1A1A1A',
+    textSecondary: '#4A4A4A',
+    textMuted: '#7A7A7A',
+    textInverse: '#F5F5F5',
 
-    success: '#059669',
-    warning: '#D97706',
-    error: '#DC2626',
-    info: '#2563EB',
+    success: '#166534',
+    warning: '#9A3412',
+    error: '#991B1B',
+    info: '#1D4ED8',
 
     border: '#D1D5DB',
+    gridLine: 'rgba(0, 0, 0, 0.05)',
+    crosshairColor: 'rgba(29, 78, 216, 0.4)',
     overlay: 'rgba(0,0,0,0.3)',
-    cameraBoundary: 'rgba(37,99,235,0.7)',
+    cameraBoundary: 'rgba(29, 78, 216, 0.7)',
 };
 
 // ─── Legacy Colors export (backward-compatible with existing code) ───────────
