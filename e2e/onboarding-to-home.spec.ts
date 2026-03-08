@@ -1,84 +1,54 @@
 import { test, expect } from '@playwright/test';
-import * as fs from 'fs';
 
 test.describe('Exelent Core Journey', () => {
   test('should complete onboarding and reach home screen', async ({ page }) => {
-    page.on('console', msg => {
-        console.log(`BROWSER ${msg.type().toUpperCase()}: ${msg.text()}`);
-    });
-    page.on('requestfailed', request => {
-        console.log(`REQUEST FAILED: ${request.url()} - ${request.failure()?.errorText}`);
-    });
-    page.on('response', response => {
-        if (response.status() >= 400) console.log(`BAD RESPONSE: ${response.status()} ${response.url()}`);
-    });
-
-    // 1. Navigate to the app (clean storage if possible or handle existing state)
+    // 1. Navigate to the app
     await page.goto('/');
     
-    // Wait for root to have some content
-    console.log('Waiting for #root to mount...');
-    try {
-        await page.waitForSelector('#root > *', { timeout: 30000 });
-        console.log('#root mounted.');
-    } catch (e) {
-        console.log('#root did not mount in 30s.');
-    }
+    // 2. Wait for the app to mount
+    await expect(page.locator('#root > *')).toBeVisible({ timeout: 15000 });
 
-    // DEBUG: Capture HTML
-    const html = await page.content();
-    console.log('HTML Length:', html.length);
-    fs.writeFileSync('e2e_debug.html', html);
-
-    // Check if onboarding button exists (by text as fallback)
-    const onboardingButton = page.getByText('CONTINUE_NAV');
-    const homeButton = page.getByText('EXECUTE_SCAN');
-
-    if (await homeButton.isVisible()) {
-        console.log('App jumped straight to Home screen!');
-    } else if (await onboardingButton.isVisible()) {
-        console.log('Onboarding screen visible.');
-    } else {
-        console.log('Neither Onboarding nor Home buttons found.');
-    }
-
-    // 2. Proceed with onboarding (or skip if already home)
+    // 3. Complete Onboarding
+    // The Onboarding screen has 3 slides. We look for the CONTINUE button.
+    const onboardingButton = page.getByTestId('onboarding-continue-button');
+    
+    // We expect the onboarding to be visible if it's the first run
     if (await onboardingButton.isVisible()) {
         // Slide 1 -> 2
         await onboardingButton.click();
         
         // Slide 2 -> 3
+        await page.waitForTimeout(500); // Wait for animation
         await onboardingButton.click();
         
-        // Slide 3 -> 4
+        // Slide 3 -> Home (Button text changes to INITIALIZE_SYSTEM but testID stays same)
+        await page.waitForTimeout(500);
         await onboardingButton.click();
-        
-        // Slide 4 -> Initialize System (Home)
-        await page.getByText('INITIALIZE_SYSTEM').click();
     }
 
-    // 3. Verify Home Screen
-    await expect(page.getByText('EXECUTE_SCAN')).toBeVisible();
-    await expect(page.getByText('IMPORT_SOURCE')).toBeVisible();
+    // 4. Verify we reached Home
+    await expect(page.getByTestId('home-screen')).toBeVisible({ timeout: 10000 });
   });
 
   test('should go to settings from home', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
     
-    // Rapidly click through onboarding if visible
-    const onboardingButton = page.getByText('CONTINUE_NAV');
+    // Wait for App to mount or potentially skip onboarding if already done
+    await expect(page.locator('#root > *')).toBeVisible();
+
+    // If onboarding is visible, skip it (or handled by state if supported)
+    const onboardingButton = page.getByTestId('onboarding-continue-button');
     while (await onboardingButton.isVisible()) {
         await onboardingButton.click();
-        await page.waitForTimeout(500);
-    }
-    const initButton = page.getByText('INITIALIZE_SYSTEM');
-    if (await initButton.isVisible()) {
-        await initButton.click();
+        await page.waitForTimeout(300);
     }
 
-    // Go to settings - assumes icon or text
-    // The HomeScreen uses icon, but maybe has a label?
-    // Let's check HomeScreen.tsx
+    // Click Settings icon
+    const settingsButton = page.getByTestId('settings-nav-button');
+    await expect(settingsButton).toBeVisible();
+    await settingsButton.click();
+
+    // Verify Settings is visible
+    await expect(page.getByTestId('settings-screen')).toBeVisible();
   });
 });
