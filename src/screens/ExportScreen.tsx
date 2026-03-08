@@ -21,6 +21,7 @@ import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelIn
 import { PDFTemplateType } from '../services/PDFTemplateService';
 import { AnalyticsService } from '../services/AnalyticsService';
 import { BiometricService } from '../services/BiometricService';
+import { useHistoryStore } from '../store/historyStore';
 import { useToast } from '../components/ToastProvider';
 import { hapticSuccess, hapticError, hapticLight } from '../utils/haptics';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
@@ -30,7 +31,8 @@ interface ExportScreenProps {
 }
 
 export default function ExportScreen({ onDone }: ExportScreenProps) {
-    const { validation, columnMappings, setExportPath, currentExportPath, extraction, settings } = useAppStore();
+    const { validation, columnMappings, setExportPath, currentExportPath, extraction, settings, capture } = useAppStore();
+    const { addEntry } = useHistoryStore();
     const { theme } = useTheme();
 
     const [activeTab, setActiveTab] = useState<'export' | 'analytics'>('export');
@@ -109,6 +111,16 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                 hapticSuccess();
                 showToast(`File stored at: ${fileUri}`, 'success');
             }
+
+            // Save to History
+            addEntry({
+                fileName: name || `Extraction_${Date.now()}`,
+                imageUris: capture.capturedImageUris,
+                extractedData: extraction.extractedData || {},
+                confidenceHealth: avgConfidence > 85 ? 'excellent' : avgConfidence > 60 ? 'caution' : 'poor',
+                averageConfidence: avgConfidence,
+                formatsExported: [format],
+            });
         } catch (e) {
             console.error(e);
             hapticError();

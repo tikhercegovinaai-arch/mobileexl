@@ -188,7 +188,6 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
         borderWidth: 1,
         marginBottom: Spacing.md,
-        ...shadow.sm,
     },
     entryHeader: {
         flexDirection: 'row',
