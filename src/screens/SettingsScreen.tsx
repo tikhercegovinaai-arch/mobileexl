@@ -173,6 +173,21 @@ export default function SettingsScreen({ visible, onClose }: SettingsScreenProps
                         />
                     </View>
 
+                    <View style={[styles.settingRow, { borderBottomColor: theme.border }]}>
+                        <View style={styles.settingTextContainer}>
+                            <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Parallel Batch Processing</Text>
+                            <Text style={[styles.settingDescription, { color: theme.textMuted }]}>
+                                Extract data from multiple documents at once. Faster, but consumes more battery and memory.
+                            </Text>
+                        </View>
+                        <Switch
+                            value={settings.maxConcurrency > 1}
+                            onValueChange={(val) => updateSettings({ maxConcurrency: val ? 2 : 1 })}
+                            trackColor={{ false: theme.surfaceAlt, true: theme.primary }}
+                            thumbColor={Platform.OS === 'android' ? theme.surface : undefined}
+                        />
+                    </View>
+
                     <TouchableOpacity style={styles.linkRow} onPress={openPrivacyPolicy}>
                         <Text style={[styles.linkLabel, { color: theme.primary }]}>Privacy Policy</Text>
                         <Text style={[styles.linkChevron, { color: theme.textMuted }]}>→</Text>
