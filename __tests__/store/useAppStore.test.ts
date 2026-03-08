@@ -143,3 +143,38 @@ describe('useAppStore — columnMappings', () => {
         expect(useAppStore.getState().columnMappings).toHaveLength(0);
     });
 });
+
+describe('useAppStore — persistence', () => {
+    it('partializes correctly', () => {
+        const options = useAppStore.persist.getOptions();
+        const state = {
+            isOnboardingDone: true,
+            settings: { themeMode: 'dark' },
+            columnMappings: [{ columnKey: 'x', fieldIds: [] }],
+            capture: { sessionId: '123' },
+            extraction: { jobId: '456' },
+        } as any;
+        
+        const partialized = options.partialize!(state);
+        
+        expect(partialized).toHaveProperty('isOnboardingDone', true);
+        expect(partialized).toHaveProperty('settings');
+        expect(partialized).toHaveProperty('columnMappings');
+        expect(partialized).not.toHaveProperty('capture');
+        expect(partialized).not.toHaveProperty('extraction');
+    });
+
+    it('migrates from v0 to v1 settings', () => {
+        const options = useAppStore.persist.getOptions();
+        const v0State = {
+            isOnboardingDone: true,
+            settings: { themeMode: 'light' }, // Missing new keys
+        };
+        
+        const migrated = options.migrate!(v0State, 0) as any;
+        
+        expect(migrated.settings.themeMode).toBe('light'); // Preserved
+        expect(migrated.settings).toHaveProperty('hapticsEnabled'); // Added from defaults
+        expect(migrated.settings).toHaveProperty('maxConcurrency');
+    });
+});
