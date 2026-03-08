@@ -4,7 +4,7 @@ import { useAppStore, ExtractionPhase } from '../store/useAppStore';
 import { BatchProcessingService } from '../services/BatchProcessingService';
 import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
-import SkeletonCard from '../components/SkeletonCard';
+import { SkeletonBox } from '../components/SkeletonBox';
 
 interface ExtractionScreenProps {
     onExtractionComplete: () => void;
@@ -83,19 +83,25 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
-            <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: theme.surface, borderColor: theme.border }, shadow(isDark ? '#000' : '#000', 10, 20, 0.3, 10)]}>
+            <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: theme.surface, borderColor: theme.border }]}>
                 {extraction.status === 'running' && (
                     <View style={{ width: '100%', marginBottom: Spacing.lg, alignItems: 'center' }}>
-                        <SkeletonCard />
-                        <Text style={[styles.title, { marginTop: Spacing.md, color: theme.textPrimary }]}>
-                            {Math.round(extraction.progress)}%
-                        </Text>
+                        <SkeletonBox height={160} />
+                        <View style={styles.progressCounter}>
+                            <Text style={[styles.monoText, { color: theme.primary, fontSize: 18 }]}>
+                                {Math.round(extraction.progress)}%_CMP
+                            </Text>
+                        </View>
                     </View>
                 )}
 
-                <Text style={[styles.title, { color: theme.textPrimary }]}>AI Intelligence Engine</Text>
+                <View style={styles.headerRow}>
+                    <View style={[styles.statusIndicator, { backgroundColor: extraction.status === 'running' ? theme.primary : theme.success }]} />
+                    <Text style={[styles.title, { color: theme.textPrimary }]}>NEURAL_EXTRACT_CORE</Text>
+                </View>
+
                 <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-                    {currentDocStr || "Initializing Pipeline..."}
+                    {currentDocStr || "INITIALIZING_PIPELINE..."}
                 </Text>
 
                 {/* Timeline */}
@@ -108,25 +114,26 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                                 <View style={styles.lineWrapper}>
                                     <View style={[
                                         styles.dot,
-                                        { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
-                                        isDone && { backgroundColor: '#4ade80', borderColor: '#4ade80' },
-                                        isActive && { backgroundColor: theme.background, borderColor: theme.primary }
+                                        { backgroundColor: 'transparent', borderColor: theme.border },
+                                        isDone && { backgroundColor: theme.primary, borderColor: theme.primary },
+                                        isActive && { backgroundColor: theme.surfaceAlt, borderColor: theme.primary }
                                     ]}>
-                                        {isDone && <Text style={styles.check}>✓</Text>}
+                                        {isActive && <View style={[styles.activeInner, { backgroundColor: theme.primary }]} />}
                                     </View>
                                     {idx < PHASES.length - 1 && (
-                                        <View style={[styles.line, { backgroundColor: theme.border }, isDone && { backgroundColor: '#4ade80' }]} />
+                                        <View style={[styles.line, { backgroundColor: theme.border }, isDone && { backgroundColor: theme.primary }]} />
                                     )}
                                 </View>
                                 <View style={styles.phaseInfo}>
                                     <Text style={[
                                         styles.phaseLabel,
+                                        styles.monoText,
                                         { color: theme.textMuted },
                                         (isActive || isDone) && { color: theme.textPrimary }
                                     ]}>
-                                        {phase.icon} {phase.label}
+                                        [{phase.id.toUpperCase()}] {phase.label}
                                     </Text>
-                                    {isActive && <Text style={[styles.phaseSub, { color: theme.primary }]}>Active...</Text>}
+                                    {isActive && <Text style={[styles.phaseSub, { color: theme.primary }]}>STATUS: ACTIVE</Text>}
                                 </View>
                             </View>
                         );
@@ -134,13 +141,13 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                 </View>
 
                 {extraction.status === 'error' && (
-                    <View style={[styles.errorBox, { backgroundColor: theme.error + '22' }]}>
-                        <Text style={[styles.errorText, { color: theme.error }]}>⚠️ {extraction.errorMessage}</Text>
+                    <View style={[styles.errorBox, { backgroundColor: theme.error + '22', borderColor: theme.error, borderWidth: 1 }]}>
+                        <Text style={[styles.errorText, { color: theme.error }]}>SYS_ERR: {extraction.errorMessage}</Text>
                     </View>
                 )}
             </Animated.View>
 
-            <Text style={[styles.footerText, { color: theme.textMuted }]}>On-Device Neural Processing Enabled</Text>
+            <Text style={[styles.footerText, { color: theme.textMuted }]}>SECURE_ON_DEVICE_NEURAL_LINK [OK]</Text>
         </View>
     );
 }
@@ -153,38 +160,39 @@ const styles = StyleSheet.create({
         padding: Spacing.xl,
     },
     card: {
-        borderRadius: BorderRadius.xl,
+        borderRadius: 2,
         padding: Spacing.xl,
         width: '100%',
-        alignItems: 'center',
         borderWidth: 1,
     },
-    loaderContainer: {
-        position: 'relative',
-        width: 100,
-        height: 100,
-        justifyContent: 'center',
+    headerRow: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: Spacing.lg,
-    },
-    percentageCircle: {
-        position: 'absolute',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    percentageText: {
-        fontSize: Typography.fontSizeXL,
-        fontWeight: Typography.fontWeightBold,
-    },
-    title: {
-        fontSize: Typography.fontSize2XL,
-        fontWeight: Typography.fontWeightBold as any,
         marginBottom: 8,
     },
+    statusIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 10,
+    },
+    progressCounter: {
+        position: 'absolute',
+        bottom: 10,
+        right: 10,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 4,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '900',
+        letterSpacing: 1,
+    },
     statusText: {
-        fontSize: Typography.fontSizeSM,
+        fontSize: 12,
         marginBottom: Spacing.xl,
-        textAlign: 'center',
+        fontWeight: '600',
+        opacity: 0.7,
     },
     timeline: {
         width: '100%',
@@ -192,7 +200,7 @@ const styles = StyleSheet.create({
     },
     timelineItem: {
         flexDirection: 'row',
-        height: 60,
+        height: 50,
     },
     lineWrapper: {
         alignItems: 'center',
@@ -200,51 +208,56 @@ const styles = StyleSheet.create({
         width: 20,
     },
     dot: {
-        width: 16,
-        height: 16,
-        borderRadius: 8,
-        borderWidth: 2,
+        width: 12,
+        height: 12,
+        borderRadius: 0, // Square dots for industrial feel
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         zIndex: 1,
     },
-    check: {
-        color: 'white',
-        fontSize: 10,
-        fontWeight: 'bold',
+    activeInner: {
+        width: 4,
+        height: 4,
     },
     line: {
-        width: 2,
+        width: 1,
         flex: 1,
         marginVertical: 2,
     },
     phaseInfo: {
         flex: 1,
+        paddingLeft: 4,
+    },
+    monoText: {
+        fontFamily: 'Courier',
+        fontWeight: '700',
     },
     phaseLabel: {
-        fontSize: Typography.fontSizeMD,
-        fontWeight: Typography.fontWeightMedium,
+        fontSize: 13,
     },
     phaseSub: {
-        fontSize: 10,
-        textTransform: 'uppercase',
+        fontSize: 9,
+        fontWeight: '900',
         letterSpacing: 1,
         marginTop: 2,
     },
     errorBox: {
         marginTop: Spacing.xl,
         padding: Spacing.md,
-        borderRadius: BorderRadius.md,
         width: '100%',
     },
     errorText: {
-        fontSize: Typography.fontSizeSM,
+        fontSize: 12,
         textAlign: 'center',
+        fontWeight: '700',
     },
     footerText: {
         position: 'absolute',
         bottom: Spacing.xxl,
-        fontSize: Typography.fontSizeXS,
-        textTransform: 'uppercase',
-        letterSpacing: 1.5,
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 2,
     },
 });
 

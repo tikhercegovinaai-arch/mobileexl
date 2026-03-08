@@ -78,24 +78,25 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
             {/* ── Header ───────────────────────────────────────────── */}
             <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                 <View>
-                    <Text style={[styles.appName, { color: theme.textPrimary }]}>Exelent</Text>
-                    <Text style={[styles.tagline, { color: theme.textMuted }]}>AI Handwriting → Excel</Text>
+                    <Text style={[styles.appName, styles.monoText, { color: theme.textPrimary }]}>EXELENT_OS_1.0</Text>
+                    <Text style={[styles.tagline, styles.monoText, { color: theme.textMuted }]}>NEURAL_HANDWRITING_EXTRACTOR</Text>
                 </View>
                 <TouchableOpacity style={[styles.settingsButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => { hapticLight(); onOpenSettings(); }} activeOpacity={0.7}>
-                    <Text style={styles.settingsIcon}>⚙️</Text>
+                    <Text style={[styles.settingsIcon, { color: theme.textPrimary }]}>[CONFIG]</Text>
                 </TouchableOpacity>
             </Animated.View>
 
             {/* ── Hero area ─────────────────────────────────────────── */}
             <Animated.View style={[styles.hero, { opacity: fadeAnim, transform: [{ scale: fadeAnim }] }]}>
-                <View style={[styles.heroIconWrapper, { backgroundColor: theme.surface, borderColor: theme.primary + '44' }]}>
-                    <Text style={styles.heroIcon}>✍️</Text>
-                    <View style={[styles.glow, { backgroundColor: theme.primary + '10' }]} />
+                <View style={[styles.heroIconWrapper, { backgroundColor: theme.surfaceAlt, borderColor: theme.primary }]}>
+                    <View style={[styles.crosshair, styles.tl, { borderColor: theme.primary }]} />
+                    <View style={[styles.crosshair, styles.br, { borderColor: theme.primary }]} />
+                    <Text style={styles.heroIcon}>[AI]</Text>
                 </View>
-                <Text style={[styles.heroTitle, { color: theme.textPrimary }]}>Transform Data</Text>
+                <Text style={[styles.heroTitle, styles.monoText, { color: theme.textPrimary }]}>DATA_TRANSFORM_CORE</Text>
                 <Text style={[styles.heroSubtitle, { color: theme.textSecondary }]}>
-                    Point your camera at handwritten documents and let AI
-                    convert them into structured tables — privately.
+                    Capture handwritten logs. Execute neural extraction.
+                    Generate structured CSV/XLSX partitions.
                 </Text>
             </Animated.View>
 
@@ -114,8 +115,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                             }
                         ]}
                     >
-                        <Text style={styles.featureIcon}>{f.icon}</Text>
-                        <Text style={[styles.featureTitle, { color: theme.textPrimary }]}>{f.title}</Text>
+                        <Text style={[styles.featureTitle, styles.monoText, { color: theme.primary }]}>{f.title.toUpperCase()}</Text>
                         <Text style={[styles.featureDesc, { color: theme.textMuted }]}>{f.description}</Text>
                     </Animated.View>
                 ))}
@@ -124,7 +124,7 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
             {/* ── CTA ───────────────────────────────────────────────── */}
             <Animated.View style={[styles.ctaContainer, { opacity: fadeAnim, transform: [{ scale: buttonScale }] }]}>
                 <View style={styles.batchToggleContainer}>
-                    <Text style={[styles.batchToggleLabel, { color: theme.textSecondary }]}>Batch Mode</Text>
+                    <Text style={[styles.batchToggleLabel, styles.monoText, { color: theme.textSecondary }]}>MODE_BATCH</Text>
                     <Switch
                         value={isBatchMode}
                         onValueChange={setIsBatchMode}
@@ -136,8 +136,8 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                 <TouchableOpacity
                     style={[
                         styles.captureButton, 
-                        { backgroundColor: theme.primary, ...shadow(theme.primary, 4, 12, 0.3, 6) } as any,
-                        isBatchMode && { backgroundColor: theme.secondary, ...shadow(theme.secondary, 4, 12, 0.3, 6) } as any
+                        { backgroundColor: theme.primary },
+                        isBatchMode && { backgroundColor: theme.secondary }
                     ]}
                     onPress={async () => {
                         hapticMedium();
@@ -148,27 +148,25 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                     }}
                     activeOpacity={0.85}
                 >
-                    <Text style={styles.captureButtonIcon}>{isBatchMode ? '📑' : '📷'}</Text>
-                    <Text style={styles.captureButtonText}>
-                        {isBatchMode ? 'Start Batch Capture' : 'Start Capture'}
+                    <Text style={[styles.captureButtonText, styles.monoText]}>
+                        {isBatchMode ? '> EXECUTE_BATCH_SCAN' : '> EXECUTE_SCAN'}
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.uploadButton, { backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
+                    style={[styles.uploadButton, { backgroundColor: 'transparent', borderColor: theme.border }]}
                     onPress={() => {
                         hapticMedium();
                         onUpload();
                     }}
                     activeOpacity={0.8}
                 >
-                    <Text style={styles.uploadButtonIcon}>☁️</Text>
-                    <Text style={[styles.uploadButtonText, { color: theme.textSecondary }]}>Upload File</Text>
+                    <Text style={[styles.uploadButtonText, styles.monoText, { color: theme.textSecondary }]}>[IMPORT_EXTERNAL_DATA]</Text>
                 </TouchableOpacity>
             </Animated.View>
 
             {/* ── Footer ───────────────────────────────────────────── */}
-            <Text style={[styles.footer, { color: theme.textMuted }]}>Local Neural Engine · GDPR Ready</Text>
+            <Text style={[styles.footer, styles.monoText, { color: theme.textMuted }]}>STATUS: SECURE | NEURAL_LINK: ACTIVE | GDPR: [OK]</Text>
         </SafeAreaView>
     );
 }
@@ -186,24 +184,23 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     appName: {
-        fontSize: Typography.fontSize2XL,
-        fontWeight: Typography.fontWeightBold,
-        letterSpacing: -0.5,
+        fontSize: 18,
+        fontWeight: '900',
+        letterSpacing: 2,
     },
     tagline: {
-        fontSize: Typography.fontSizeSM,
-        marginTop: 2,
+        fontSize: 9,
+        marginTop: 4,
+        letterSpacing: 1,
     },
     settingsButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        alignItems: 'center',
-        justifyContent: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         borderWidth: 1,
     },
     settingsIcon: {
-        fontSize: 20,
+        fontSize: 10,
+        fontWeight: '900',
     },
 
     // Hero
@@ -212,36 +209,49 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     heroIconWrapper: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 80,
+        height: 80,
         borderWidth: 1,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: Spacing.md,
         position: 'relative',
     },
-    glow: {
+    crosshair: {
         position: 'absolute',
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        zIndex: -1,
+        width: 10,
+        height: 10,
+    },
+    tl: {
+        top: -2,
+        left: -2,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+    },
+    br: {
+        bottom: -2,
+        right: -2,
+        borderBottomWidth: 2,
+        borderRightWidth: 2,
     },
     heroIcon: {
-        fontSize: 44,
+        fontSize: 20,
+        fontWeight: '900',
+        fontFamily: 'Courier',
     },
     heroTitle: {
-        fontSize: Typography.fontSize3XL,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 22,
+        fontWeight: '900',
         marginBottom: Spacing.sm,
         textAlign: 'center',
     },
     heroSubtitle: {
-        fontSize: Typography.fontSizeMD,
+        fontSize: 12,
         textAlign: 'center',
-        lineHeight: 24,
-        maxWidth: 300,
+        lineHeight: 18,
+        maxWidth: 280,
+        fontWeight: '600',
+        opacity: 0.8,
     },
 
     // Feature cards
@@ -252,22 +262,20 @@ const styles = StyleSheet.create({
     },
     featureCard: {
         flex: 1,
-        borderRadius: BorderRadius.md,
+        borderRadius: 0,
         padding: Spacing.md,
         borderWidth: 1,
-        gap: Spacing.xs,
-    },
-    featureIcon: {
-        fontSize: 24,
-        marginBottom: 2,
+        gap: 4,
     },
     featureTitle: {
-        fontSize: Typography.fontSizeSM,
-        fontWeight: Typography.fontWeightSemiBold,
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 1,
     },
     featureDesc: {
-        fontSize: 10,
-        lineHeight: 14,
+        fontSize: 9,
+        lineHeight: 12,
+        fontWeight: '600',
     },
 
     // CTA
@@ -282,48 +290,47 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.lg,
     },
     batchToggleLabel: {
-        fontSize: Typography.fontSizeSM,
-        fontWeight: Typography.fontWeightMedium,
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 1,
     },
     captureButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: Spacing.sm,
-        borderRadius: BorderRadius.lg,
-        paddingVertical: Spacing.lg,
+        borderRadius: 0,
+        paddingVertical: 18,
         marginBottom: Spacing.lg,
     },
-    captureButtonIcon: {
-        fontSize: Typography.fontSizeLG,
-    },
     captureButtonText: {
-        fontSize: Typography.fontSizeLG,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 14,
+        fontWeight: '900',
         color: 'white',
+        letterSpacing: 1,
     },
     uploadButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: Spacing.sm,
-        borderRadius: BorderRadius.lg,
-        paddingVertical: Spacing.md,
-        borderWidth: 1.5,
-        ...shadow('#000', 2, 8, 0.15, 3),
-    },
-    uploadButtonIcon: {
-        fontSize: Typography.fontSizeLG,
+        borderRadius: 0,
+        paddingVertical: 12,
+        borderWidth: 1,
     },
     uploadButtonText: {
-        fontSize: Typography.fontSizeMD,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 11,
+        fontWeight: '900',
+        letterSpacing: 1,
     },
-
+    monoText: {
+        fontFamily: 'Courier',
+        fontWeight: '700',
+    },
     footer: {
         textAlign: 'center',
-        fontSize: 10,
-        textTransform: 'uppercase',
+        fontSize: 9,
+        fontWeight: '800',
         letterSpacing: 1,
         marginBottom: Spacing.lg,
     },

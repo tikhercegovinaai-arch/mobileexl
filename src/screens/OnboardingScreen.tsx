@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,11 +12,15 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
+    withRepeat,
+    withSequence,
     withTiming,
-    interpolateColor,
+    Easing,
 } from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
 import { Typography, Spacing, BorderRadius } from '../constants/theme';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface OnboardingScreenProps {
     onComplete: () => void;
@@ -24,7 +28,7 @@ interface OnboardingScreenProps {
 
 interface Slide {
     id: string;
-    icon: string;
+    label: string;
     title: string;
     description: string;
 }
@@ -32,78 +36,110 @@ interface Slide {
 const slides: Slide[] = [
     {
         id: '1',
-        icon: '📸',
-        title: 'Scan Documents',
-        description: 'Point your camera at handwritten notes, invoices, or forms. Our edge-detection finds the document automatically.',
+        label: 'DOC_SCAN_01',
+        title: 'Precision Capture',
+        description: 'Industrial-grade edge detection for handwritten logs, invoices, and blueprints. Local processing only.',
     },
     {
         id: '2',
-        icon: '🤖',
-        title: 'AI Extraction',
-        description: 'On-device AI reads your handwriting with zero cloud uploads. Your data never leaves your phone.',
+        label: 'AI_EXTRACT_02',
+        title: 'Neural Parsing',
+        description: 'Advanced on-device neural networks transform ink to data. Zero latency, 100% privacy.',
     },
     {
         id: '3',
-        icon: '✏️',
-        title: 'Review & Edit',
-        description: 'Verify extracted fields, fix any mistakes, and organize data with drag-and-drop columns.',
+        label: 'DATA_VALID_03',
+        title: 'Smart Validation',
+        description: 'Confidence-scored field review. Verify and refine extracted data with surgical precision.',
     },
     {
         id: '4',
-        icon: '📊',
-        title: 'Export to Excel',
-        description: 'Export clean, structured data to XLSX, CSV, JSON, or PDF — ready for your spreadsheet.',
-    },
-    {
-        id: '5',
-        icon: '🔒',
-        title: 'Privacy First',
-        description: '100% offline processing. PII is automatically redacted. You control everything.',
+        label: 'SYS_EXPORT_04',
+        title: 'System Export',
+        description: 'Seamless integration with your ecosystem. Export to XLSX, CSV, or JSON in seconds.',
     },
 ];
 
-const Dot = ({ active, theme }: { active: boolean; theme: any }) => {
-    const width = useSharedValue(8);
-
-    React.useEffect(() => {
-        width.value = withSpring(active ? 24 : 8);
-    }, [active]);
-
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            width: width.value,
-            backgroundColor: active ? theme.primary : theme.surfaceAlt,
-        };
-    });
-
-    return <Animated.View style={[styles.dot, animatedStyle]} />;
+const BackgroundGrid = () => {
+    const { theme } = useTheme();
+    return (
+        <View style={[StyleSheet.absoluteFill, styles.gridContainer]}>
+            {[...Array(20)].map((_, i) => (
+                <View key={`v-${i}`} style={[styles.gridLineV, { left: i * (SCREEN_WIDTH / 10), backgroundColor: theme.gridLine }]} />
+            ))}
+            {[...Array(40)].map((_, i) => (
+                <View key={`h-${i}`} style={[styles.gridLineH, { top: i * (SCREEN_HEIGHT / 20), backgroundColor: theme.gridLine }]} />
+            ))}
+        </View>
+    );
 };
 
-const SlideIcon = ({ icon, active }: { icon: string; active: boolean }) => {
-    const scale = useSharedValue(0.8);
+const Crosshair = () => {
+    const { theme } = useTheme();
+    const opacity = useSharedValue(0.3);
 
-    React.useEffect(() => {
+    useEffect(() => {
+        opacity.value = withRepeat(
+            withSequence(withTiming(0.8, { duration: 1000 }), withTiming(0.3, { duration: 1000 })),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+    }));
+
+    return (
+        <Animated.View style={[styles.crosshairWrapper, animatedStyle]}>
+            <View style={[styles.crosshairH, { backgroundColor: theme.primary }]} />
+            <View style={[styles.crosshairV, { backgroundColor: theme.primary }]} />
+        </Animated.View>
+    );
+};
+
+const Scanline = ({ active }: { active: boolean }) => {
+    const { theme } = useTheme();
+    const translateY = useSharedValue(-150);
+
+    useEffect(() => {
         if (active) {
-            scale.value = withSpring(1.2, { damping: 10, stiffness: 100 }, () => {
-                scale.value = withSpring(1);
-            });
+            translateY.value = withRepeat(
+                withTiming(150, { duration: 2500, easing: Easing.linear }),
+                -1
+            );
         } else {
-            scale.value = withTiming(0.8);
+            translateY.value = -150;
         }
     }, [active]);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
+        transform: [{ translateY: translateY.value }],
     }));
 
+    if (!active) return null;
+
     return (
-        <Animated.Text style={[styles.slideIcon, animatedStyle]}>
-            {icon}
-        </Animated.Text>
+        <View style={styles.scanlineWindow}>
+            <Animated.View style={[styles.scanline, { backgroundColor: theme.primary }, animatedStyle]} />
+        </View>
     );
 };
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const Dot = ({ active, theme }: { active: boolean; theme: any }) => {
+    const width = useSharedValue(8);
+
+    useEffect(() => {
+        width.value = withSpring(active ? 24 : 8);
+    }, [active]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        width: width.value,
+        backgroundColor: active ? theme.primary : theme.border,
+    }));
+
+    return <Animated.View style={[styles.dot, animatedStyle]} />;
+};
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     const { theme } = useTheme();
@@ -119,30 +155,37 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         }
     };
 
-    const handleSkip = () => {
-        onComplete();
-    };
+    const handleSkip = () => onComplete();
 
-    const renderSlide = ({ item, index }: { item: Slide; index: number }) => (
-        <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
-            <SlideIcon icon={item.icon} active={index === currentIndex} />
-            <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>{item.title}</Text>
-            <Text style={[styles.slideDescription, { color: theme.textSecondary }]}>{item.description}</Text>
-        </View>
-    );
+    const renderSlide = ({ item, index }: { item: Slide; index: number }) => {
+        const isActive = index === currentIndex;
+        return (
+            <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
+                <View style={styles.visualContainer}>
+                    <BackgroundGrid />
+                    <Crosshair />
+                    <Scanline active={isActive} />
+                    <View style={styles.labelWrapper}>
+                        <Text style={[styles.monoLabel, { color: theme.primary }]}>{item.label}</Text>
+                    </View>
+                </View>
+                <View style={styles.textContainer}>
+                    <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>{item.title.toUpperCase()}</Text>
+                    <Text style={[styles.slideDescription, { color: theme.textSecondary }]}>{item.description}</Text>
+                </View>
+            </View>
+        );
+    };
 
     const isLastSlide = currentIndex === slides.length - 1;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <View style={styles.topBar}>
+            <View style={styles.header}>
+                <Text style={[styles.headerLogo, { color: theme.textPrimary }]}>EXELENT // 2026</Text>
                 {!isLastSlide && (
-                    <TouchableOpacity
-                        onPress={handleSkip}
-                        accessibilityLabel="Skip onboarding"
-                        accessibilityRole="button"
-                    >
-                        <Text style={[styles.skipText, { color: theme.textMuted }]}>Skip</Text>
+                    <TouchableOpacity onPress={handleSkip}>
+                        <Text style={[styles.skipText, { color: theme.textMuted }]}>SKIP_LGC</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -159,21 +202,23 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 style={styles.flatList}
             />
 
-            <View style={styles.dotsRow}>
-                {slides.map((_, i) => (
-                    <Dot key={i} active={i === currentIndex} theme={theme} />
-                ))}
-            </View>
+            <View style={styles.footer}>
+                <View style={styles.dotsRow}>
+                    {slides.map((_, i) => (
+                        <Dot key={i} active={i === currentIndex} theme={theme} />
+                    ))}
+                </View>
 
-            {/* CTA */}
-            <TouchableOpacity
-                style={[styles.ctaBtn, { backgroundColor: theme.primary }]}
-                onPress={handleNext}
-                accessibilityLabel={isLastSlide ? 'Get Started' : 'Next'}
-                accessibilityRole="button"
-            >
-                <Text style={styles.ctaText}>{isLastSlide ? 'Get Started' : 'Next'}</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.ctaBtn, { backgroundColor: theme.primary }]}
+                    onPress={handleNext}
+                    activeOpacity={0.8}
+                >
+                    <Text style={[styles.ctaText, { color: theme.textInverse }]}>
+                        {isLastSlide ? 'INITIALIZE_SYSTEM' : 'CONTINUE_NAV'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 }
@@ -182,14 +227,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    topBar: {
+    header: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        padding: Spacing.md,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: Spacing.xl,
+        paddingTop: Spacing.md,
+    },
+    headerLogo: {
+        fontSize: 12,
+        fontWeight: '700',
+        letterSpacing: 2,
     },
     skipText: {
-        fontSize: Typography.fontSizeMD,
-        fontWeight: Typography.fontWeightMedium,
+        fontSize: 12,
+        fontWeight: '600',
+        letterSpacing: 1,
     },
     flatList: {
         flex: 1,
@@ -198,22 +251,93 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: Spacing.xl,
     },
-    slideIcon: {
-        fontSize: 72,
-        marginBottom: Spacing.xl,
+    visualContainer: {
+        width: SCREEN_WIDTH * 0.8,
+        height: SCREEN_WIDTH * 0.8,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    gridContainer: {
+        opacity: 0.5,
+    },
+    gridLineV: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        width: 1,
+    },
+    gridLineH: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: 1,
+    },
+    crosshairWrapper: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    crosshairH: {
+        width: '100%',
+        height: 1,
+        position: 'absolute',
+    },
+    crosshairV: {
+        width: 1,
+        height: '100%',
+        position: 'absolute',
+    },
+    scanlineWindow: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'transparent',
+    },
+    scanline: {
+        height: 2,
+        width: '100%',
+        shadowColor: '#2196F3',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    labelWrapper: {
+        position: 'absolute',
+        bottom: 10,
+        left: 10,
+        padding: 4,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    monoLabel: {
+        fontSize: 10,
+        fontWeight: '700',
+        fontFamily: 'Courier',
+    },
+    textContainer: {
+        marginTop: Spacing.xxl,
+        paddingHorizontal: Spacing.xl,
+        alignItems: 'center',
     },
     slideTitle: {
-        fontSize: Typography.fontSize3XL,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 22,
+        fontWeight: '800',
+        letterSpacing: 1,
         marginBottom: Spacing.md,
         textAlign: 'center',
     },
     slideDescription: {
-        fontSize: Typography.fontSizeLG,
+        fontSize: 15,
         textAlign: 'center',
-        lineHeight: 26,
+        lineHeight: 22,
+        opacity: 0.8,
+    },
+    footer: {
+        paddingBottom: Spacing.xxl,
     },
     dotsRow: {
         flexDirection: 'row',
@@ -223,19 +347,18 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     dot: {
-        height: 8,
-        borderRadius: BorderRadius.full,
+        height: 4,
+        borderRadius: 2,
     },
     ctaBtn: {
         marginHorizontal: Spacing.xl,
-        marginBottom: Spacing.xxl,
-        paddingVertical: Spacing.md,
-        borderRadius: BorderRadius.md,
+        paddingVertical: Spacing.lg,
+        borderRadius: 2, // Sharp corners for industrial feel
         alignItems: 'center',
     },
     ctaText: {
-        color: '#FFFFFF',
-        fontSize: Typography.fontSizeLG,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 13,
+        fontWeight: '900',
+        letterSpacing: 2,
     },
 });
