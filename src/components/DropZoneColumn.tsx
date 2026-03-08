@@ -8,7 +8,8 @@ import {
     LayoutChangeEvent,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { ValidationField } from '../store/useAppStore';
 
 export interface DropZoneColumnProps {
@@ -27,15 +28,16 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
     onLayout,
 }) => {
     const glowOpacity = useSharedValue(0);
+    const { theme } = useTheme();
 
     React.useEffect(() => {
         glowOpacity.value = withTiming(isHighlighted ? 1 : 0, { duration: 150 });
     }, [isHighlighted]);
 
     const glowStyle = useAnimatedStyle(() => ({
-        borderColor: isHighlighted ? Colors.primary : Colors.border,
+        borderColor: isHighlighted ? theme.primary : theme.border,
         shadowOpacity: glowOpacity.value * 0.6,
-        shadowColor: Colors.primary,
+        shadowColor: theme.primary,
         shadowRadius: 8,
         elevation: glowOpacity.value * 6,
     }));
@@ -50,11 +52,11 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
     );
 
     return (
-        <Animated.View style={[styles.column, glowStyle]} onLayout={handleLayout}>
+        <Animated.View style={[styles.column, glowStyle, { backgroundColor: theme.surface }]} onLayout={handleLayout}>
             {/* Column header */}
-            <View style={styles.header}>
-                <Text style={styles.headerLabel}>{label}</Text>
-                <View style={styles.badge}>
+            <View style={[styles.header, { backgroundColor: theme.surfaceAlt, borderBottomColor: theme.border }]}>
+                <Text style={[styles.headerLabel, { color: theme.textPrimary }]}>{label}</Text>
+                <View style={[styles.badge, { backgroundColor: theme.primary }]}>
                     <Text style={styles.badgeText}>{acceptedFields.length}</Text>
                 </View>
             </View>
@@ -66,15 +68,15 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
             >
                 {acceptedFields.length === 0 ? (
                     <View style={styles.emptyHint}>
-                        <Text style={styles.emptyHintText}>Drop fields here</Text>
+                        <Text style={[styles.emptyHintText, { color: theme.textMuted }]}>Drop fields here</Text>
                     </View>
                 ) : (
                     acceptedFields.map((f) => (
-                        <View key={f.id} style={styles.chip}>
-                            <Text style={styles.chipLabel} numberOfLines={1}>
+                        <View key={f.id} style={[styles.chip, { backgroundColor: theme.card, borderLeftColor: theme.primary }]}>
+                            <Text style={[styles.chipLabel, { color: theme.textSecondary }]} numberOfLines={1}>
                                 {f.label}
                             </Text>
-                            <Text style={styles.chipValue} numberOfLines={1}>
+                            <Text style={[styles.chipValue, { color: theme.textPrimary }]} numberOfLines={1}>
                                 {f.value}
                             </Text>
                         </View>
@@ -88,7 +90,6 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
 const styles = StyleSheet.create({
     column: {
         flex: 1,
-        backgroundColor: Colors.surface,
         borderRadius: BorderRadius.md,
         borderWidth: 1.5,
         borderStyle: 'dashed',
@@ -102,17 +103,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.sm,
         paddingVertical: Spacing.xs,
-        backgroundColor: Colors.surfaceAlt,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
     },
     headerLabel: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightSemiBold,
     },
     badge: {
-        backgroundColor: Colors.primary,
         borderRadius: BorderRadius.full,
         minWidth: 20,
         height: 20,
@@ -136,25 +133,20 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.lg,
     },
     emptyHintText: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeXS,
         fontStyle: 'italic',
     },
     chip: {
-        backgroundColor: Colors.card,
         borderRadius: BorderRadius.sm,
         paddingHorizontal: Spacing.sm,
         paddingVertical: Spacing.xs,
         borderLeftWidth: 3,
-        borderLeftColor: Colors.primary,
     },
     chipLabel: {
-        color: Colors.textSecondary,
         fontSize: 10,
         textTransform: 'uppercase',
     },
     chipValue: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightMedium,
     },

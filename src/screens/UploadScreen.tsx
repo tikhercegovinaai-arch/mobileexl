@@ -9,7 +9,8 @@ import {
     SafeAreaView,
     ScrollView,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { hapticLight, hapticMedium } from '../utils/haptics';
 import { useToast } from '../components/ToastProvider';
 import { pickFiles } from '../services/UploadService';
@@ -73,6 +74,7 @@ export default function UploadScreen({
     const [isParsing, setIsParsing] = useState(false);
     const [parseStatus, setParseStatus] = useState('');
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const { theme, isDark } = useTheme();
     const { show: showToast } = useToast();
 
     React.useEffect(() => {
@@ -132,20 +134,20 @@ export default function UploadScreen({
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={() => { hapticLight(); onBack(); }} style={styles.backButton}>
-                    <Text style={styles.backText}>← Back</Text>
+                    <Text style={[styles.backText, { color: theme.textSecondary }]}>← Back</Text>
                 </TouchableOpacity>
-                <Text style={styles.title}>Upload File</Text>
+                <Text style={[styles.title, { color: theme.textPrimary }]}>Upload File</Text>
                 <View style={{ width: 60 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
                 {/* Subtitle */}
                 <Animated.View style={{ opacity: fadeAnim }}>
-                    <Text style={styles.subtitle}>
+                    <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
                         Select a file type to upload and extract data from
                     </Text>
 
@@ -156,7 +158,9 @@ export default function UploadScreen({
                                 key={ft.category}
                                 style={[
                                     styles.typeCard,
-                                    selectedCategory === ft.category && styles.typeCardActive,
+                                    { backgroundColor: theme.surface, borderColor: theme.border },
+                                    selectedCategory === ft.category && { borderColor: theme.primary, backgroundColor: theme.primary + '15' },
+                                    shadow(isDark ? '#000' : '#000', 2, 8, 0.15, 3)
                                 ]}
                                 onPress={() => handlePickFiles(ft.category)}
                                 activeOpacity={0.75}
@@ -164,11 +168,12 @@ export default function UploadScreen({
                                 <Text style={styles.typeIcon}>{ft.icon}</Text>
                                 <Text style={[
                                     styles.typeLabel,
-                                    selectedCategory === ft.category && styles.typeLabelActive,
+                                    { color: theme.textPrimary },
+                                    selectedCategory === ft.category && { color: theme.primary },
                                 ]}>
                                     {ft.label}
                                 </Text>
-                                <Text style={styles.typeDesc}>{ft.description}</Text>
+                                <Text style={[styles.typeDesc, { color: theme.textMuted }]}>{ft.description}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -176,27 +181,27 @@ export default function UploadScreen({
                     {/* Picked Files List */}
                     {pickedFiles.length > 0 && (
                         <View style={styles.filesSection}>
-                            <Text style={styles.sectionTitle}>
+                            <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
                                 Selected ({pickedFiles.length} file{pickedFiles.length !== 1 ? 's' : ''})
                             </Text>
                             {pickedFiles.map((file, idx) => (
-                                <View key={idx} style={styles.fileRow}>
+                                <View key={idx} style={[styles.fileRow, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                                     <Text style={styles.fileIcon}>
                                         {file.mimeType.startsWith('image/') ? '🖼️' :
                                             file.mimeType === 'application/pdf' ? '📄' :
                                                 file.name.endsWith('.xlsx') || file.name.endsWith('.xls') ? '📊' : '📝'}
                                     </Text>
                                     <View style={styles.fileInfo}>
-                                        <Text style={styles.fileName} numberOfLines={1}>{file.name}</Text>
-                                        <Text style={styles.fileSize}>
+                                        <Text style={[styles.fileName, { color: theme.textPrimary }]} numberOfLines={1}>{file.name}</Text>
+                                        <Text style={[styles.fileSize, { color: theme.textMuted }]}>
                                             {file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'Size unknown'}
                                         </Text>
                                     </View>
                                     <TouchableOpacity
                                         onPress={() => handleRemoveFile(idx)}
-                                        style={styles.removeButton}
+                                        style={[styles.removeButton, { backgroundColor: theme.error + '33' }]}
                                     >
-                                        <Text style={styles.removeText}>×</Text>
+                                        <Text style={[styles.removeText, { color: theme.error }]}>×</Text>
                                     </TouchableOpacity>
                                 </View>
                             ))}
@@ -205,20 +210,20 @@ export default function UploadScreen({
 
                     {/* Parsing indicator */}
                     {isParsing && (
-                        <View style={styles.parsingBox}>
-                            <ActivityIndicator color={Colors.primary} size="small" />
-                            <Text style={styles.parsingText}>{parseStatus}</Text>
+                        <View style={[styles.parsingBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                            <ActivityIndicator color={theme.primary} size="small" />
+                            <Text style={[styles.parsingText, { color: theme.textSecondary }]}>{parseStatus}</Text>
                         </View>
                     )}
 
                     {/* Web drag-and-drop hint */}
                     {pickedFiles.length === 0 && (
-                        <View style={styles.dropZone}>
+                        <View style={[styles.dropZone, { borderColor: theme.border }]}>
                             <Text style={styles.dropIcon}>☁️</Text>
-                            <Text style={styles.dropText}>
+                            <Text style={[styles.dropText, { color: theme.textSecondary }]}>
                                 Tap a file type above to select files
                             </Text>
-                            <Text style={styles.dropHint}>
+                            <Text style={[styles.dropHint, { color: theme.textMuted }]}>
                                 Supports: images, PDF, Excel, Word
                             </Text>
                         </View>
@@ -228,9 +233,9 @@ export default function UploadScreen({
 
             {/* Analyze Button */}
             {pickedFiles.length > 0 && !isParsing && (
-                <View style={styles.footer}>
+                <View style={[styles.footer, { backgroundColor: theme.background, borderTopColor: theme.border }]}>
                     <TouchableOpacity
-                        style={styles.analyzeButton}
+                        style={[styles.analyzeButton, { backgroundColor: theme.primary }, shadow(theme.primary, 4, 12, 0.35, 6)]}
                         onPress={() => {
                             hapticMedium();
                             handleAnalyze();
@@ -251,7 +256,6 @@ export default function UploadScreen({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -260,15 +264,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
     },
     backButton: { paddingVertical: Spacing.xs, paddingRight: Spacing.md },
     backText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
     },
     title: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeLG,
         fontWeight: Typography.fontWeightBold,
     },
@@ -277,7 +278,6 @@ const styles = StyleSheet.create({
         paddingBottom: 120,
     },
     subtitle: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
         textAlign: 'center',
         marginBottom: Spacing.lg,
@@ -291,28 +291,21 @@ const styles = StyleSheet.create({
     },
     typeCard: {
         width: '47%',
-        backgroundColor: Colors.card,
         borderRadius: BorderRadius.md,
         padding: Spacing.md,
         borderWidth: 1.5,
-        borderColor: Colors.border,
         gap: 6,
-        ...shadow('#000', 2, 8, 0.15, 3),
     },
     typeCardActive: {
-        borderColor: Colors.primary,
-        backgroundColor: Colors.primary + '15',
     },
     typeIcon: { fontSize: 30 },
     typeLabel: {
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightBold,
-        color: Colors.textPrimary,
     },
-    typeLabelActive: { color: Colors.primary },
+    typeLabelActive: { },
     typeDesc: {
         fontSize: Typography.fontSizeXS,
-        color: Colors.textMuted,
         lineHeight: 16,
     },
 
@@ -321,7 +314,6 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.lg,
     },
     sectionTitle: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightSemiBold,
         marginBottom: Spacing.sm,
@@ -331,23 +323,19 @@ const styles = StyleSheet.create({
     fileRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.surface,
         borderRadius: BorderRadius.sm,
         padding: Spacing.sm,
         marginBottom: Spacing.xs,
         borderWidth: 1,
-        borderColor: Colors.border,
         gap: Spacing.sm,
     },
     fileIcon: { fontSize: 24 },
     fileInfo: { flex: 1 },
     fileName: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightMedium,
     },
     fileSize: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeXS,
         marginTop: 2,
     },
@@ -355,12 +343,10 @@ const styles = StyleSheet.create({
         width: 28,
         height: 28,
         borderRadius: 14,
-        backgroundColor: Colors.error + '33',
         alignItems: 'center',
         justifyContent: 'center',
     },
     removeText: {
-        color: Colors.error,
         fontSize: 18,
         fontWeight: Typography.fontWeightBold,
         marginTop: -1,
@@ -370,7 +356,6 @@ const styles = StyleSheet.create({
     dropZone: {
         borderWidth: 2,
         borderStyle: 'dashed',
-        borderColor: Colors.border,
         borderRadius: BorderRadius.lg,
         padding: Spacing.xl,
         alignItems: 'center',
@@ -379,12 +364,10 @@ const styles = StyleSheet.create({
     },
     dropIcon: { fontSize: 40 },
     dropText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
         textAlign: 'center',
     },
     dropHint: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeSM,
         textAlign: 'center',
     },
@@ -394,15 +377,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: Spacing.sm,
-        backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: Colors.border,
         borderRadius: BorderRadius.md,
         padding: Spacing.md,
         marginBottom: Spacing.lg,
     },
     parsingText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeSM,
     },
 
@@ -413,19 +393,15 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         padding: Spacing.lg,
-        backgroundColor: Colors.background,
         borderTopWidth: 1,
-        borderTopColor: Colors.border,
     },
     analyzeButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: Spacing.sm,
-        backgroundColor: Colors.primary,
         borderRadius: BorderRadius.lg,
         paddingVertical: Spacing.md,
-        ...shadow(Colors.primary, 4, 12, 0.35, 6),
     },
     analyzeIcon: { fontSize: Typography.fontSizeLG },
     analyzeText: {

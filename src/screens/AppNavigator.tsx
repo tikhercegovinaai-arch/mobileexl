@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, StyleSheet, Alert, AppState } from 'react-native';
+import { View, StyleSheet, Alert, AppState, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -265,10 +265,11 @@ function AppContent({
     isLocked: boolean;
     renderScreen: () => React.ReactNode;
 }) {
-    const { theme } = useTheme();
+    const { theme, isDark } = useTheme();
 
     return (
         <ErrorBoundary>
+            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
             <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.background }]}>
                 <BottomSheetModalProvider>
                     <ToastProvider>
