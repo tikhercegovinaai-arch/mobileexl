@@ -1,7 +1,9 @@
 import * as XLSX from 'xlsx';
 import { Paths, File } from 'expo-file-system';
+import * as Print from 'expo-print';
 import { ValidationField } from '../store/useAppStore';
 import { ExportFormat } from './ExcelExportService';
+import { PDFTemplateService, PDFTemplateType } from './PDFTemplateService';
 
 /**
  * Maps a column key to its ordered position in the output sheet.
@@ -37,9 +39,9 @@ export class ExcelInjectorService {
     static async injectToExcel(
         fields: ValidationField[],
         mappings: InjectorColumnMapping[],
-        options: { filename?: string; format?: ExportFormat } = {},
+        options: { filename?: string; format?: ExportFormat; pdfTemplate?: PDFTemplateType } = {},
     ): Promise<string> {
-        const { filename, format = 'xlsx' } = options;
+        const { filename, format = 'xlsx', pdfTemplate = 'corporate' } = options;
 
         // Build a quick lookup from fieldId → field
         const fieldMap = new Map<string, ValidationField>(fields.map((f) => [f.id, f]));
@@ -121,6 +123,14 @@ export class ExcelInjectorService {
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Structured Data');
+
+        if (format === 'pdf') {
+            const html = PDFTemplateService.getTemplate(pdfTemplate, fields, {
+                title: filename || 'Structured Extraction Report',
+            });
+            const { uri } = await Print.printToFileAsync({ html });
+            return uri;
+        }
 
         // Write
         const ext = format === 'csv' ? 'csv' : 'xlsx';

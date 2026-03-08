@@ -17,6 +17,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
 import { ExcelExportService, ExportFormat } from '../services/ExcelExportService';
 import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelInjectorService';
+import { PDFTemplateType } from '../services/PDFTemplateService';
 import { AnalyticsService } from '../services/AnalyticsService';
 import { BiometricService } from '../services/BiometricService';
 import { useToast } from '../components/ToastProvider';
@@ -35,6 +36,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
     const [isExporting, setIsExporting] = useState(false);
     const { show: showToast } = useToast();
     const [format, setFormat] = useState<ExportFormat>('xlsx');
+    const [pdfTemplate, setPdfTemplate] = useState<PDFTemplateType>('corporate');
     const [customFilename, setCustomFilename] = useState('');
     const [savedPath, setSavedPath] = useState<string | null>(null);
 
@@ -66,10 +68,10 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     });
                 }
             });
-            return ExcelInjectorService.injectToExcel(validation.fields, injectorMappings, { filename: name, format });
+            return ExcelInjectorService.injectToExcel(validation.fields, injectorMappings, { filename: name, format, pdfTemplate });
         }
 
-        return ExcelExportService.exportToExcel(validation.fields, { filename: name, format });
+        return ExcelExportService.exportToExcel(validation.fields, { filename: name, format, pdfTemplate });
     };
 
     /** Share via OS share sheet */
@@ -204,6 +206,37 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                             ))}
                         </View>
                     </View>
+
+                    {/* Template selector (PDF only) */}
+                    {format === 'pdf' && (
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>PDF Template</Text>
+                            <View style={styles.formatRow}>
+                                {(['corporate', 'financial', 'grid'] as PDFTemplateType[]).map((t) => (
+                                    <TouchableOpacity
+                                        key={t}
+                                        style={[
+                                            styles.formatChip,
+                                            { backgroundColor: theme.surface, borderColor: theme.border },
+                                            pdfTemplate === t && { borderColor: theme.primary, backgroundColor: theme.primary + '22' }
+                                        ]}
+                                        onPress={() => {
+                                            hapticLight();
+                                            setPdfTemplate(t);
+                                        }}
+                                    >
+                                        <Text style={[
+                                            styles.formatChipText,
+                                            { color: theme.textSecondary },
+                                            pdfTemplate === t && { color: theme.primary }
+                                        ]}>
+                                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    )}
 
                     {/* Filename */}
                     <View style={styles.section}>
