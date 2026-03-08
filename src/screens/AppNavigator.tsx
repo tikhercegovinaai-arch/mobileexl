@@ -15,6 +15,7 @@ import PrivacyGateScreen from './PrivacyGateScreen';
 import SettingsScreen from './SettingsScreen';
 import OnboardingScreen from './OnboardingScreen';
 import AnalyticsScreen from './AnalyticsScreen';
+import HistoryScreen from './HistoryScreen';
 import ModelDownloadOverlay from '../components/ModelDownloadOverlay';
 import PermissionGate from '../components/PermissionGate';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -26,7 +27,7 @@ import { useAppStore } from '../store/useAppStore';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ThemeTokens } from '../constants/theme';
 
-type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload' | 'analytics';
+type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload' | 'analytics' | 'history';
 
 export default function AppNavigator() {
     return (
@@ -172,6 +173,7 @@ function AppNavigationInner() {
                             onOpenSettings={() => setScreen('settings')}
                             onUpload={() => setScreen('upload')}
                             onViewAnalytics={() => setScreen('analytics')}
+                            onViewHistory={() => setScreen('history')}
                         />
                         <SettingsScreen
                             visible={isSettingsVisible}
@@ -260,6 +262,19 @@ function AppNavigationInner() {
                     <Animated.View key="analytics" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
                         <AnalyticsScreen
                             onBack={() => setScreen('home')}
+                        />
+                    </Animated.View>
+                );
+            case 'history':
+                return (
+                    <Animated.View key="history" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
+                        <HistoryScreen
+                            onBack={() => setScreen('home')}
+                            onViewEntry={(entry) => {
+                                // Load historical data into validation store and go to validation
+                                useAppStore.getState().initializeValidation(entry.extractedData);
+                                setScreen('validation');
+                            }}
                         />
                     </Animated.View>
                 );

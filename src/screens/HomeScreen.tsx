@@ -12,6 +12,11 @@ import {
 import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
+import AnalyticsScreen from './AnalyticsScreen';
+import HistoryScreen from './HistoryScreen';
+import ModelDownloadOverlay from '../components/ModelDownloadOverlay';
+import PermissionGate from '../components/PermissionGate';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { hapticMedium, hapticLight } from '../utils/haptics';
 import { enforceSecurityPolicy } from '../utils/security';
 import { TechnicalButton } from '../components/TechnicalButton';
@@ -22,6 +27,7 @@ interface HomeScreenProps {
     onOpenSettings: () => void;
     onUpload: () => void;
     onViewAnalytics: () => void;
+    onViewHistory: () => void;
 }
 
 const FEATURES = [
@@ -42,7 +48,7 @@ const FEATURES = [
     },
 ];
 
-export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, onViewAnalytics }: HomeScreenProps) {
+export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, onViewAnalytics, onViewHistory }: HomeScreenProps) {
     const [isBatchMode, setIsBatchMode] = useState(false);
     const { theme, isDark } = useTheme();
 
@@ -159,6 +165,13 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                     label="[VIEW_SYSTEM_ANALYTICS]"
                     variant="outline"
                     onPress={onViewAnalytics}
+                    style={{ marginBottom: Spacing.md }}
+                />
+
+                <TechnicalButton
+                    label="[VIEW_EXTRACTION_HISTORY]"
+                    variant="outline"
+                    onPress={onViewHistory}
                 />
             </Animated.View>
 
@@ -262,6 +275,7 @@ const styles = StyleSheet.create({
         borderRadius: 0,
         padding: Spacing.md,
         borderWidth: 1,
+        marginBottom: Spacing.md,
         gap: 4,
     },
     featureTitle: {
