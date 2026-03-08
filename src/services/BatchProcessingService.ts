@@ -35,20 +35,30 @@ export const BatchProcessingService = {
 
         const allStructuredData = await runPool(
             uris.map((uri, i) => async () => {
-                // Phase 1: OCR
+                // Phase 1: Security Audit (Mock)
+                updateProgress(i, 0, 'initializing');
+                await new Promise(r => setTimeout(r, 600)); // Mock security scan
+                updateProgress(i, 10, 'initializing');
+
+                // Phase 2: OCR
                 const text = await OCRService.extractText(uri, (prog: number) => {
-                    updateProgress(i, prog * 0.33, 'recognizing');
+                    updateProgress(i, 10 + (prog * 0.3), 'recognizing');
                 });
 
-                // Phase 2: PII Redaction
+                // Phase 3: PII Redaction
                 const redactedText = await PIIRedactionService.redact(text, (prog: number) => {
-                    updateProgress(i, 33 + (prog * 0.33), 'redacting');
+                    updateProgress(i, 40 + (prog * 0.2), 'redacting');
                 });
 
-                // Phase 3: LLM Structuring
+                // Phase 4: LLM Structuring
                 const structuredData = await LLMInferenceService.structureData(redactedText, (prog: number) => {
-                    updateProgress(i, 66 + (prog * 0.34), 'structuring');
+                    updateProgress(i, 60 + (prog * 0.3), 'structuring');
                 });
+
+                // Phase 5: Finalizing (Digital Signature Mock)
+                updateProgress(i, 90, 'finalizing');
+                await new Promise(r => setTimeout(r, 400)); // Mock signing
+                updateProgress(i, 100, 'finalizing');
 
                 return structuredData;
             }),

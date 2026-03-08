@@ -13,6 +13,7 @@ import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
 import { hapticMedium, hapticLight } from '../utils/haptics';
+import { enforceSecurityPolicy } from '../utils/security';
 
 interface HomeScreenProps {
     onStartCapture: (isBatch: boolean) => void;
@@ -138,9 +139,12 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload }:
                         { backgroundColor: theme.primary, ...shadow(theme.primary, 4, 12, 0.3, 6) } as any,
                         isBatchMode && { backgroundColor: theme.secondary, ...shadow(theme.secondary, 4, 12, 0.3, 6) } as any
                     ]}
-                    onPress={() => {
+                    onPress={async () => {
                         hapticMedium();
-                        onStartCapture(isBatchMode);
+                        const isSecure = await enforceSecurityPolicy();
+                        if (isSecure) {
+                            onStartCapture(isBatchMode);
+                        }
                     }}
                     activeOpacity={0.85}
                 >

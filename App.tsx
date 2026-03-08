@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/screens/AppNavigator';
 import { SecureStorageService, STORAGE_KEYS } from './src/services/SecureStorageService';
 import { useAppStore } from './src/store/useAppStore';
-import { Colors } from './src/constants/theme';
+import { ThemeProvider } from './src/context/ThemeContext';
 import { RASPService } from './src/services/RASPService';
 
 // Initialize network pinning globally for any out-of-band analytics/telemetry (if enabled eventually).
@@ -48,8 +48,10 @@ export default function App() {
   }, [setOnboardingDone]);
 
   return (
-    <SafeAreaProvider>
-      <AppNavigator />
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <AppNavigator />
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }

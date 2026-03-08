@@ -22,7 +22,7 @@ export interface CaptureSession {
     capturedAt: Date | null;
 }
 
-export type ExtractionPhase = 'idle' | 'recognizing' | 'redacting' | 'structuring' | 'completed' | 'failed';
+export type ExtractionPhase = 'idle' | 'initializing' | 'recognizing' | 'redacting' | 'structuring' | 'finalizing' | 'completed' | 'failed';
 
 export interface BoundingBox {
     x: number;

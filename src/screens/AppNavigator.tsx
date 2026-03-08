@@ -248,12 +248,10 @@ export default function AppNavigator() {
     };
 
     return (
-        <ThemeProvider>
-            <AppContent
-                isLocked={isLocked}
-                renderScreen={renderScreen}
-            />
-        </ThemeProvider>
+        <AppContent
+            isLocked={isLocked}
+            renderScreen={renderScreen}
+        />
     );
 }
 

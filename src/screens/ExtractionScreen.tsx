@@ -12,9 +12,11 @@ interface ExtractionScreenProps {
 }
 
 const PHASES: { id: ExtractionPhase; label: string; icon: string }[] = [
+    { id: 'initializing', label: 'Security Audit', icon: '🛡️' },
     { id: 'recognizing', label: 'Handwriting Recognition', icon: '✍️' },
-    { id: 'redacting', label: 'PII Scrubbing', icon: '🛡️' },
+    { id: 'redacting', label: 'PII Scrubbing', icon: '✂️' },
     { id: 'structuring', label: 'Semantic Structuring', icon: '📊' },
+    { id: 'finalizing', label: 'Finalizing & Signing', icon: '🔏' },
 ];
 
 export default function ExtractionScreen({ onExtractionComplete, onExtractionError }: ExtractionScreenProps) {
