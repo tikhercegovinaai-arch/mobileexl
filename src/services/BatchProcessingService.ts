@@ -7,9 +7,11 @@ import { runPool } from '../utils/concurrencyPool';
 export interface BatchProgressCallback {
     (
         overallProgress: number,
-        currentDocumentIndex: number,
-        totalDocuments: number,
-        phase: ExtractionPhase
+        itemUpdate?: {
+            index: number;
+            progress: number;
+            phase: ExtractionPhase;
+        }
     ): void;
 }
 
@@ -35,9 +37,7 @@ export const BatchProcessingService = {
             // Overall progress is average of all docs
             const overall = docProgresses.reduce((sum, curr) => sum + curr, 0) / total;
             
-            // For the callback, we "estimate" the most relevant index-phase pair, 
-            // or we could change the callback signature. For now, keep it compatible.
-            onProgress(overall, index, total, phase);
+            onProgress(overall, { index, progress, phase });
         };
 
         const allStructuredData = await runPool(
@@ -81,13 +81,13 @@ export const BatchProcessingService = {
         );
 
         // Merge results into a single consolidated JSON structure
-        onProgress(99, total, total, 'structuring');
+        onProgress(99, { index: -1, progress: 99, phase: 'structuring' });
         const consolidated = await LLMInferenceService.consolidateRecords(allStructuredData, (prog: number) => {
             // Consolidation is the last 1%
-            onProgress(99 + (prog * 0.01), total, total, 'structuring');
+            onProgress(99 + (prog * 0.01), { index: -1, progress: 99 + (prog * 0.01), phase: 'structuring' });
         });
         
-        onProgress(100, total, total, 'completed');
+        onProgress(100, { index: -1, progress: 100, phase: 'completed' });
         return consolidated;
     },
 

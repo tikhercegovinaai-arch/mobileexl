@@ -26,6 +26,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         extraction,
         startExtractionJob,
         updateExtractionProgress,
+        updateItemProgress,
         completeExtractionJob,
         failExtractionJob
     } = useAppStore();
@@ -57,10 +58,23 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
 
                 const structuredData: any = await BatchProcessingService.processBatch(
                     capture.preprocessedImageUris,
-                    (overallProgress: number, currentIndex: number, total: number, phase: ExtractionPhase) => {
-                        updateExtractionProgress(overallProgress, phase);
-                        if (total > 1) {
-                            setCurrentDocStr(`Processing Document ${currentIndex + 1} of ${total}`);
+                    (overallProgress, itemUpdate) => {
+                        if (itemUpdate) {
+                            const { index, progress, phase } = itemUpdate;
+                            if (index >= 0) {
+                                updateItemProgress(index, progress, phase);
+                                // For overall phase, use the "youngest" active phase or the phase of the last item
+                                updateExtractionProgress(overallProgress, phase);
+                                if (capture.preprocessedImageUris.length > 1) {
+                                    setCurrentDocStr(`OPTIMIZING_THREAD_${index} [${Math.round(progress)}%]`);
+                                }
+                            } else {
+                                // Consolidation phase (index -1)
+                                updateExtractionProgress(overallProgress, phase);
+                                setCurrentDocStr("CONSOLIDATING_RECORDS...");
+                            }
+                        } else {
+                            updateExtractionProgress(overallProgress);
                         }
                     }
                 );
@@ -95,6 +109,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                     </View>
                 )}
 
+                {/* Summary Section */}
                 <View style={styles.headerRow}>
                     <View style={[styles.statusIndicator, { backgroundColor: extraction.status === 'running' ? theme.primary : theme.success }]} />
                     <Text style={[styles.title, { color: theme.textPrimary }]}>NEURAL_EXTRACT_CORE</Text>
@@ -104,41 +119,73 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
                     {currentDocStr || "INITIALIZING_PIPELINE..."}
                 </Text>
 
-                {/* Timeline */}
-                <View style={styles.timeline}>
-                    {PHASES.map((phase, idx) => {
-                        const isDone = idx < activeIndex;
-                        const isActive = idx === activeIndex;
-                        return (
-                            <View key={phase.id} style={styles.timelineItem}>
-                                <View style={styles.lineWrapper}>
-                                    <View style={[
-                                        styles.dot,
-                                        { backgroundColor: 'transparent', borderColor: theme.border },
-                                        isDone && { backgroundColor: theme.primary, borderColor: theme.primary },
-                                        isActive && { backgroundColor: theme.surfaceAlt, borderColor: theme.primary }
-                                    ]}>
-                                        {isActive && <View style={[styles.activeInner, { backgroundColor: theme.primary }]} />}
+                {/* Parallel Progress Bars (for batch) or Traditional Timeline (for single) */}
+                {capture.preprocessedImageUris.length > 1 ? (
+                    <View style={styles.parallelList}>
+                        {capture.preprocessedImageUris.map((_, idx) => {
+                            const prog = extraction.itemProgresses[idx] || 0;
+                            const phase = extraction.itemPhases[idx] || 'idle';
+                            return (
+                                <View key={idx} style={styles.parallelItem}>
+                                    <View style={styles.parallelHeader}>
+                                        <Text style={[styles.monoText, { color: theme.textSecondary, fontSize: 10 }]}>
+                                            DOC_{idx.toString().padStart(3, '0')}
+                                        </Text>
+                                        <Text style={[styles.monoText, { color: theme.primary, fontSize: 9 }]}>
+                                            {phase.toUpperCase()}
+                                        </Text>
                                     </View>
-                                    {idx < PHASES.length - 1 && (
-                                        <View style={[styles.line, { backgroundColor: theme.border }, isDone && { backgroundColor: theme.primary }]} />
-                                    )}
+                                    <View style={[styles.progressBarContainer, { backgroundColor: theme.surfaceAlt }]}>
+                                        <Animated.View 
+                                            style={[
+                                                styles.progressBar, 
+                                                { 
+                                                    backgroundColor: theme.primary,
+                                                    width: `${prog}%` 
+                                                }
+                                            ]} 
+                                        />
+                                    </View>
                                 </View>
-                                <View style={styles.phaseInfo}>
-                                    <Text style={[
-                                        styles.phaseLabel,
-                                        styles.monoText,
-                                        { color: theme.textMuted },
-                                        (isActive || isDone) && { color: theme.textPrimary }
-                                    ]}>
-                                        [{phase.id.toUpperCase()}] {phase.label}
-                                    </Text>
-                                    {isActive && <Text style={[styles.phaseSub, { color: theme.primary }]}>STATUS: ACTIVE</Text>}
+                            );
+                        })}
+                    </View>
+                ) : (
+                    <View style={styles.timeline}>
+                        {PHASES.map((phase, idx) => {
+                            const isDone = idx < activeIndex;
+                            const isActive = idx === activeIndex;
+                            return (
+                                <View key={phase.id} style={styles.timelineItem}>
+                                    <View style={styles.lineWrapper}>
+                                        <View style={[
+                                            styles.dot,
+                                            { backgroundColor: 'transparent', borderColor: theme.border },
+                                            isDone && { backgroundColor: theme.primary, borderColor: theme.primary },
+                                            isActive && { backgroundColor: theme.surfaceAlt, borderColor: theme.primary }
+                                        ]}>
+                                            {isActive && <View style={[styles.activeInner, { backgroundColor: theme.primary }]} />}
+                                        </View>
+                                        {idx < PHASES.length - 1 && (
+                                            <View style={[styles.line, { backgroundColor: theme.border }, isDone && { backgroundColor: theme.primary }]} />
+                                        )}
+                                    </View>
+                                    <View style={styles.phaseInfo}>
+                                        <Text style={[
+                                            styles.phaseLabel,
+                                            styles.monoText,
+                                            { color: theme.textMuted },
+                                            (isActive || isDone) && { color: theme.textPrimary }
+                                        ]}>
+                                            [{phase.id.toUpperCase()}] {phase.label}
+                                        </Text>
+                                        {isActive && <Text style={[styles.phaseSub, { color: theme.primary }]}>STATUS: ACTIVE</Text>}
+                                    </View>
                                 </View>
-                            </View>
-                        );
-                    })}
-                </View>
+                            );
+                        })}
+                    </View>
+                )}
 
                 {extraction.status === 'error' && (
                     <View style={[styles.errorBox, { backgroundColor: theme.error + '22', borderColor: theme.error, borderWidth: 1 }]}>
@@ -258,6 +305,27 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '800',
         letterSpacing: 2,
+    },
+    parallelList: {
+        width: '100%',
+        marginTop: Spacing.md,
+    },
+    parallelItem: {
+        marginBottom: Spacing.md,
+    },
+    parallelHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    progressBarContainer: {
+        height: 4,
+        width: '100%',
+        overflow: 'hidden',
+    },
+    progressBar: {
+        height: '100%',
     },
 });
 

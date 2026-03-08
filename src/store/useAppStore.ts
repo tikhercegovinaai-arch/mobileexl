@@ -55,6 +55,8 @@ export interface ExtractionJob {
     status: 'idle' | 'running' | 'success' | 'error';
     phase: ExtractionPhase;
     progress: number; // 0–100
+    itemProgresses: Record<number, number>; // index -> 0-100
+    itemPhases: Record<number, ExtractionPhase>; // index -> phase
     errorMessage: string | null;
     extractedData: Record<string, unknown> | null;
 }
@@ -115,6 +117,7 @@ export interface AppSessionState {
     setIsBatchMode: (isBatch: boolean) => void;
     startExtractionJob: (jobId: string) => void;
     updateExtractionProgress: (progress: number, phase?: ExtractionPhase) => void;
+    updateItemProgress: (index: number, progress: number, phase: ExtractionPhase) => void;
     completeExtractionJob: (data: Record<string, unknown>) => void;
     failExtractionJob: (message: string) => void;
     initializeValidation: (data: Record<string, unknown>) => void;
@@ -151,6 +154,8 @@ const initialExtraction: ExtractionJob = {
     status: 'idle',
     phase: 'idle',
     progress: 0,
+    itemProgresses: {},
+    itemPhases: {},
     errorMessage: null,
     extractedData: null,
 };
@@ -238,6 +243,21 @@ export const useAppStore = create<AppSessionState>()(
                         ...state.extraction,
                         progress,
                         ...(phase ? { phase } : {}),
+                    },
+                })),
+
+            updateItemProgress: (index, progress, phase) =>
+                set((state) => ({
+                    extraction: {
+                        ...state.extraction,
+                        itemProgresses: {
+                            ...state.extraction.itemProgresses,
+                            [index]: progress,
+                        },
+                        itemPhases: {
+                            ...state.extraction.itemPhases,
+                            [index]: phase,
+                        },
                     },
                 })),
 

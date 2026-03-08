@@ -14,6 +14,7 @@ import ExportScreen from './ExportScreen';
 import PrivacyGateScreen from './PrivacyGateScreen';
 import SettingsScreen from './SettingsScreen';
 import OnboardingScreen from './OnboardingScreen';
+import ModelDownloadOverlay from '../components/ModelDownloadOverlay';
 import PermissionGate from '../components/PermissionGate';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { ToastProvider } from '../components/ToastProvider';
@@ -287,6 +288,7 @@ function AppContent({
                     <ToastProvider>
                         {isLocked && <PrivacyGateScreen />}
                         {!isLocked && renderScreen()}
+                        <ModelDownloadOverlay />
                     </ToastProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

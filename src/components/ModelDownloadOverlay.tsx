@@ -1,141 +1,197 @@
-import React from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    ActivityIndicator,
-} from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
-import { Typography, Spacing, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
+import { Spacing, shadow } from '../constants/theme';
 
 /**
- * Full-screen overlay showing model download progress.
- * Renders a circular progress ring, speed/ETA stats, and Pause/Resume/Cancel.
+ * Premium Industrial-themed overlay for AI model downloads.
+ * Uses a bottom-docked utilitarian aesthetic consistent with the extraction screen.
  */
 export default function ModelDownloadOverlay() {
-    const { theme } = useTheme();
     const { modelDownload, updateModelDownload, resetModelDownload } = useAppStore();
+    const { theme } = useTheme();
+    const slideAnim = useRef(new Animated.Value(200)).current;
 
-    if (!modelDownload.isDownloading && !modelDownload.isPaused) return null;
+    const isVisible = modelDownload.isDownloading || modelDownload.isPaused;
+
+    useEffect(() => {
+        if (isVisible) {
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: 200,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isVisible]);
+
+    if (!isVisible && slideAnim.valueOf() === 200) return null;
 
     const progressPercent = Math.round(modelDownload.progress);
-    const mbWritten = (modelDownload.bytesWritten / (1024 * 1024)).toFixed(1);
-    const mbTotal = modelDownload.contentLength
+    const mbDownloaded = (modelDownload.bytesWritten / (1024 * 1024)).toFixed(1);
+    const mbTotal = modelDownload.contentLength 
         ? (modelDownload.contentLength / (1024 * 1024)).toFixed(1)
         : '??';
 
     return (
-        <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
-            <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Text style={[styles.title, { color: theme.textPrimary }]}>Downloading Model</Text>
-
-                {/* Progress circle placeholder (native SVG would go here) */}
-                <View style={[styles.progressCircle, { borderColor: theme.primary }]}>
-                    <Text style={[styles.progressText, { color: theme.primary }]}>
-                        {progressPercent}%
+        <Animated.View 
+            style={[
+                styles.container, 
+                { 
+                    backgroundColor: theme.surface, 
+                    borderColor: theme.border,
+                    transform: [{ translateY: slideAnim }] 
+                }
+            ]}
+        >
+            <View style={styles.header}>
+                <View style={styles.titleGroup}>
+                    <View style={[styles.statusIndicator, { backgroundColor: modelDownload.isPaused ? theme.warning : theme.primary }]} />
+                    <Text style={[styles.title, { color: theme.textPrimary }]}>AI_MODEL_SYNC</Text>
+                    <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                        {modelDownload.isPaused ? '[PAUSED]' : '[ACTIVE]'}
                     </Text>
                 </View>
+                <Text style={[styles.percentage, { color: theme.primary }]}>{progressPercent}%</Text>
+            </View>
 
-                <Text style={[styles.stats, { color: theme.textSecondary }]}>
-                    {mbWritten} MB / {mbTotal} MB
+            <View style={[styles.progressBg, { backgroundColor: theme.surfaceAlt }]}>
+                <View 
+                    style={[
+                        styles.progressFill, 
+                        { 
+                            backgroundColor: theme.primary, 
+                            width: `${modelDownload.progress}%` 
+                        }
+                    ]} 
+                />
+            </View>
+
+            <View style={styles.footer}>
+                <Text style={[styles.stats, { color: theme.textMuted }]}>
+                    DL_SIZE: {mbDownloaded}MB / {mbTotal}MB
                 </Text>
-
-                <View style={styles.actions}>
-                    {modelDownload.isPaused ? (
-                        <TouchableOpacity
-                            style={[styles.actionBtn, { backgroundColor: theme.primary }]}
-                            onPress={() => updateModelDownload({ isPaused: false, isDownloading: true })}
-                            accessibilityLabel="Resume download"
-                            accessibilityRole="button"
-                        >
-                            <Text style={styles.actionText}>Resume</Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity
-                            style={[styles.actionBtn, { backgroundColor: theme.warning }]}
-                            onPress={() => updateModelDownload({ isPaused: true, isDownloading: false })}
-                            accessibilityLabel="Pause download"
-                            accessibilityRole="button"
-                        >
-                            <Text style={styles.actionText}>Pause</Text>
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity
-                        style={[styles.actionBtn, { backgroundColor: theme.error }]}
-                        onPress={() => resetModelDownload()}
-                        accessibilityLabel="Cancel download"
-                        accessibilityRole="button"
+                <View style={styles.actionGroup}>
+                    <TouchableOpacity 
+                        style={[styles.actionButton, { borderColor: theme.border }]}
+                        onPress={() => updateModelDownload({ isPaused: !modelDownload.isPaused, isDownloading: !!modelDownload.isPaused })}
                     >
-                        <Text style={styles.actionText}>Cancel</Text>
+                        <Text style={[styles.actionText, { color: theme.textPrimary }]}>
+                            {modelDownload.isPaused ? 'RESUME' : 'PAUSE'}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={[styles.actionButton, { borderColor: theme.error, marginLeft: Spacing.sm }]}
+                        onPress={() => resetModelDownload()}
+                    >
+                        <Text style={[styles.actionText, { color: theme.error }]}>ABORT</Text>
                     </TouchableOpacity>
                 </View>
-
-                {modelDownload.error && (
-                    <Text style={[styles.errorText, { color: theme.error }]}>
-                        {modelDownload.error}
-                    </Text>
-                )}
             </View>
-        </View>
+
+            {modelDownload.error && (
+                <View style={[styles.errorBox, { backgroundColor: theme.error + '11' }]}>
+                    <Text style={[styles.error, { color: theme.error }]}>
+                        CRC_CHECK_FAILED: {modelDownload.error}
+                    </Text>
+                </View>
+            )}
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 100,
-    },
-    card: {
-        width: '80%',
-        maxWidth: 340,
-        borderRadius: BorderRadius.lg,
-        padding: Spacing.xl,
-        alignItems: 'center',
+    container: {
+        position: 'absolute',
+        bottom: 30,
+        left: 20,
+        right: 20,
+        padding: Spacing.lg,
         borderWidth: 1,
+        borderRadius: 2,
+        ...shadow('#000000', 4, 12, 0.3, 8),
+        zIndex: 1000,
     },
-    title: {
-        fontSize: Typography.fontSizeLG,
-        fontWeight: Typography.fontWeightBold,
-        marginBottom: Spacing.lg,
-    },
-    progressCircle: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        borderWidth: 6,
-        justifyContent: 'center',
-        alignItems: 'center',
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
         marginBottom: Spacing.md,
     },
-    progressText: {
-        fontSize: Typography.fontSize2XL,
-        fontWeight: Typography.fontWeightBold,
+    titleGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    statusIndicator: {
+        width: 6,
+        height: 6,
+        marginRight: 8,
+    },
+    title: {
+        fontSize: 14,
+        fontWeight: '900',
+        letterSpacing: 1.5,
+    },
+    subtitle: {
+        fontSize: 10,
+        fontWeight: '700',
+        marginLeft: 8,
+        fontFamily: 'Courier',
+    },
+    percentage: {
+        fontSize: 18,
+        fontFamily: 'Courier',
+        fontWeight: 'bold',
+    },
+    progressBg: {
+        height: 4,
+        width: '100%',
+        marginBottom: Spacing.md,
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     stats: {
-        fontSize: Typography.fontSizeSM,
-        marginBottom: Spacing.lg,
+        fontSize: 9,
+        fontFamily: 'Courier',
+        fontWeight: '700',
     },
-    actions: {
+    actionGroup: {
         flexDirection: 'row',
-        gap: Spacing.md,
     },
-    actionBtn: {
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: Spacing.sm,
-        borderRadius: BorderRadius.sm,
+    actionButton: {
+        paddingHorizontal: Spacing.md,
+        paddingVertical: 4,
+        borderWidth: 1,
+        borderRadius: 1,
     },
     actionText: {
-        color: '#FFFFFF',
-        fontSize: Typography.fontSizeSM,
-        fontWeight: Typography.fontWeightBold,
+        fontSize: 9,
+        fontWeight: '900',
+        letterSpacing: 1,
     },
-    errorText: {
-        fontSize: Typography.fontSizeSM,
-        marginTop: Spacing.md,
-        textAlign: 'center',
+    errorBox: {
+        marginTop: Spacing.sm,
+        padding: 4,
+        borderLeftWidth: 2,
+        borderLeftColor: 'red',
+    },
+    error: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        fontFamily: 'Courier',
     },
 });
