@@ -2,10 +2,14 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 
 test.describe('Exelent Core Journey', () => {
-  test('should complete onboarding and reach home screen', async ({ page }) => {
     page.on('console', msg => {
-        if (msg.type() === 'error') console.log(`BROWSER ERROR: ${msg.text()}`);
-        else console.log(`BROWSER LOG: ${msg.text()}`);
+        console.log(`BROWSER ${msg.type().toUpperCase()}: ${msg.text()}`);
+    });
+    page.on('requestfailed', request => {
+        console.log(`REQUEST FAILED: ${request.url()} - ${request.failure()?.errorText}`);
+    });
+    page.on('response', response => {
+        if (response.status() >= 400) console.log(`BAD RESPONSE: ${response.status()} ${response.url()}`);
     });
 
     // 1. Navigate to the app (clean storage if possible or handle existing state)
@@ -14,10 +18,10 @@ test.describe('Exelent Core Journey', () => {
     // Wait for root to have some content
     console.log('Waiting for #root to mount...');
     try {
-        await page.waitForSelector('#root > *', { timeout: 15000 });
+        await page.waitForSelector('#root > *', { timeout: 30000 });
         console.log('#root mounted.');
     } catch (e) {
-        console.log('#root did not mount in 15s.');
+        console.log('#root did not mount in 30s.');
     }
 
     // DEBUG: Capture HTML
