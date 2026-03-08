@@ -1,21 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
     View,
     StyleSheet,
     Text,
     TouchableOpacity,
     TextInput,
-    Modal,
     Keyboard,
-    ScrollView,
-    Pressable,
 } from 'react-native';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    withTiming,
-} from 'react-native-reanimated';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 
@@ -49,18 +41,24 @@ export const FieldManipulationSheet: React.FC<FieldManipulationSheetProps> = ({
     const [mergeTargetId, setMergeTargetId] = useState('');
     const [batchCategory, setBatchCategory] = useState('');
 
-    const translateY = useSharedValue(600);
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     useEffect(() => {
-        translateY.value = visible ? withSpring(0, { damping: 20 }) : withTiming(600, { duration: 250 });
-        if (visible && targetField) {
-            setSplitPosition(Math.floor(targetField.value.length / 2));
+        if (visible) {
+            bottomSheetRef.current?.present();
+            if (targetField) {
+                setSplitPosition(Math.floor(targetField.value.length / 2));
+            }
+        } else {
+            bottomSheetRef.current?.dismiss();
         }
-    }, [visible]);
+    }, [visible, targetField]);
 
-    const sheetStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }],
-    }));
+    const handleSheetChanges = useCallback((index: number) => {
+        if (index === -1) {
+            onClose();
+        }
+    }, [onClose]);
 
     const handleSplit = () => {
         if (!targetField) return;
@@ -89,12 +87,17 @@ export const FieldManipulationSheet: React.FC<FieldManipulationSheetProps> = ({
     );
 
     return (
-        <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-            <Pressable style={styles.backdrop} onPress={onClose} />
-            <Animated.View style={[styles.sheet, sheetStyle]}>
-                {/* Handle bar */}
-                <View style={styles.handle} />
-
+        <BottomSheetModal
+            ref={bottomSheetRef}
+            snapPoints={['75%']}
+            onChange={handleSheetChanges}
+            backdropComponent={(props) => (
+                <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+            )}
+            backgroundStyle={{ backgroundColor: Colors.surface, borderRadius: BorderRadius.xl }}
+            handleIndicatorStyle={styles.handleIndicator}
+        >
+            <View style={styles.sheetContent}>
                 {/* Title */}
                 <Text style={styles.sheetTitle}>Field Operations</Text>
 
@@ -113,7 +116,7 @@ export const FieldManipulationSheet: React.FC<FieldManipulationSheetProps> = ({
                     ))}
                 </View>
 
-                <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+                <BottomSheetScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
                     {/* ── SPLIT ── */}
                     {mode === 'split' && targetField && (
                         <View>
@@ -232,41 +235,27 @@ export const FieldManipulationSheet: React.FC<FieldManipulationSheetProps> = ({
                             </TouchableOpacity>
                         </View>
                     )}
-                </ScrollView>
+                </BottomSheetScrollView>
 
                 {/* Cancel */}
                 <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                     <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
-            </Animated.View>
-        </Modal>
+            </View>
+        </BottomSheetModal>
     );
 };
 
 const styles = StyleSheet.create({
-    backdrop: {
+    sheetContent: {
         flex: 1,
-        backgroundColor: Colors.overlay,
-    },
-    sheet: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: Colors.surface,
-        borderTopLeftRadius: BorderRadius.xl,
-        borderTopRightRadius: BorderRadius.xl,
         paddingBottom: Spacing.xl,
-        maxHeight: '75%',
-        ...shadow('#000', -4, 12, 0.3, 20),
     },
-    handle: {
+    handleIndicator: {
         width: 40,
         height: 4,
         backgroundColor: Colors.textMuted,
         borderRadius: 2,
-        alignSelf: 'center',
-        marginVertical: Spacing.sm,
     },
     sheetTitle: {
         color: Colors.textPrimary,

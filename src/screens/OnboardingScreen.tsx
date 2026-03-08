@@ -12,7 +12,8 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
-    interpolate,
+    withTiming,
+    interpolateColor,
 } from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
 import { Typography, Spacing, BorderRadius } from '../constants/theme';
@@ -61,6 +62,47 @@ const slides: Slide[] = [
     },
 ];
 
+const Dot = ({ active, theme }: { active: boolean; theme: any }) => {
+    const width = useSharedValue(8);
+
+    React.useEffect(() => {
+        width.value = withSpring(active ? 24 : 8);
+    }, [active]);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            width: width.value,
+            backgroundColor: active ? theme.primary : theme.surfaceAlt,
+        };
+    });
+
+    return <Animated.View style={[styles.dot, animatedStyle]} />;
+};
+
+const SlideIcon = ({ icon, active }: { icon: string; active: boolean }) => {
+    const scale = useSharedValue(0.8);
+
+    React.useEffect(() => {
+        if (active) {
+            scale.value = withSpring(1.2, { damping: 10, stiffness: 100 }, () => {
+                scale.value = withSpring(1);
+            });
+        } else {
+            scale.value = withTiming(0.8);
+        }
+    }, [active]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    return (
+        <Animated.Text style={[styles.slideIcon, animatedStyle]}>
+            {icon}
+        </Animated.Text>
+    );
+};
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
@@ -81,9 +123,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         onComplete();
     };
 
-    const renderSlide = ({ item }: { item: Slide }) => (
+    const renderSlide = ({ item, index }: { item: Slide; index: number }) => (
         <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
-            <Text style={styles.slideIcon}>{item.icon}</Text>
+            <SlideIcon icon={item.icon} active={index === currentIndex} />
             <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>{item.title}</Text>
             <Text style={[styles.slideDescription, { color: theme.textSecondary }]}>{item.description}</Text>
         </View>
@@ -117,19 +159,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 style={styles.flatList}
             />
 
-            {/* Progress dots */}
             <View style={styles.dotsRow}>
                 {slides.map((_, i) => (
-                    <View
-                        key={i}
-                        style={[
-                            styles.dot,
-                            {
-                                backgroundColor: i === currentIndex ? theme.primary : theme.surfaceAlt,
-                                width: i === currentIndex ? 24 : 8,
-                            },
-                        ]}
-                    />
+                    <Dot key={i} active={i === currentIndex} theme={theme} />
                 ))}
             </View>
 

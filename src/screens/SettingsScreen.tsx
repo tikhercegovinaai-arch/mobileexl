@@ -1,21 +1,21 @@
-import React from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
     View,
     StyleSheet,
     Text,
-    SafeAreaView,
     TouchableOpacity,
     Switch,
     Linking,
     Platform,
-    ScrollView,
 } from 'react-native';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Spacing, Typography, BorderRadius } from '../constants/theme';
 import { useAppStore, ThemeMode } from '../store/useAppStore';
 import { useTheme } from '../context/ThemeContext';
 
 interface SettingsScreenProps {
-    onBack: () => void;
+    visible: boolean;
+    onClose: () => void;
 }
 
 const themeModes: { label: string; value: ThemeMode }[] = [
@@ -24,31 +24,55 @@ const themeModes: { label: string; value: ThemeMode }[] = [
     { label: 'System', value: 'system' },
 ];
 
-export default function SettingsScreen({ onBack }: SettingsScreenProps) {
+export default function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     const { settings, updateSettings } = useAppStore();
     const { theme } = useTheme();
+
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+    useEffect(() => {
+        if (visible) {
+            bottomSheetRef.current?.present();
+        } else {
+            bottomSheetRef.current?.dismiss();
+        }
+    }, [visible]);
+
+    const handleSheetChanges = useCallback((index: number) => {
+        if (index === -1) {
+            onClose();
+        }
+    }, [onClose]);
 
     const openPrivacyPolicy = () => {
         Linking.openURL('https://example.com/privacy');
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <BottomSheetModal
+            ref={bottomSheetRef}
+            snapPoints={['90%']}
+            onChange={handleSheetChanges}
+            backdropComponent={(props) => (
+                <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+            )}
+            backgroundStyle={{ backgroundColor: theme.surface }}
+            handleIndicatorStyle={styles.handleIndicator}
+        >
             <View style={[styles.header, { borderBottomColor: theme.border }]}>
                 <TouchableOpacity
-                    onPress={onBack}
+                    onPress={onClose}
                     style={styles.headerBtn}
-                    accessibilityLabel="Go back"
+                    accessibilityLabel="Close settings"
                     accessibilityRole="button"
                 >
-                    <Text style={[styles.headerBtnIcon, { color: theme.primary }]}>←</Text>
-                    <Text style={[styles.headerBtnText, { color: theme.primary }]}>Back</Text>
+                    <Text style={[styles.headerBtnText, { color: theme.primary }]}>Close</Text>
                 </TouchableOpacity>
                 <Text style={[styles.title, { color: theme.textPrimary }]}>Settings</Text>
                 <View style={styles.headerBtn} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <BottomSheetScrollView contentContainerStyle={styles.content}>
                 {/* ── Appearance ────────────────────────────────────────────── */}
                 <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                     <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Appearance</Text>
@@ -159,8 +183,8 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
                     <Text style={[styles.footerText, { color: theme.textMuted }]}>Exelent Scanner v1.0.0</Text>
                     <Text style={[styles.footerText, { color: theme.textMuted }]}>100% Offline AI Extraction</Text>
                 </View>
-            </ScrollView>
-        </SafeAreaView>
+            </BottomSheetScrollView>
+        </BottomSheetModal>
     );
 }
 
@@ -175,15 +199,16 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
         borderBottomWidth: 1,
     },
+    handleIndicator: {
+        backgroundColor: '#999',
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+    },
     headerBtn: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    headerBtnIcon: {
-        fontSize: Typography.fontSizeXL,
-        marginRight: Spacing.xs,
-        marginTop: -3,
     },
     headerBtnText: {
         fontSize: Typography.fontSizeMD,

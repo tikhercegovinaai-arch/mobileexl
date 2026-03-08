@@ -30,6 +30,7 @@ export default function AppNavigator() {
     const { isLocked, setLocked, initializeValidation, isOnboardingDone, setOnboardingDone } = useAppStore();
 
     const [screen, setScreen] = useState<Screen>(isOnboardingDone ? 'home' : 'onboarding');
+    const [isSettingsVisible, setSettingsVisible] = useState(false);
     const [permissions, setPermissions] = useState<PermissionState>({
         camera: 'undetermined',
         mediaLibrary: 'undetermined',
@@ -157,15 +158,13 @@ export default function AppNavigator() {
                     <Animated.View key="home" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
                         <HomeScreen
                             onStartCapture={handleStartCapture}
-                            onOpenSettings={() => setScreen('settings')}
+                            onOpenSettings={() => setSettingsVisible(true)}
                             onUpload={() => setScreen('upload')}
                         />
-                    </Animated.View>
-                );
-            case 'settings':
-                return (
-                    <Animated.View key="settings" entering={FadeIn} exiting={FadeOut} style={styles.screen}>
-                        <SettingsScreen onBack={() => setScreen('home')} />
+                        <SettingsScreen
+                            visible={isSettingsVisible}
+                            onClose={() => setSettingsVisible(false)}
+                        />
                     </Animated.View>
                 );
             case 'upload':
