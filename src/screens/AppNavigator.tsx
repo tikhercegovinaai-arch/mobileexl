@@ -18,6 +18,7 @@ import { DocumentScannerService } from '../services/DocumentScannerService';
 import UploadScreen from './UploadScreen';
 import { useAppStore } from '../store/useAppStore';
 import { Colors } from '../constants/theme';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 type Screen = 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
 
@@ -234,7 +235,27 @@ export default function AppNavigator() {
     };
 
     return (
-        <GestureHandlerRootView style={styles.root}>
+        <ThemeProvider>
+            <AppContent
+                isLocked={isLocked}
+                renderScreen={renderScreen}
+            />
+        </ThemeProvider>
+    );
+}
+
+/** Inner component that consumes theme context for dynamic styling */
+function AppContent({
+    isLocked,
+    renderScreen,
+}: {
+    isLocked: boolean;
+    renderScreen: () => React.ReactNode;
+}) {
+    const { theme } = useTheme();
+
+    return (
+        <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.background }]}>
             {isLocked && <PrivacyGateScreen />}
             {!isLocked && renderScreen()}
         </GestureHandlerRootView>
@@ -244,7 +265,7 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: Colors.background,
+        backgroundColor: Colors.background, // fallback; overridden inline
     },
     screen: {
         flex: 1,
