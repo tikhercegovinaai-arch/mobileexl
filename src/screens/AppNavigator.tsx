@@ -21,7 +21,6 @@ import { PermissionService, PermissionState } from '../services/PermissionServic
 import { DocumentScannerService } from '../services/DocumentScannerService';
 import UploadScreen from './UploadScreen';
 import { useAppStore } from '../store/useAppStore';
-import { Colors } from '../constants/theme';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 type Screen = 'onboarding' | 'home' | 'permission' | 'preview' | 'batchReview' | 'extraction' | 'validation' | 'columnMapping' | 'export' | 'settings' | 'upload';
@@ -285,7 +284,6 @@ function AppContent({
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: Colors.background, // fallback; overridden inline
     },
     screen: {
         flex: 1,

@@ -11,7 +11,8 @@ import {
     Animated,
 } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
-import { Colors, Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import SkeletonBox from '../components/SkeletonBox';
 
 interface BatchReviewScreenProps {
@@ -24,6 +25,7 @@ const THUMBNAIL_WIDTH = (width - Spacing.lg * 2 - Spacing.md) / 2;
 
 export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScreenProps) {
     const { capture, setPreprocessedImages } = useAppStore();
+    const { theme } = useTheme();
     const images = capture.preprocessedImageUris || [];
 
     // Animation values for each thumbnail
@@ -65,15 +67,15 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
                 <View style={styles.headerTitleRow}>
-                    <Text style={styles.title}>Review Batch</Text>
-                    <View style={styles.countBadge}>
-                        <Text style={styles.countBadgeText}>{images.length}</Text>
+                    <Text style={[styles.title, { color: theme.textPrimary }]}>Review Batch</Text>
+                    <View style={[styles.countBadge, { backgroundColor: theme.primary + '33', borderColor: theme.primary }]}>
+                        <Text style={[styles.countBadgeText, { color: theme.primary }]}>{images.length}</Text>
                     </View>
                 </View>
-                <Text style={styles.subtitle}>Tap images to review or remove</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Tap images to review or remove</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.gallery} showsVerticalScrollIndicator={false}>
@@ -129,20 +131,20 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
 
                 {/* Placeholder for adding more */}
                 <TouchableOpacity
-                    style={[styles.thumbnailContainer, styles.addButton]}
+                    style={[styles.thumbnailContainer, styles.addButton, { backgroundColor: 'transparent', borderColor: theme.border }]}
                     onPress={onRetake}
                 >
-                    <Text style={styles.addIcon}>+</Text>
-                    <Text style={styles.addText}>Add Map</Text>
+                    <Text style={[styles.addIcon, { color: theme.textMuted }]}>+</Text>
+                    <Text style={[styles.addText, { color: theme.textMuted }]}>Add Map</Text>
                 </TouchableOpacity>
             </ScrollView>
 
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.retakeButton} onPress={onRetake}>
-                    <Text style={styles.retakeButtonText}>Discard Batch</Text>
+            <View style={[styles.footer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+                <TouchableOpacity style={[styles.retakeButton, { backgroundColor: theme.surfaceAlt }]} onPress={onRetake}>
+                    <Text style={[styles.retakeButtonText, { color: theme.textSecondary }]}>Discard Batch</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
+                <TouchableOpacity style={[styles.acceptButton, { backgroundColor: theme.primary }, shadow(theme.primary, 4, 8, 0.3, 6)]} onPress={onAccept}>
                     <Text style={styles.acceptButtonText}>
                         Analyze {images.length} Document{images.length !== 1 ? 's' : ''}
                     </Text>
@@ -155,14 +157,11 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     header: {
         paddingVertical: Spacing.lg,
         paddingHorizontal: Spacing.lg,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
-        backgroundColor: Colors.surface,
     },
     headerTitleRow: {
         flexDirection: 'row',
@@ -172,25 +171,20 @@ const styles = StyleSheet.create({
     title: {
         fontSize: Typography.fontSize2XL,
         fontWeight: Typography.fontWeightBold,
-        color: Colors.textPrimary,
         marginRight: Spacing.sm,
     },
     countBadge: {
-        backgroundColor: Colors.primary + '33',
         paddingHorizontal: 10,
         paddingVertical: 2,
         borderRadius: BorderRadius.full,
         borderWidth: 1,
-        borderColor: Colors.primary,
     },
     countBadgeText: {
-        color: Colors.primary,
         fontSize: Typography.fontSizeXS,
         fontWeight: Typography.fontWeightBold,
     },
     subtitle: {
         fontSize: Typography.fontSizeSM,
-        color: Colors.textSecondary,
     },
     gallery: {
         padding: Spacing.lg,
@@ -206,11 +200,8 @@ const styles = StyleSheet.create({
         aspectRatio: 3 / 4,
         borderRadius: BorderRadius.lg,
         overflow: 'hidden',
-        backgroundColor: Colors.surfaceAlt,
         borderWidth: 1,
-        borderColor: Colors.border,
         position: 'relative',
-        ...shadow('#000', 4, 8, 0.2, 4),
     },
     thumbnail: {
         width: '100%',
@@ -221,13 +212,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 10,
         left: 10,
-        backgroundColor: Colors.primary,
+        backgroundColor: '#4ade80', // Keep a distinct badge color or use theme.primary? Let's use #4ade80 for green success
         width: 24,
         height: 24,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        ...shadow('#000', 2, 4, 0.3, 2),
     },
     orderBadgeText: {
         color: 'white',
@@ -238,7 +228,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 8,
         right: 8,
-        backgroundColor: 'rgba(239, 68, 68, 0.9)', // Colors.error with opacity
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
         width: 28,
         height: 28,
         borderRadius: 14,
@@ -253,18 +243,15 @@ const styles = StyleSheet.create({
     },
     addButton: {
         borderStyle: 'dashed',
-        backgroundColor: 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
         width: THUMBNAIL_WIDTH,
     },
     addIcon: {
         fontSize: 40,
-        color: Colors.textMuted,
         marginBottom: 8,
     },
     addText: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeSM,
         fontWeight: Typography.fontWeightSemiBold,
     },
@@ -273,19 +260,15 @@ const styles = StyleSheet.create({
         padding: Spacing.lg,
         gap: Spacing.md,
         borderTopWidth: 1,
-        borderTopColor: Colors.border,
-        backgroundColor: Colors.surface,
     },
     retakeButton: {
         flex: 1,
         paddingVertical: Spacing.md,
         borderRadius: BorderRadius.md,
-        backgroundColor: Colors.surfaceAlt,
         alignItems: 'center',
         justifyContent: 'center',
     },
     retakeButtonText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightSemiBold,
     },
@@ -293,10 +276,8 @@ const styles = StyleSheet.create({
         flex: 2,
         paddingVertical: Spacing.md,
         borderRadius: BorderRadius.md,
-        backgroundColor: Colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
-        ...shadow(Colors.primary, 4, 8, 0.3, 6),
     },
     acceptButtonText: {
         color: 'white',

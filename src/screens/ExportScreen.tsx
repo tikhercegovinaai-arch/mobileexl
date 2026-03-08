@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Spacing, Typography, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
 import { ExcelExportService, ExportFormat } from '../services/ExcelExportService';
 import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelInjectorService';
@@ -28,6 +29,7 @@ interface ExportScreenProps {
 
 export default function ExportScreen({ onDone }: ExportScreenProps) {
     const { validation, columnMappings, setExportPath, currentExportPath, extraction, settings } = useAppStore();
+    const { theme } = useTheme();
 
     const [activeTab, setActiveTab] = useState<'export' | 'analytics'>('export');
     const [isExporting, setIsExporting] = useState(false);
@@ -93,7 +95,9 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     mimeType:
                         format === 'csv'
                             ? 'text/csv'
-                            : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            : format === 'pdf'
+                                ? 'application/pdf'
+                                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     dialogTitle: 'Export Extracted Data',
                     ...(format === 'xlsx' && { UTI: 'com.microsoft.excel.xlsx' }),
                 });
@@ -114,26 +118,26 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
     /** Save directly to device - not needed as Share handles this natively via OS share sheet */
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             {/* Tab navigation */}
-            <View style={styles.tabBar}>
+            <View style={[styles.tabBar, { borderBottomColor: theme.border, backgroundColor: theme.surface }]}>
                 <TouchableOpacity
-                    style={[styles.tab, activeTab === 'export' && styles.activeTab]}
+                    style={[styles.tab, activeTab === 'export' && { borderBottomColor: theme.primary, borderBottomWidth: 2 }]}
                     onPress={() => {
                         hapticLight();
                         setActiveTab('export');
                     }}
                 >
-                    <Text style={[styles.tabText, activeTab === 'export' && styles.activeTabText]}>Export Data</Text>
+                    <Text style={[styles.tabText, { color: activeTab === 'export' ? theme.primary : theme.textSecondary, fontWeight: activeTab === 'export' ? Typography.fontWeightBold : Typography.fontWeightMedium }]}>Export Data</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.tab, activeTab === 'analytics' && styles.activeTab]}
+                    style={[styles.tab, activeTab === 'analytics' && { borderBottomColor: theme.primary, borderBottomWidth: 2 }]}
                     onPress={() => {
                         hapticLight();
                         setActiveTab('analytics');
                     }}
                 >
-                    <Text style={[styles.tabText, activeTab === 'analytics' && styles.activeTabText]}>Analytics</Text>
+                    <Text style={[styles.tabText, { color: activeTab === 'analytics' ? theme.primary : theme.textSecondary, fontWeight: activeTab === 'analytics' ? Typography.fontWeightBold : Typography.fontWeightMedium }]}>Analytics</Text>
                 </TouchableOpacity>
             </View>
 
@@ -142,12 +146,12 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
             ) : (
                 <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                     {/* Icon */}
-                    <View style={[styles.iconContainer, { backgroundColor: Colors.success + '20' }]}>
+                    <View style={[styles.iconContainer, { backgroundColor: theme.success + '20' }]}>
                         <Text style={styles.icon}>📊</Text>
                     </View>
 
-                    <Text style={styles.title}>Export Ready</Text>
-                    <Text style={styles.subtitle}>
+                    <Text style={[styles.title, { color: theme.textPrimary }]}>Export Ready</Text>
+                    <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
                         {validation.fields.length} fields validated.
                         {columnMappings.length > 0
                             ? ` ${columnMappings.length} columns mapped.`
@@ -155,37 +159,45 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                     </Text>
 
                     {/* Stats */}
-                    <View style={styles.statsContainer}>
+                    <View style={[styles.statsContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                         <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{validation.fields.length}</Text>
-                            <Text style={styles.statLabel}>Fields</Text>
+                            <Text style={[styles.statValue, { color: theme.textPrimary }]}>{validation.fields.length}</Text>
+                            <Text style={[styles.statLabel, { color: theme.textMuted }]}>Fields</Text>
                         </View>
-                        <View style={styles.statDivider} />
+                        <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
                         <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{avgConfidence}%</Text>
-                            <Text style={styles.statLabel}>Avg Conf.</Text>
+                            <Text style={[styles.statValue, { color: theme.textPrimary }]}>{avgConfidence}%</Text>
+                            <Text style={[styles.statLabel, { color: theme.textMuted }]}>Avg Conf.</Text>
                         </View>
-                        <View style={styles.statDivider} />
+                        <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
                         <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{columnMappings.length}</Text>
-                            <Text style={styles.statLabel}>Columns</Text>
+                            <Text style={[styles.statValue, { color: theme.textPrimary }]}>{columnMappings.length}</Text>
+                            <Text style={[styles.statLabel, { color: theme.textMuted }]}>Columns</Text>
                         </View>
                     </View>
 
                     {/* Format selector */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Export Format</Text>
+                        <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Export Format</Text>
                         <View style={styles.formatRow}>
-                            {(['xlsx', 'csv'] as ExportFormat[]).map((f) => (
+                            {(['xlsx', 'csv', 'pdf'] as ExportFormat[]).map((f) => (
                                 <TouchableOpacity
                                     key={f}
-                                    style={[styles.formatChip, format === f && styles.formatChipActive]}
+                                    style={[
+                                        styles.formatChip, 
+                                        { backgroundColor: theme.surface, borderColor: theme.border },
+                                        format === f && { borderColor: theme.primary, backgroundColor: theme.primary + '22' }
+                                    ]}
                                     onPress={() => {
                                         hapticLight();
                                         setFormat(f);
                                     }}
                                 >
-                                    <Text style={[styles.formatChipText, format === f && styles.formatChipTextActive]}>
+                                    <Text style={[
+                                        styles.formatChipText, 
+                                        { color: theme.textSecondary },
+                                        format === f && { color: theme.primary }
+                                    ]}>
                                         .{f.toUpperCase()}
                                     </Text>
                                 </TouchableOpacity>
@@ -195,11 +207,11 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
 
                     {/* Filename */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Filename (optional)</Text>
+                        <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Filename (optional)</Text>
                         <TextInput
-                            style={styles.filenameInput}
+                            style={[styles.filenameInput, { backgroundColor: theme.surface, borderColor: theme.border, color: theme.textPrimary }]}
                             placeholder={`Extraction_${Date.now()}`}
-                            placeholderTextColor={Colors.textMuted}
+                            placeholderTextColor={theme.textMuted}
                             value={customFilename}
                             onChangeText={setCustomFilename}
                             autoCapitalize="none"
@@ -208,12 +220,12 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
 
                     {isExporting ? (
                         <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={Colors.primary} />
-                            <Text style={styles.loadingText}>Generating File…</Text>
+                            <ActivityIndicator size="large" color={theme.primary} />
+                            <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Generating File…</Text>
                         </View>
                     ) : (
                         <View style={styles.buttonStack}>
-                            <TouchableOpacity style={styles.primaryButton} onPress={() => {
+                            <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary }]} onPress={() => {
                                 hapticSuccess();
                                 handleShare();
                             }}>
@@ -226,13 +238,13 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                                 hapticLight();
                                 onDone();
                             }}>
-                                <Text style={styles.ghostButtonText}>Finish Session</Text>
+                                <Text style={[styles.ghostButtonText, { color: theme.textSecondary }]}>Finish Session</Text>
                             </TouchableOpacity>
                         </View>
                     )}
 
                     {savedPath && (
-                        <Text style={styles.savedPathText} numberOfLines={2}>
+                        <Text style={[styles.savedPathText, { color: theme.success }]} numberOfLines={2}>
                             ✓ Saved: {savedPath}
                         </Text>
                     )}
@@ -245,31 +257,18 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     tabBar: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
-        backgroundColor: Colors.surface,
     },
     tab: {
         flex: 1,
         paddingVertical: Spacing.md,
         alignItems: 'center',
     },
-    activeTab: {
-        borderBottomWidth: 2,
-        borderBottomColor: Colors.primary,
-    },
     tabText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeSM,
-        fontWeight: Typography.fontWeightMedium,
-    },
-    activeTabText: {
-        color: Colors.primary,
-        fontWeight: Typography.fontWeightBold,
     },
     content: {
         padding: Spacing.xl,
@@ -287,39 +286,33 @@ const styles = StyleSheet.create({
         fontSize: 40,
     },
     title: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSize2XL,
         fontWeight: Typography.fontWeightBold,
         textAlign: 'center',
         marginBottom: Spacing.xs,
     },
     subtitle: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
         textAlign: 'center',
         marginBottom: Spacing.xl,
     },
     statsContainer: {
         flexDirection: 'row',
-        backgroundColor: Colors.surface,
         borderRadius: BorderRadius.md,
         padding: Spacing.lg,
         width: '100%',
         marginBottom: Spacing.xl,
         borderWidth: 1,
-        borderColor: Colors.border,
     },
     statItem: {
         flex: 1,
         alignItems: 'center',
     },
     statValue: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeXL,
         fontWeight: Typography.fontWeightBold,
     },
     statLabel: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeXS,
         textTransform: 'uppercase',
         marginTop: Spacing.xs,
@@ -327,14 +320,12 @@ const styles = StyleSheet.create({
     statDivider: {
         width: 1,
         height: '100%',
-        backgroundColor: Colors.border,
     },
     section: {
         width: '100%',
         marginBottom: Spacing.md,
     },
     sectionLabel: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeXS,
         fontWeight: Typography.fontWeightBold,
         textTransform: 'uppercase',
@@ -350,27 +341,14 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.sm,
         borderRadius: BorderRadius.sm,
         borderWidth: 1.5,
-        borderColor: Colors.border,
-        backgroundColor: Colors.surface,
-    },
-    formatChipActive: {
-        borderColor: Colors.primary,
-        backgroundColor: Colors.primary + '22',
     },
     formatChipText: {
-        color: Colors.textSecondary,
         fontWeight: Typography.fontWeightSemiBold,
         fontSize: Typography.fontSizeSM,
     },
-    formatChipTextActive: {
-        color: Colors.primary,
-    },
     filenameInput: {
-        backgroundColor: Colors.surface,
         borderRadius: BorderRadius.sm,
         borderWidth: 1,
-        borderColor: Colors.border,
-        color: Colors.textPrimary,
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.sm,
         fontSize: Typography.fontSizeMD,
@@ -381,7 +359,6 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.xl,
     },
     loadingText: {
-        color: Colors.textSecondary,
         marginTop: Spacing.md,
         fontSize: Typography.fontSizeMD,
     },
@@ -390,7 +367,6 @@ const styles = StyleSheet.create({
         gap: Spacing.sm,
     },
     primaryButton: {
-        backgroundColor: Colors.primary,
         paddingVertical: Spacing.md,
         borderRadius: BorderRadius.md,
         alignItems: 'center',
@@ -401,15 +377,12 @@ const styles = StyleSheet.create({
         fontWeight: Typography.fontWeightBold,
     },
     secondaryButton: {
-        backgroundColor: Colors.surface,
         paddingVertical: Spacing.md,
         borderRadius: BorderRadius.md,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: Colors.border,
     },
     secondaryButtonText: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightSemiBold,
     },
@@ -418,12 +391,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     ghostButtonText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
     },
     savedPathText: {
         marginTop: Spacing.md,
-        color: Colors.success,
         fontSize: Typography.fontSizeXS,
         textAlign: 'center',
     },

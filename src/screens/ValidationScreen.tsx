@@ -7,9 +7,11 @@ import {
     ScrollView,
     TouchableOpacity,
     LayoutChangeEvent,
+    StatusBar,
 } from 'react-native';
 import { Image } from 'react-native';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Spacing, Typography, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
 import { DraggableFieldCard } from '../components/DraggableFieldCard';
@@ -32,6 +34,7 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
         splitField,
         batchUpdateCategory,
     } = useAppStore();
+    const { theme, isDark } = useTheme();
     const { show: showToast } = useToast();
 
     // Image pixel dimensions
@@ -104,16 +107,17 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
     const allSelected = selectedIds.length === sortedFields.length && sortedFields.length > 0;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={onBack} style={styles.headerBtn}>
-                    <Text style={styles.headerBtnText}>Cancel</Text>
+                    <Text style={[styles.headerBtnText, { color: theme.textSecondary }]}>Cancel</Text>
                 </TouchableOpacity>
                 <View>
-                    <Text style={styles.title}>Validate Data</Text>
+                    <Text style={[styles.title, { color: theme.textPrimary }]}>Validate Data</Text>
                     {lowConfCount > 0 && (
-                        <Text style={styles.warningSubtitle}>{lowConfCount} low-confidence field(s)</Text>
+                        <Text style={[styles.warningSubtitle, { color: theme.error }]}>{lowConfCount} low-confidence field(s)</Text>
                     )}
                 </View>
                 <TouchableOpacity 
@@ -121,14 +125,14 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                         hapticMedium();
                         onContinue();
                     }} 
-                    style={styles.continueBtn}
+                    style={[styles.continueBtn, { backgroundColor: theme.primary }]}
                 >
                     <Text style={styles.continueBtnText}>Map →</Text>
                 </TouchableOpacity>
             </View>
 
             {/* Image preview with bounding box overlay */}
-            <View style={styles.imagePreview} onLayout={handleContainerLayout}>
+            <View style={[styles.imagePreview, { backgroundColor: theme.surface, borderBottomColor: theme.border }]} onLayout={handleContainerLayout}>
                 {capture.preprocessedImageUris?.[0] ? (
                     <>
                         <Image
@@ -150,31 +154,39 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                     </>
                 ) : (
                     <View style={styles.noImageHint}>
-                        <Text style={styles.noImageText}>No scanned image available</Text>
+                        <Text style={[styles.noImageText, { color: theme.textMuted }]}>No scanned image available</Text>
                     </View>
                 )}
             </View>
 
             {/* Toolbar */}
-            <View style={styles.toolbar}>
+            <View style={[styles.toolbar, { borderBottomColor: theme.border }]}>
                 <TouchableOpacity
-                    style={[styles.filterChip, showLowConfOnly && styles.filterChipActive]}
+                    style={[
+                        styles.filterChip, 
+                        { backgroundColor: theme.surface, borderColor: theme.border },
+                        showLowConfOnly && { backgroundColor: theme.error + '22', borderColor: theme.error }
+                    ]}
                     onPress={() => setShowLowConfOnly((v) => !v)}
                 >
-                    <Text style={[styles.filterChipText, showLowConfOnly && styles.filterChipTextActive]}>
+                    <Text style={[
+                        styles.filterChipText, 
+                        { color: theme.textSecondary },
+                        showLowConfOnly && { color: theme.error, fontWeight: Typography.fontWeightSemiBold }
+                    ]}>
                         🔴 Low Confidence{lowConfCount > 0 ? ` (${lowConfCount})` : ''}
                     </Text>
                 </TouchableOpacity>
 
                 {selectedIds.length > 0 && (
                     <TouchableOpacity
-                        style={styles.batchBtn}
+                        style={[styles.batchBtn, { backgroundColor: theme.primary + '33', borderColor: theme.primary }]}
                         onPress={() => {
                             setSelectedField(null);
                             setShowManipSheet(true);
                         }}
                     >
-                        <Text style={styles.batchBtnText}>
+                        <Text style={[styles.batchBtnText, { color: theme.primary }]}>
                             Batch ({selectedIds.length}) ▲
                         </Text>
                     </TouchableOpacity>
@@ -186,7 +198,7 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
                         setSelectedIds(allSelected ? [] : sortedFields.map((f) => f.id))
                     }
                 >
-                    <Text style={styles.selectAllText}>
+                    <Text style={[styles.selectAllText, { color: theme.textSecondary }]}>
                         {allSelected ? 'Deselect All' : 'Select All'}
                     </Text>
                 </TouchableOpacity>
@@ -194,7 +206,7 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
 
             {/* Fields list */}
             <View style={styles.fieldsList}>
-                <Text style={styles.sectionTitle}>
+                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
                     {showLowConfOnly ? 'Low-Confidence Fields' : 'All Extracted Fields'} ({sortedFields.length})
                 </Text>
                 <ScrollView
@@ -247,7 +259,6 @@ export default function ValidationScreen({ onBack, onContinue }: ValidationScree
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -255,30 +266,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: Spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
     },
     headerBtn: {
         padding: Spacing.xs,
         minWidth: 60,
     },
     headerBtnText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeMD,
     },
     title: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeLG,
         fontWeight: Typography.fontWeightBold,
         textAlign: 'center',
     },
     warningSubtitle: {
-        color: Colors.error,
         fontSize: Typography.fontSizeXS,
         textAlign: 'center',
         marginTop: 2,
     },
     continueBtn: {
-        backgroundColor: Colors.primary,
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.xs,
         borderRadius: BorderRadius.sm,
@@ -291,9 +297,7 @@ const styles = StyleSheet.create({
     },
     imagePreview: {
         height: '35%',
-        backgroundColor: Colors.surface,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
         overflow: 'hidden',
     },
     noImageHint: {
@@ -302,7 +306,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     noImageText: {
-        color: Colors.textMuted,
         fontSize: Typography.fontSizeSM,
     },
     toolbar: {
@@ -312,7 +315,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.md,
         paddingVertical: Spacing.sm,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.border,
         flexWrap: 'wrap',
     },
     filterChip: {
@@ -320,31 +322,17 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: BorderRadius.full,
         borderWidth: 1,
-        borderColor: Colors.border,
-        backgroundColor: Colors.surface,
-    },
-    filterChipActive: {
-        backgroundColor: Colors.error + '22',
-        borderColor: Colors.error,
     },
     filterChipText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeXS,
-    },
-    filterChipTextActive: {
-        color: Colors.error,
-        fontWeight: Typography.fontWeightSemiBold,
     },
     batchBtn: {
         paddingHorizontal: Spacing.sm,
         paddingVertical: 4,
         borderRadius: BorderRadius.full,
-        backgroundColor: Colors.primary + '33',
         borderWidth: 1,
-        borderColor: Colors.primary,
     },
     batchBtnText: {
-        color: Colors.primary,
         fontSize: Typography.fontSizeXS,
         fontWeight: Typography.fontWeightSemiBold,
     },
@@ -352,7 +340,6 @@ const styles = StyleSheet.create({
         marginLeft: 'auto',
     },
     selectAllText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeXS,
     },
     fieldsList: {
@@ -360,7 +347,6 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
     },
     sectionTitle: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeXS,
         fontWeight: Typography.fontWeightBold,
         textTransform: 'uppercase',

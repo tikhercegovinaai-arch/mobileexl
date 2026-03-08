@@ -15,7 +15,8 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Typography, Spacing, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { useAppStore, ValidationField } from '../store/useAppStore';
 import { BoundingBoxOverlay } from '../components/BoundingBoxOverlay';
 import { FieldManipulationSheet } from '../components/FieldManipulationSheet';
@@ -28,6 +29,7 @@ interface PreviewScreenProps {
 
 export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps) {
     const { capture, validation, updateField, mergeFields, splitField, batchUpdateCategory } = useAppStore();
+    const { theme, isDark } = useTheme();
     const uri = capture.preprocessedImageUris[0];
 
     // Interactive correction state
@@ -112,25 +114,25 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
 
     if (!uri) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.primary} />
-                <Text style={styles.loadingText}>Loading Preview...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Loading Preview...</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             {/* ── Header ── */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Review Scan</Text>
-                <Text style={styles.headerSubtitle}>
+                <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Review Scan</Text>
+                <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
                     Pinch to zoom · Double-tap to reset
                 </Text>
             </View>
 
             {/* ── Image Preview with Scaled Overlay ── */}
-            <View style={styles.imageContainer} onLayout={handleContainerLayout}>
+            <View style={[styles.imageContainer, { backgroundColor: theme.surface, borderColor: theme.border }]} onLayout={handleContainerLayout}>
                 <GestureDetector gesture={withDoubleTap}>
                     <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
                         <Image
@@ -169,8 +171,8 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
 
                 {/* Zoom hint badge */}
                 {imageDims && (
-                    <View style={styles.dimsBadge}>
-                        <Text style={styles.dimsText}>
+                    <View style={[styles.dimsBadge, { backgroundColor: theme.surface + 'CC' }]}>
+                        <Text style={[styles.dimsText, { color: theme.textSecondary }]}>
                             {imageDims.width} × {imageDims.height} px
                         </Text>
                     </View>
@@ -180,20 +182,20 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
             {/* ── Actions ── */}
             <View style={styles.actionsContainer}>
                 <TouchableOpacity
-                    style={[styles.button, styles.retakeButton]}
+                    style={[styles.button, styles.retakeButton, { backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
                     onPress={() => {
                         hapticLight();
                         onRetake();
                     }}
                 >
-                    <Text style={[styles.buttonText, styles.retakeButtonText]}>Retake</Text>
+                    <Text style={[styles.buttonText, styles.retakeButtonText, { color: theme.textPrimary }]}>Retake</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button} onPress={() => {
+                <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={() => {
                     hapticMedium();
                     onAccept();
                 }}>
-                    <Text style={styles.buttonText}>Accept & Extract</Text>
+                    <Text style={[styles.buttonText, { color: 'white' }]}>Accept & Extract</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -203,16 +205,13 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.background,
     },
     loadingText: {
-        color: Colors.textSecondary,
         marginTop: Spacing.md,
         fontSize: Typography.fontSizeMD,
     },
@@ -221,12 +220,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     headerTitle: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeXL,
         fontWeight: Typography.fontWeightBold,
     },
     headerSubtitle: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeSM,
         marginTop: Spacing.xs,
     },
@@ -236,9 +233,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.lg,
         borderRadius: BorderRadius.md,
         overflow: 'hidden',
-        backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: Colors.border,
     },
     image: {
         width: '100%',
@@ -248,13 +243,11 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: Spacing.sm,
         right: Spacing.sm,
-        backgroundColor: Colors.overlay,
         paddingHorizontal: Spacing.sm,
         paddingVertical: 3,
         borderRadius: BorderRadius.sm,
     },
     dimsText: {
-        color: Colors.textSecondary,
         fontSize: Typography.fontSizeXS,
     },
     actionsContainer: {
@@ -264,22 +257,17 @@ const styles = StyleSheet.create({
     },
     button: {
         flex: 1,
-        backgroundColor: Colors.primary,
         paddingVertical: Spacing.md,
         borderRadius: BorderRadius.md,
         alignItems: 'center',
     },
     buttonText: {
-        color: Colors.textPrimary,
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightSemiBold,
     },
     retakeButton: {
-        backgroundColor: Colors.surfaceAlt,
         borderWidth: 1,
-        borderColor: Colors.border,
     },
     retakeButtonText: {
-        color: Colors.textPrimary,
     },
 });
