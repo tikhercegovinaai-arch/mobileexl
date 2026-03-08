@@ -1,7 +1,8 @@
 import { OCRService } from './OCRService';
 import { PIIRedactionService } from './PIIRedactionService';
 import { LLMInferenceService } from './LLMInferenceService';
-import { ExtractionPhase } from '../store/useAppStore';
+import { ExtractionPhase, useAppStore } from '../store/useAppStore';
+import { runPool } from '../utils/concurrencyPool';
 
 export interface BatchProgressCallback {
     (
@@ -22,30 +23,37 @@ export const BatchProcessingService = {
             throw new Error("No images provided for batch processing");
         }
 
-        const allStructuredData: any[] = [];
+        const { settings } = useAppStore.getState();
+        const concurrency = settings.maxConcurrency || 2;
+        const docProgresses = new Array(total).fill(0);
 
-        for (let i = 0; i < total; i++) {
-            const uri = uris[i];
-            const baseProgress = (i / total) * 100;
-            const docWeight = 100 / total;
+        const updateProgress = (index: number, progress: number, phase: ExtractionPhase) => {
+            docProgresses[index] = progress;
+            const overall = docProgresses.reduce((sum, curr) => sum + curr, 0) / total;
+            onProgress(overall, index, total, phase);
+        };
 
-            // Phase 1: OCR
-            const text = await OCRService.extractText(uri, (prog: number) => {
-                onProgress(baseProgress + (prog / 100) * docWeight * 0.33, i, total, 'recognizing');
-            });
+        const allStructuredData = await runPool(
+            uris.map((uri, i) => async () => {
+                // Phase 1: OCR
+                const text = await OCRService.extractText(uri, (prog: number) => {
+                    updateProgress(i, prog * 0.33, 'recognizing');
+                });
 
-            // Phase 2: PII Redaction
-            const redactedText = await PIIRedactionService.redact(text, (prog: number) => {
-                onProgress(baseProgress + docWeight * 0.33 + (prog / 100) * docWeight * 0.33, i, total, 'redacting');
-            });
+                // Phase 2: PII Redaction
+                const redactedText = await PIIRedactionService.redact(text, (prog: number) => {
+                    updateProgress(i, 33 + (prog * 0.33), 'redacting');
+                });
 
-            // Phase 3: LLM Structuring
-            const structuredData = await LLMInferenceService.structureData(redactedText, (prog: number) => {
-                onProgress(baseProgress + docWeight * 0.66 + (prog / 100) * docWeight * 0.34, i, total, 'structuring');
-            });
+                // Phase 3: LLM Structuring
+                const structuredData = await LLMInferenceService.structureData(redactedText, (prog: number) => {
+                    updateProgress(i, 66 + (prog * 0.34), 'structuring');
+                });
 
-            allStructuredData.push(structuredData);
-        }
+                return structuredData;
+            }),
+            concurrency
+        );
 
         // Merge results into a single consolidated JSON structure via LLM (Reduce Phase)
         return LLMInferenceService.consolidateRecords(allStructuredData, (prog: number) => {
