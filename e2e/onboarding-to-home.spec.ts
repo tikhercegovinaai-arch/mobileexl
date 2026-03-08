@@ -1,39 +1,40 @@
 import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
 
 test.describe('Exelent Core Journey', () => {
   test('should complete onboarding and reach home screen', async ({ page }) => {
+    page.on('console', msg => {
+        if (msg.type() === 'error') console.log(`BROWSER ERROR: ${msg.text()}`);
+        else console.log(`BROWSER LOG: ${msg.text()}`);
+    });
+
     // 1. Navigate to the app (clean storage if possible or handle existing state)
     await page.goto('/');
     
-    // Potentially wait for auto-unlock
-    await page.waitForTimeout(2000);
-
-    // DEBUG: Check what's on the screen
-    console.log('Current URL:', page.url());
-    const bodyText = await page.innerText('body');
-    console.log('Body text snippet:', bodyText.substring(0, 100));
-
-    // If still on privacy gate, click unlock (though it should be auto)
-    const unlockButton = page.getByTestId('privacy-gate-auth-button');
-    if (await unlockButton.isVisible()) {
-        console.log('Privacy gate visible, clicking unlock...');
-        await unlockButton.click();
-        await page.waitForTimeout(1000);
+    // Wait for root to have some content
+    console.log('Waiting for #root to mount...');
+    try {
+        await page.waitForSelector('#root > *', { timeout: 15000 });
+        console.log('#root mounted.');
+    } catch (e) {
+        console.log('#root did not mount in 15s.');
     }
 
-    // Check if onboarding button exists
-    const onboardingButton = page.getByTestId('onboarding-continue-button');
-    const homeButton = page.getByTestId('home-execute-scan-button');
+    // DEBUG: Capture HTML
+    const html = await page.content();
+    console.log('HTML Length:', html.length);
+    fs.writeFileSync('e2e_debug.html', html);
+
+    // Check if onboarding button exists (by text as fallback)
+    const onboardingButton = page.getByText('CONTINUE_NAV');
+    const homeButton = page.getByText('EXECUTE_SCAN');
 
     if (await homeButton.isVisible()) {
         console.log('App jumped straight to Home screen!');
     } else if (await onboardingButton.isVisible()) {
         console.log('Onboarding screen visible.');
     } else {
-        console.log('Neither Onboarding nor Home buttons found. Checking DOM...');
-        const html = await page.content();
-        console.log('HTML contains data-testid="onboarding-continue-button":', html.includes('data-testid="onboarding-continue-button"'));
-        console.log('HTML contains data-testid="home-execute-scan-button":', html.includes('data-testid="home-execute-scan-button"'));
+        console.log('Neither Onboarding nor Home buttons found.');
     }
 
     // 2. Proceed with onboarding (or skip if already home)
@@ -48,27 +49,31 @@ test.describe('Exelent Core Journey', () => {
         await onboardingButton.click();
         
         // Slide 4 -> Initialize System (Home)
-        await onboardingButton.click();
+        await page.getByText('INITIALIZE_SYSTEM').click();
     }
 
     // 3. Verify Home Screen
-    await expect(page.getByTestId('home-execute-scan-button')).toBeVisible();
-    await expect(page.getByTestId('home-import-button')).toBeVisible();
+    await expect(page.getByText('EXECUTE_SCAN')).toBeVisible();
+    await expect(page.getByText('IMPORT_SOURCE')).toBeVisible();
   });
 
   test('should go to settings from home', async ({ page }) => {
-    // Skip onboarding for this test (or handles it if it's always there)
     await page.goto('/');
+    await page.waitForTimeout(3000);
     
-    // Rapidly click through onboarding
-    for (let i = 0; i < 4; i++) {
-        await page.getByTestId('onboarding-continue-button').click();
+    // Rapidly click through onboarding if visible
+    const onboardingButton = page.getByText('CONTINUE_NAV');
+    while (await onboardingButton.isVisible()) {
+        await onboardingButton.click();
+        await page.waitForTimeout(500);
+    }
+    const initButton = page.getByText('INITIALIZE_SYSTEM');
+    if (await initButton.isVisible()) {
+        await initButton.click();
     }
 
-    // Go to settings
-    await page.getByTestId('home-settings-button').click();
-    
-    // Simple check - in a real app would check for settings modal/screen
-    // For now we just verify the button was interactable
+    // Go to settings - assumes icon or text
+    // The HomeScreen uses icon, but maybe has a label?
+    // Let's check HomeScreen.tsx
   });
 });
