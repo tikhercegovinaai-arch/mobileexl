@@ -6,11 +6,15 @@ import Animated, {
     useAnimatedStyle,
     withSpring,
     runOnJS,
+    withRepeat,
+    withTiming,
+    withSequence,
 } from 'react-native-reanimated';
 import { Colors, Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { ValidationField } from '../store/useAppStore';
 import ConfidenceBar from './ConfidenceBar';
 import { hapticLight, hapticMedium } from '../utils/haptics';
+import { useEffect } from 'react';
 
 interface DraggableFieldCardProps {
     field: ValidationField;
@@ -41,6 +45,22 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
     const isDragging = useSharedValue(false);
     const translationX = useSharedValue(0);
     const translationY = useSharedValue(0);
+    const pulseScale = useSharedValue(1);
+
+    useEffect(() => {
+        if (field.confidence < 0.7) {
+            pulseScale.value = withRepeat(
+                withSequence(
+                    withTiming(1.02, { duration: 1000 }),
+                    withTiming(1, { duration: 1000 })
+                ),
+                -1,
+                true
+            );
+        } else {
+            pulseScale.value = 1;
+        }
+    }, [field.confidence]);
 
     const gesture = Gesture.Pan()
         .onStart(() => {
@@ -73,12 +93,12 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
         transform: [
             { translateX: translationX.value },
             { translateY: translationY.value },
-            { scale: isDragging.value ? 1.05 : 1 },
+            { scale: isDragging.value ? 1.05 : pulseScale.value },
         ],
         zIndex: isDragging.value ? 100 : 1,
-        elevation: isDragging.value ? 8 : 0,
-        shadowOpacity: isDragging.value ? 0.35 : 0,
-        shadowRadius: isDragging.value ? 10 : 0,
+        elevation: isDragging.value ? 8 : (field.confidence < 0.7 ? 2 : 0),
+        shadowOpacity: isDragging.value ? 0.35 : (field.confidence < 0.7 ? 0.1 : 0),
+        shadowRadius: isDragging.value ? 10 : 4,
     }));
 
     const confidenceColor = getConfidenceColor(field.confidence);
