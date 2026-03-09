@@ -13,7 +13,7 @@ import {
 import { useAppStore } from '../store/useAppStore';
 import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
-import SkeletonBox from '../components/SkeletonBox';
+import { SkeletonBox } from '../components/SkeletonBox';
 
 interface BatchReviewScreenProps {
     onRetake: () => void;

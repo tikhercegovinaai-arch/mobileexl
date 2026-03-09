@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import SkeletonBox from './SkeletonBox';
+import { SkeletonBox } from './SkeletonBox';
 import { Spacing, BorderRadius } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 
