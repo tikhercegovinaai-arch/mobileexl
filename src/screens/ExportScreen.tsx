@@ -21,7 +21,7 @@ import { ExcelInjectorService, InjectorColumnMapping } from '../services/ExcelIn
 import { PDFTemplateType } from '../services/PDFTemplateService';
 import { AnalyticsService } from '../services/AnalyticsService';
 import { BiometricService } from '../services/BiometricService';
-import { useHistoryStore } from '../store/historyStore';
+import { useHistoryStore, HistoryEntry } from '../store/historyStore';
 import { useToast } from '../components/ToastProvider';
 import { hapticSuccess, hapticError, hapticLight } from '../utils/haptics';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
@@ -113,14 +113,15 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
             }
 
             // Save to History
-            addEntry({
-                fileName: name || `Extraction_${Date.now()}`,
+            const historyEntry: Omit<HistoryEntry, 'id' | 'timestamp'> = {
+                fileName: name ? name : `Extraction_${Date.now()}`,
                 imageUris: capture.capturedImageUris,
                 extractedData: extraction.extractedData || {},
-                confidenceHealth: avgConfidence > 85 ? 'excellent' : avgConfidence > 60 ? 'caution' : 'poor',
+                confidenceHealth: (avgConfidence > 85 ? 'excellent' : avgConfidence > 60 ? 'caution' : 'poor') as 'excellent' | 'caution' | 'poor',
                 averageConfidence: avgConfidence,
                 formatsExported: [format],
-            });
+            };
+            addEntry(historyEntry);
         } catch (e) {
             console.error(e);
             hapticError();
@@ -211,7 +212,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                                 <TouchableOpacity
                                     key={f}
                                     style={[
-                                        styles.formatChip, 
+                                        styles.formatChip,
                                         { backgroundColor: theme.surface, borderColor: theme.border },
                                         format === f && { borderColor: theme.primary, backgroundColor: theme.primary + '22' }
                                     ]}
@@ -221,7 +222,7 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                                     }}
                                 >
                                     <Text style={[
-                                        styles.formatChipText, 
+                                        styles.formatChipText,
                                         { color: theme.textSecondary },
                                         format === f && { color: theme.primary }
                                     ]}>
@@ -292,8 +293,8 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
                                 </Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity 
-                                style={[styles.secondaryButton, { borderColor: theme.border, backgroundColor: theme.surface }]} 
+                            <TouchableOpacity
+                                style={[styles.secondaryButton, { borderColor: theme.border, backgroundColor: theme.surface }]}
                                 onPress={handleCopyToClipboard}
                             >
                                 <Text style={[styles.secondaryButtonText, { color: theme.textPrimary }]}>
