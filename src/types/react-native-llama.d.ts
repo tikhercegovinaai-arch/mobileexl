@@ -33,4 +33,5 @@ export interface InitLlamaOptions {
     n_gpu_layers?: number;
 }
 
-export declare function initLlama(options: InitLlamaOptions): Promise<LlamaContext>;
+declare const initLlama: (options: InitLlamaOptions) => Promise<LlamaContext>;
+export { initLlama };

@@ -1,4 +1,4 @@
-import { initLlama, LlamaContext } from 'react-native-llama';
+import { initLlama, LlamaContext } from '../types/react-native-llama';
 import { EXTRACTION_SCHEMA, CONFIDENCE_SCHEMA } from '../constants/schemas';
 
 /**
@@ -15,7 +15,7 @@ export class LLMInferenceService {
      */
     private static async _withLock<T>(fn: () => Promise<T>): Promise<T> {
         const promise = this.lock.then(fn);
-        this.lock = promise.then(() => {}).catch(() => {});
+        this.lock = promise.then(() => { }).catch(() => { });
         return promise;
     }
 
@@ -64,7 +64,7 @@ export class LLMInferenceService {
 
         // --- Phase 3: Merging & Finalizing ---
         if (onProgress) onProgress(95);
-        
+
         // Attach confidence scores to the extracted data
         // For UI simplicity, we'll return a flat structure with _confidence map
         const finalData = {

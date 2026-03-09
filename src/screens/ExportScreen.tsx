@@ -113,8 +113,9 @@ export default function ExportScreen({ onDone }: ExportScreenProps) {
             }
 
             // Save to History
+            const fileNameValue = name !== undefined && name !== '' ? name : `Extraction_${Date.now()}`;
             const historyEntry: Omit<HistoryEntry, 'id' | 'timestamp'> = {
-                fileName: name ? name : `Extraction_${Date.now()}`,
+                fileName: fileNameValue,
                 imageUris: capture.capturedImageUris,
                 extractedData: extraction.extractedData || {},
                 confidenceHealth: (avgConfidence > 85 ? 'excellent' : avgConfidence > 60 ? 'caution' : 'poor') as 'excellent' | 'caution' | 'poor',
