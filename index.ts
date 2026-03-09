@@ -1,3 +1,12 @@
+// Polyfill for import.meta
+if (typeof globalThis.importMeta === 'undefined') {
+    // @ts-ignore
+    globalThis.importMeta = {
+        url: typeof __webpack_require__ !== 'undefined' ? __webpack_require__.p : '',
+        env: {}
+    };
+}
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';
