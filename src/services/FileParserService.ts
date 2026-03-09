@@ -71,11 +71,11 @@ export const FileParserService = {
 
     async _parsePdf(file: UploadedFile): Promise<ParsedResult> {
         try {
-            // Dynamically import pdfjs-dist to avoid bundle bloat on native
-            const pdfjsLib = await import('pdfjs-dist');
+            // Dynamically import pdfjs-dist legacy build to avoid import.meta Metro bundler error
+            const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
             // Point worker to CDN to avoid bundling issues
             (pdfjsLib as any).GlobalWorkerOptions.workerSrc =
-                `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+                `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
             const buffer = file.content as ArrayBuffer;
             const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
