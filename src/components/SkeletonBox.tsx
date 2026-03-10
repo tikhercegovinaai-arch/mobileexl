@@ -8,6 +8,7 @@ import Animated, {
     Easing,
 } from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
+import { shadow } from '../constants/theme';
 
 interface SkeletonBoxProps {
     width?: number | string;
@@ -110,10 +111,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 4,
-        shadowColor: '#2196F3',
-        shadowOpacity: 0.8,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 10,
+        ...shadow('#2196F3', 0, 10, 0.8, 10),
     },
 });
