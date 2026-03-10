@@ -82,7 +82,7 @@ function FieldBox({ field, scale, isSelected, onPress }: FieldBoxProps) {
     const gid = gradientId(field.id);
 
     return (
-        <G key={field.id} onPress={onPress}>
+        <G key={field.id}>
             {/* Gradient definition (inline per field so colours are self-contained) */}
             <Defs>
                 <LinearGradient id={gid} x1="0" y1="0" x2="1" y2="0">
@@ -132,6 +132,16 @@ function FieldBox({ field, scale, isSelected, onPress }: FieldBoxProps) {
             >
                 {Math.round(field.confidence * 100)}%
             </SvgText>
+
+            {/* Transparent overlay for reliable cross-platform touch handling */}
+            <Rect
+                x={sx}
+                y={sy - 14}
+                width={Math.max(sw, 34)}
+                height={sh + 14}
+                fill="transparent"
+                onPress={onPress}
+            />
         </G>
     );
 }
