@@ -62,20 +62,20 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 600,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             }),
             Animated.spring(slideAnim, {
                 toValue: 0,
                 tension: 20,
                 friction: 7,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             }),
             Animated.spring(buttonScale, {
                 toValue: 1,
                 tension: 50,
                 friction: 5,
                 delay: 400,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             })
         ]).start();
     }, []);

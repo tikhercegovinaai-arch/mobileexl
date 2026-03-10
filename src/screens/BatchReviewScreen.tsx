@@ -42,7 +42,7 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
                 tension: 40,
                 friction: 7,
                 delay: i * 80,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             })
         );
 
@@ -54,7 +54,7 @@ export default function BatchReviewScreen({ onRetake, onAccept }: BatchReviewScr
         Animated.timing(animValues.current[index], {
             toValue: 0,
             duration: 200,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
         }).start(() => {
             const newImages = [...images];
             newImages.splice(index, 1);

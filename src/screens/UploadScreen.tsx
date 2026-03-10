@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     SafeAreaView,
     ScrollView,
+    Platform,
 } from 'react-native';
 import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
@@ -78,7 +79,7 @@ export default function UploadScreen({
     const { show: showToast } = useToast();
 
     React.useEffect(() => {
-        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }).start();
     }, []);
 
     const handlePickFiles = async (category: FileCategory) => {
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
         fontSize: Typography.fontSizeMD,
         fontWeight: Typography.fontWeightBold,
     },
-    typeLabelActive: { },
+    typeLabelActive: {},
     typeDesc: {
         fontSize: Typography.fontSizeXS,
         lineHeight: 16,

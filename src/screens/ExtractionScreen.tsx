@@ -38,7 +38,7 @@ export default function ExtractionScreen({ onExtractionComplete, onExtractionErr
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
         }).start();
     }, []);
 
