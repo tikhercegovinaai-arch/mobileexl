@@ -88,7 +88,7 @@ const Crosshair = () => {
 
     const animatedStyle = useAnimatedStyle(() => ({
         opacity: opacity.value,
-    }));
+    }), []);
 
     return (
         <Animated.View style={[styles.crosshairWrapper, animatedStyle]}>
@@ -115,7 +115,7 @@ const Scanline = ({ active }: { active: boolean }) => {
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: translateY.value }],
-    }));
+    }), []);
 
     if (!active) return null;
 
@@ -136,7 +136,7 @@ const Dot = ({ active, theme }: { active: boolean; theme: any }) => {
     const animatedStyle = useAnimatedStyle(() => ({
         width: width.value,
         backgroundColor: active ? theme.primary : theme.border,
-    }));
+    }), [active, theme.primary, theme.border]);
 
     return <Animated.View style={[styles.dot, animatedStyle]} />;
 };
