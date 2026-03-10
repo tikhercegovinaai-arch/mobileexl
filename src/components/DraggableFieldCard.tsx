@@ -99,7 +99,7 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
         elevation: isDragging.value ? 8 : (field.confidence < 0.7 ? 2 : 0),
         shadowOpacity: isDragging.value ? 0.35 : (field.confidence < 0.7 ? 0.1 : 0),
         shadowRadius: isDragging.value ? 10 : 4,
-    }));
+    }), [field.confidence]);
 
     const confidenceColor = getConfidenceColor(field.confidence);
 
@@ -115,9 +115,9 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
                     styles.card,
                     animatedStyle,
                     isSelected && styles.cardSelected,
-                    field.confidence < 0.7 && { 
-                        backgroundColor: Colors.error + '08', 
-                        borderColor: Colors.error + '44' 
+                    field.confidence < 0.7 && {
+                        backgroundColor: Colors.error + '08',
+                        borderColor: Colors.error + '44'
                     },
                 ]}
             >

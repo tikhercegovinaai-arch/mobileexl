@@ -40,7 +40,7 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
         shadowColor: theme.primary,
         shadowRadius: 8,
         elevation: glowOpacity.value * 6,
-    }));
+    }), [isHighlighted, theme.primary, theme.border]);
 
     const handleLayout = useCallback(
         (e: LayoutChangeEvent) => {
