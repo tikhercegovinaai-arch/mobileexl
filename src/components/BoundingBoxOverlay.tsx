@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
     useSharedValue,
@@ -140,7 +140,7 @@ function FieldBox({ field, scale, isSelected, onPress }: FieldBoxProps) {
                 width={Math.max(sw, 34)}
                 height={sh + 14}
                 fill="transparent"
-                onPress={onPress}
+                {...(Platform.OS === 'web' ? { onClick: onPress } as any : { onPress })}
             />
         </G>
     );
