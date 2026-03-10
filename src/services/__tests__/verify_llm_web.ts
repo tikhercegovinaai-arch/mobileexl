@@ -1,13 +1,16 @@
 import { LLMInferenceService } from '../LLMInferenceService.web.ts';
 
+// Mock environment variable if not present for testing logic
+if (!process.env.EXPO_PUBLIC_GEMINI_API_KEY) {
+    process.env.EXPO_PUBLIC_GEMINI_API_KEY = "mock-key-for-testing";
+}
+
+async function verify() {
+    console.log("--- LLMInferenceService Web Verification ---");
     
-    // Mock environment variable if not present for testing logic
-    if (!process.env.EXPO_PUBLIC_GEMINI_API_KEY) {
-        process.env.EXPO_PUBLIC_GEMINI_API_KEY = "mock-key-for-testing";
+    if (process.env.EXPO_PUBLIC_GEMINI_API_KEY === "mock-key-for-testing") {
         console.warn("WARNING: EXPO_PUBLIC_GEMINI_API_KEY is not set. Using a mock key for demonstration.");
     }
-
-    console.log("--- LLMInferenceService Web Verification ---");
 
     const testText = "Patient Name: Jane Doe\nDiagnosis: Hypertension\nPrescriptions: Lisinopril 10mg";
     
@@ -16,7 +19,10 @@ import { LLMInferenceService } from '../LLMInferenceService.web.ts';
         const result = await LLMInferenceService.structureData(testText, (p) => {
             console.log(`Progress: ${p}%`);
         });
-        console.log("Result:", JSON.stringify(result, null, 2));
+        console.log("Result keys:", Object.keys(result));
+        if (result._confidence) {
+            console.log("Confidence score for patientName:", (result as any)._confidence.patientName?.score);
+        }
     } catch (e) {
         console.error("structureData failed:", e);
     }
@@ -30,7 +36,7 @@ import { LLMInferenceService } from '../LLMInferenceService.web.ts';
         const consolidated = await LLMInferenceService.consolidateRecords(records, (p) => {
             console.log(`Progress: ${p}%`);
         });
-        console.log("Consolidated Result:", JSON.stringify(consolidated, null, 2));
+        console.log("Consolidated Result keys:", Object.keys(consolidated));
     } catch (e) {
         console.error("consolidateRecords failed:", e);
     }
