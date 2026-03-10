@@ -2,6 +2,7 @@
  * Web implementation of UploadService.
  * Uses an invisible <input type="file"> element injected into the DOM.
  */
+export * from './UploadService.types';
 import { UploadedFile, UploadResult, FileCategory, MIME_TYPES } from './UploadService.types';
 
 function buildAcceptString(categories: FileCategory[]): string {
