@@ -1,7 +1,9 @@
 // Polyfill for import.meta
+// @ts-ignore
 if (typeof globalThis.importMeta === 'undefined') {
     // @ts-ignore
     globalThis.importMeta = {
+        // @ts-ignore
         url: typeof __webpack_require__ !== 'undefined' ? __webpack_require__.p : '',
         env: {}
     };

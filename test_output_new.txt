@@ -1,0 +1,185 @@
+
+> mobile@1.0.0 test
+> jest --watchAll=false
+
+FAIL __tests__/services/ExcelInjectorService.test.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\expo-print\build\Print.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import { UnavailabilityError } from 'expo-modules-core';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+    [0m [90m 1 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m'xlsx'[39m[33m;[39m
+     [90m 2 |[39m [36mimport[39m { [33mPaths[39m[33m,[39m [33mFile[39m } [36mfrom[39m [32m'expo-file-system'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mPrint[39m [36mfrom[39m [32m'expo-print'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 4 |[39m [36mimport[39m { [33mValidationField[39m } [36mfrom[39m [32m'../store/useAppStore'[39m[33m;[39m
+     [90m 5 |[39m [36mimport[39m { [33mExportFormat[39m } [36mfrom[39m [32m'./ExcelExportService'[39m[33m;[39m
+     [90m 6 |[39m [36mimport[39m { [33mPDFTemplateService[39m[33m,[39m [33mPDFTemplateType[39m } [36mfrom[39m [32m'./PDFTemplateService'[39m[33m;[39m[0m
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/services/ExcelInjectorService.ts:3:1)
+      at Object.<anonymous> (__tests__/services/ExcelInjectorService.test.ts:38:1)
+
+FAIL __tests__/services/LLMInferenceService.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../types/react-native-llama' from 'src/services/LLMInferenceService.native.ts'
+
+    Require stack:
+      src/services/LLMInferenceService.native.ts
+      src/services/LLMInferenceService.ts
+      __tests__/services/LLMInferenceService.test.ts
+
+
+    However, Jest was able to find:
+    	'../types/react-native-llama.d.ts'
+
+    You might want to include a file extension in your import, or update your 'moduleFileExtensions', which is currently ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'json', 'node'].
+
+    See https://jestjs.io/docs/configuration#modulefileextensions-arraystring
+
+    [0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { initLlama[33m,[39m [33mLlamaContext[39m } [36mfrom[39m [32m'../types/react-native-llama'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 2 |[39m [36mimport[39m { [33mEXTRACTION_SCHEMA[39m[33m,[39m [33mCONFIDENCE_SCHEMA[39m } [36mfrom[39m [32m'../constants/schemas'[39m[33m;[39m
+     [90m 3 |[39m
+     [90m 4 |[39m [90m/**[39m[0m
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (src/services/LLMInferenceService.native.ts:1:1)
+      at Object.<anonymous> (src/services/LLMInferenceService.ts:7:1)
+      at Object.<anonymous> (__tests__/services/LLMInferenceService.test.ts:1:1)
+
+PASS __tests__/services/PermissionService.test.ts (10.852 s)
+PASS __tests__/store/useAppStore.test.ts (10.866 s)
+PASS src/store/__tests__/useAppStore.test.ts (10.898 s)
+PASS src/storage/__tests__/mmkvStorage.test.ts (11.014 s)
+PASS __tests__/services/SecureStorageService.test.ts (11.085 s)
+  ● Console
+
+    console.error
+      [SecureStorage] write failed for key "exelent_session_id": Error: Keystore unavailable
+          at Object.<anonymous> (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__tests__\services\SecureStorageService.test.ts:52:48)
+          at Promise.then.completed (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 33 |[39m             [36mreturn[39m [36mtrue[39m[33m;[39m
+     [90m 34 |[39m         } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 35 |[39m             console[33m.[39merror([32m`[SecureStorage] write failed for key "${key}":`[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 36 |[39m             [36mreturn[39m [36mfalse[39m[33m;[39m
+     [90m 37 |[39m         }
+     [90m 38 |[39m     }[33m,[39m[0m
+
+      at Object.write (src/services/SecureStorageService.native.ts:35:21)
+      at Object.<anonymous> (__tests__/services/SecureStorageService.test.ts:53:24)
+
+    console.error
+      [SecureStorage] read failed for key "exelent_session_id": Error: Decryption failed
+          at Object.<anonymous> (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__tests__\services\SecureStorageService.test.ts:85:48)
+          at Promise.then.completed (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 48 |[39m             [36mreturn[39m [33mJSON[39m[33m.[39mparse(raw) [36mas[39m [33mT[39m[33m;[39m
+     [90m 49 |[39m         } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 50 |[39m             console[33m.[39merror([32m`[SecureStorage] read failed for key "${key}":`[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 51 |[39m             [36mreturn[39m [36mnull[39m[33m;[39m
+     [90m 52 |[39m         }
+     [90m 53 |[39m     }[33m,[39m[0m
+
+      at Object.read (src/services/SecureStorageService.native.ts:50:21)
+      at Object.<anonymous> (__tests__/services/SecureStorageService.test.ts:86:25)
+
+    console.error
+      [SecureStorage] delete failed for key "exelent_session_id": Error: Delete failed
+          at Object.<anonymous> (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\__tests__\services\SecureStorageService.test.ts:102:51)
+          at Promise.then.completed (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (c:\Users\Administrator\Documents\GitHub\Exelent\mobile\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 62 |[39m             [36mreturn[39m [36mtrue[39m[33m;[39m
+     [90m 63 |[39m         } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 64 |[39m             console[33m.[39merror([32m`[SecureStorage] delete failed for key "${key}":`[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 65 |[39m             [36mreturn[39m [36mfalse[39m[33m;[39m
+     [90m 66 |[39m         }
+     [90m 67 |[39m     }[33m,[39m[0m
+
+      at Object.delete (src/services/SecureStorageService.native.ts:64:21)
+      at Object.<anonymous> (__tests__/services/SecureStorageService.test.ts:103:24)
+
+    console.info
+      [SecureStorage] Session keys cleared.
+
+      at Object.clearSession (src/services/SecureStorageService.native.ts:86:17)
+
+PASS __tests__/services/PIIRedactionService.test.ts (13.435 s)
+
+Test Suites: 2 failed, 6 passed, 8 total
+Tests:       43 passed, 43 total
+Snapshots:   0 total
+Time:        15.213 s
+Ran all test suites.
