@@ -44,7 +44,7 @@ export const SkeletonBox = ({
 
     const scanlineStyle = useAnimatedStyle(() => ({
         top: `${scanlinePos.value}%`,
-    }));
+    }), []);
 
     return (
         <View

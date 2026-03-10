@@ -105,7 +105,7 @@ export default function PreviewScreen({ onRetake, onAccept }: PreviewScreenProps
             { translateY: translateY.value },
             { scale: scale.value },
         ],
-    }));
+    }), []);
 
     const handleFieldPress = useCallback((field: ValidationField) => {
         setSelectedField(field);

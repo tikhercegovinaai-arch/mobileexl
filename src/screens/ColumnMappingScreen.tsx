@@ -77,7 +77,7 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
         shadowOpacity: dragging.value ? 0.4 : 0,
         shadowRadius: dragging.value ? 12 : 0,
         elevation: dragging.value ? 8 : 0,
-    }));
+    }), []);
 
     const confidenceColor =
         field.confidence >= 0.9 ? theme.success
