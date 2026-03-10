@@ -1,23 +1,26 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
     TouchableOpacity,
     Text,
     StyleSheet,
-    View,
     ViewStyle,
     TextStyle,
+    Animated,
+    Platform
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { hapticMedium } from '../utils/haptics';
+import { shadow } from '../constants/theme';
 
 interface TechnicalButtonProps {
     onPress: () => void;
     label: string;
-    variant?: 'primary' | 'outline';
+    variant?: 'primary' | 'outline' | 'secondary';
     style?: ViewStyle;
     textStyle?: TextStyle;
     disabled?: boolean;
     testID?: string;
+    icon?: React.ReactNode;
 }
 
 export const TechnicalButton = ({
@@ -28,8 +31,24 @@ export const TechnicalButton = ({
     textStyle,
     disabled = false,
     testID,
+    icon,
 }: TechnicalButtonProps) => {
     const { theme } = useTheme();
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.96,
+            useNativeDriver: Platform.OS !== 'web',
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: Platform.OS !== 'web',
+        }).start();
+    };
 
     const handlePress = () => {
         if (!disabled) {
@@ -38,70 +57,72 @@ export const TechnicalButton = ({
         }
     };
 
+    const getBackgroundColor = () => {
+        if (variant === 'primary') return theme.primary;
+        if (variant === 'secondary') return theme.secondary;
+        return 'transparent';
+    };
+
+    const getTextColor = () => {
+        if (variant === 'primary' || variant === 'secondary') return '#FFFFFF';
+        return theme.primary;
+    };
+
+    const getBorderColor = () => {
+        if (variant === 'outline') return theme.primary;
+        return 'transparent';
+    };
+
     return (
-        <TouchableOpacity
-            onPress={handlePress}
-            disabled={disabled}
-            activeOpacity={0.8}
-            testID={testID}
-            style={[
-                styles.container,
-                {
-                    backgroundColor: variant === 'primary' ? theme.primary : 'transparent',
-                    borderColor: variant === 'primary' ? theme.primary : theme.border,
-                },
-                disabled && { opacity: 0.5 },
-                style,
-            ]}
-        >
-            <View style={[styles.corner, styles.tl, { borderColor: variant === 'primary' ? theme.surface : theme.primary }]} />
-            <View style={[styles.corner, styles.br, { borderColor: variant === 'primary' ? theme.surface : theme.primary }]} />
-            
-            <Text
+        <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
+            <TouchableOpacity
+                onPress={handlePress}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                disabled={disabled}
+                activeOpacity={0.9}
+                testID={testID}
                 style={[
-                    styles.text,
+                    styles.container,
                     {
-                        color: variant === 'primary' ? '#FFFFFF' : theme.textPrimary,
+                        backgroundColor: getBackgroundColor(),
+                        borderColor: getBorderColor(),
+                        borderWidth: variant === 'outline' ? 2 : 0,
+                        opacity: disabled ? 0.6 : 1,
                     },
-                    textStyle,
+                    variant === 'primary' && !disabled ? shadow(theme.primary, 4, 12, 0.3) : {},
                 ]}
             >
-                {label.toUpperCase()}
-            </Text>
-        </TouchableOpacity>
+                {icon && <Animated.View style={styles.iconContainer}>{icon}</Animated.View>}
+                <Text
+                    style={[
+                        styles.text,
+                        { color: getTextColor() },
+                        textStyle,
+                    ]}
+                >
+                    {label}
+                </Text>
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderWidth: 1,
+        paddingVertical: 18,
+        paddingHorizontal: 28,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
+        flexDirection: 'row',
     },
     text: {
-        fontFamily: 'Courier',
-        fontWeight: '900',
-        fontSize: 14,
-        letterSpacing: 2,
+        fontWeight: '700',
+        fontSize: 16,
+        letterSpacing: 0.5,
     },
-    corner: {
-        position: 'absolute',
-        width: 8,
-        height: 8,
-    },
-    tl: {
-        top: -1,
-        left: -1,
-        borderTopWidth: 2,
-        borderLeftWidth: 2,
-    },
-    br: {
-        bottom: -1,
-        right: -1,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
+    iconContainer: {
+        marginRight: 8,
     },
 });

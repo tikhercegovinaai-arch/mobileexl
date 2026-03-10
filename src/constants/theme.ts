@@ -72,63 +72,63 @@ export interface ThemeTokens {
 // ─── Dark Theme (Industrial Utilitarian) ─────────────────────────────────────
 
 export const darkTheme: ThemeTokens = {
-    background: '#0A0A0A', // Deeper Black
-    surface: '#121212',
-    surfaceAlt: '#1A1A1A',
-    card: '#141414',
-    headerBackground: '#000000',
+    background: '#0F172A', // slate-900
+    surface: '#1E293B',    // slate-800
+    surfaceAlt: '#334155', // slate-700
+    card: '#1E293B',
+    headerBackground: '#020617',
 
-    primary: '#2196F3', // Blueprint Blue
-    primaryDark: '#1976D2',
-    secondary: '#3F51B5',
-    accent: '#FF5722', // Industrial Orange
+    primary: '#3B82F6', // Blue-500 (Vibrant Blue)
+    primaryDark: '#2563EB',
+    secondary: '#1E40AF', // Blue-800
+    accent: '#F59E0B',    // Amber-500 (CTA highlight)
 
-    textPrimary: '#E0E0E0',
-    textSecondary: '#A0A0A0',
-    textMuted: '#606060',
-    textInverse: '#121212',
+    textPrimary: '#F8FAFC',
+    textSecondary: '#CBD5E1',
+    textMuted: '#94A3B8',
+    textInverse: '#0F172A',
 
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#F44336',
-    info: '#2196F3',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
+    info: '#3B82F6',
 
-    border: '#2A2A2A',
-    gridLine: 'rgba(255, 255, 255, 0.03)',
-    crosshairColor: 'rgba(33, 150, 243, 0.5)',
-    overlay: 'rgba(0,0,0,0.8)',
-    cameraBoundary: 'rgba(33, 150, 243, 0.7)',
+    border: '#334155',
+    gridLine: 'rgba(255, 255, 255, 0.05)',
+    crosshairColor: 'rgba(59, 130, 246, 0.5)',
+    overlay: 'rgba(15, 23, 42, 0.8)',
+    cameraBoundary: 'rgba(59, 130, 246, 0.7)',
 };
 
 // ─── Light Theme ─────────────────────────────────────────────────────────────
 
 export const lightTheme: ThemeTokens = {
-    background: '#F5F5F5',
+    background: '#F8FAFC', // Slate-50
     surface: '#FFFFFF',
-    surfaceAlt: '#EEEEEE',
+    surfaceAlt: '#F1F5F9', // Slate-100
     card: '#FFFFFF',
-    headerBackground: '#E0E0E0',
+    headerBackground: '#F8FAFC',
 
-    primary: '#1D4ED8',
-    primaryDark: '#1E3A8A',
-    secondary: '#4338CA',
-    accent: '#EA580C',
+    primary: '#1E40AF',    // Blue-800
+    primaryDark: '#1E3A8A',// Blue-900
+    secondary: '#3B82F6',  // Blue-500
+    accent: '#F59E0B',     // Amber-500
 
-    textPrimary: '#1A1A1A',
-    textSecondary: '#4A4A4A',
-    textMuted: '#7A7A7A',
-    textInverse: '#F5F5F5',
+    textPrimary: '#0F172A', // Slate-900
+    textSecondary: '#334155', // Slate-700
+    textMuted: '#64748B',   // Slate-500
+    textInverse: '#F8FAFC',
 
-    success: '#166534',
-    warning: '#9A3412',
-    error: '#991B1B',
-    info: '#1D4ED8',
+    success: '#059669',
+    warning: '#D97706',
+    error: '#DC2626',
+    info: '#2563EB',
 
-    border: '#D1D5DB',
+    border: '#E2E8F0',
     gridLine: 'rgba(0, 0, 0, 0.05)',
-    crosshairColor: 'rgba(29, 78, 216, 0.4)',
-    overlay: 'rgba(0,0,0,0.3)',
-    cameraBoundary: 'rgba(29, 78, 216, 0.7)',
+    crosshairColor: 'rgba(30, 64, 175, 0.4)',
+    overlay: 'rgba(15, 23, 42, 0.3)',
+    cameraBoundary: 'rgba(30, 64, 175, 0.7)',
 };
 
 // ─── Legacy Colors export (backward-compatible with existing code) ───────────
