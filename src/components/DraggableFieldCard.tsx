@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Platform } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
     useSharedValue,
@@ -89,17 +89,28 @@ export const DraggableFieldCard: React.FC<DraggableFieldCardProps> = ({
 
     const composed = Gesture.Exclusive(longPressGesture, gesture);
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateX: translationX.value },
-            { translateY: translationY.value },
-            { scale: isDragging.value ? 1.05 : pulseScale.value },
-        ],
-        zIndex: isDragging.value ? 100 : 1,
-        elevation: isDragging.value ? 8 : (field.confidence < 0.7 ? 2 : 0),
-        shadowOpacity: isDragging.value ? 0.35 : (field.confidence < 0.7 ? 0.1 : 0),
-        shadowRadius: isDragging.value ? 10 : 4,
-    }), [field.confidence]);
+    const animatedStyle = useAnimatedStyle(() => {
+        const isWeb = Platform.OS === 'web';
+        const shadowOp = isDragging.value ? 0.35 : (field.confidence < 0.7 ? 0.1 : 0);
+        const shadowRad = isDragging.value ? 10 : 4;
+        const alpha = Math.round(shadowOp * 255).toString(16).padStart(2, '0');
+
+        return {
+            transform: [
+                { translateX: translationX.value },
+                { translateY: translationY.value },
+                { scale: isDragging.value ? 1.05 : pulseScale.value },
+            ],
+            zIndex: isDragging.value ? 100 : 1,
+            ...(isWeb ? {
+                boxShadow: '0px 4px ' + shadowRad + 'px ' + Colors.primary + alpha
+            } : {
+                elevation: isDragging.value ? 8 : (field.confidence < 0.7 ? 2 : 0),
+                shadowOpacity: shadowOp,
+                shadowRadius: shadowRad,
+            })
+        };
+    }, [field.confidence]);
 
     const confidenceColor = getConfidenceColor(field.confidence);
 
