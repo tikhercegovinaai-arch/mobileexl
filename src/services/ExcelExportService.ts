@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Paths, File } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import { ValidationField } from '../store/useAppStore';
 import { PDFTemplateService, PDFTemplateType } from './PDFTemplateService';
@@ -123,12 +123,20 @@ export class ExcelExportService {
             encoding = 'base64';
         }
 
-        const file = new File(Paths.cache, name);
-        await file.write(wbout as string, {
+        const fileUri = `${FileSystem.cacheDirectory}${name}`;
+
+        // Ensure the directory exists
+        const directoryUri = FileSystem.cacheDirectory;
+        const dirInfo = await FileSystem.getInfoAsync(directoryUri);
+        if (!dirInfo.exists) {
+            await FileSystem.makeDirectoryAsync(directoryUri, { intermediates: true });
+        }
+
+        await FileSystem.writeAsStringAsync(fileUri, wbout as string, {
             encoding,
         });
 
-        return file.uri;
+        return fileUri;
     }
 
     /** Bold + dark background header row */
@@ -163,7 +171,7 @@ export class ExcelExportService {
     }
 
     private static async _exportToPdf(
-        fields: ValidationField[], 
+        fields: ValidationField[],
         filename?: string,
         templateType: PDFTemplateType = 'corporate'
     ): Promise<string> {
