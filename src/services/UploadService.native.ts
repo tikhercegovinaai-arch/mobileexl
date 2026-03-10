@@ -4,7 +4,7 @@
  */
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { UploadedFile, UploadResult, FileCategory, MIME_TYPES } from './UploadService';
+import { UploadedFile, UploadResult, FileCategory, MIME_TYPES } from './UploadService.types';
 
 export async function pickFiles(
     categories: FileCategory[],
