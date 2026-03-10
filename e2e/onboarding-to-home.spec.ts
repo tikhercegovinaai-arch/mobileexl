@@ -63,4 +63,25 @@ test.describe('Exelent Core Journey', () => {
     // Verify Settings is visible
     await expect(page.getByTestId('settings-screen')).toBeVisible();
   });
+
+  test('Scenario 1.2: Returning user skips onboarding', async ({ page }) => {
+    await page.goto('/');
+    
+    // Complete onboarding once
+    const onboardingButton = page.getByTestId('onboarding-continue-button');
+    while (await onboardingButton.isVisible()) {
+        await onboardingButton.click();
+        await page.waitForTimeout(300);
+    }
+    
+    // Verify Home
+    await expect(page.getByTestId('home-screen')).toBeVisible();
+
+    // Reload page
+    await page.reload();
+    
+    // Verify it stays on Home and doesn't show Oboarding again
+    await expect(page.getByTestId('home-screen')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('onboarding-continue-button')).not.toBeVisible();
+  });
 });
