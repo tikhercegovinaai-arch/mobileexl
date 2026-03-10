@@ -29,6 +29,7 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
 }) => {
     const glowOpacity = useSharedValue(0);
     const { theme } = useTheme();
+    const viewRef = useRef<View>(null);
 
     React.useEffect(() => {
         glowOpacity.value = withTiming(isHighlighted ? 1 : 0, { duration: 150 });
@@ -44,15 +45,21 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
 
     const handleLayout = useCallback(
         (e: LayoutChangeEvent) => {
-            e.target.measure((_fx, _fy, w, h, px, py) => {
-                onLayout(columnKey, { x: px, y: py, width: w, height: h });
-            });
+            // e.target.measure can be undefined on the web
+            if (viewRef.current) {
+                viewRef.current.measure((_fx, _fy, w, h, px, py) => {
+                    onLayout(columnKey, { x: px, y: py, width: w, height: h });
+                });
+            } else {
+                // Fallback to relative layout if measure is somehow unavailable
+                onLayout(columnKey, { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y, width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height });
+            }
         },
         [columnKey, onLayout],
     );
 
     return (
-        <Animated.View style={[styles.column, glowStyle, { backgroundColor: theme.surface }]} onLayout={handleLayout}>
+        <Animated.View ref={viewRef} style={[styles.column, glowStyle, { backgroundColor: theme.surface }]} onLayout={handleLayout}>
             {/* Column header */}
             <View style={[styles.header, { backgroundColor: theme.surfaceAlt, borderBottomColor: theme.border }]}>
                 <Text style={[styles.headerLabel, { color: theme.textPrimary }]}>{label}</Text>
