@@ -10,7 +10,7 @@ config.resolver.extraNodeModules = {
     ...config.resolver.extraNodeModules,
     xlsx: path.resolve(__dirname, 'node_modules/xlsx/xlsx.js'),
     zod: path.resolve(__dirname, 'node_modules/zod/index.cjs'),
-    'zod-to-json-schema': path.resolve(__dirname, 'node_modules/zod-to-json-schema/dist/index.cjs'),
+    'zod-to-json-schema': path.resolve(__dirname, 'node_modules/zod-to-json-schema/dist/cjs/index.js'),
 };
 
 module.exports = config;
