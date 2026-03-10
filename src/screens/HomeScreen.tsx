@@ -7,8 +7,8 @@ import {
     SafeAreaView,
     StatusBar,
     Switch,
-    Animated,
-} from 'react-native';
+    Animated, Platform
+, Platform } from 'react-native';
 import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Animated , Platform } from 'react-native';
 import { useAppStore, ExtractionPhase } from '../store/useAppStore';
 import { BatchProcessingService } from '../services/BatchProcessingService';
 import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';

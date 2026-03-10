@@ -9,6 +9,7 @@ import {
     ScrollView,
     Dimensions,
     Animated,
+    Platform
 } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
