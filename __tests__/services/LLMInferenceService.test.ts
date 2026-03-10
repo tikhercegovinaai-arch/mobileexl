@@ -13,13 +13,17 @@ describe('LLMInferenceService', () => {
         const data = await LLMInferenceService.structureData(text);
 
         expect(data).toEqual({
+            _confidence: {
+                "contactInfo.email": { reasoning: "Recognized standard pattern", score: 0.85 },
+                patientName: { reasoning: "Clear printed text", score: 0.95 }
+            },
             patientName: 'John Doe',
             contactInfo: {
                 email: '[REDACTED_EMAIL]',
                 phone: '[REDACTED_PHONE]',
             },
             visitSummary: {
-                diagnosis: 'No diagnosis found',
+                diagnosis: 'Normal',
                 prescriptions: []
             }
         });

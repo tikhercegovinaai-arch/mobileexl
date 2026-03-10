@@ -1,4 +1,4 @@
-import { initLlama, LlamaContext } from '../types/react-native-llama';
+import { initLlama, LlamaContext } from 'react-native-llama';
 import { EXTRACTION_SCHEMA, CONFIDENCE_SCHEMA } from '../constants/schemas';
 
 /**
