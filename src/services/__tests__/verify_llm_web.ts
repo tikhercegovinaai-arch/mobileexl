@@ -1,12 +1,13 @@
-import { LLMInferenceService } from '../LLMInferenceService.web';
+import { LLMInferenceService } from '../LLMInferenceService.web.ts';
 
-async function verify() {
-    console.log("--- LLMInferenceService Web Verification ---");
     
-    // Check if API key is present
+    // Mock environment variable if not present for testing logic
     if (!process.env.EXPO_PUBLIC_GEMINI_API_KEY) {
-        console.warn("WARNING: EXPO_PUBLIC_GEMINI_API_KEY is not set. The service will use mock fallback.");
+        process.env.EXPO_PUBLIC_GEMINI_API_KEY = "mock-key-for-testing";
+        console.warn("WARNING: EXPO_PUBLIC_GEMINI_API_KEY is not set. Using a mock key for demonstration.");
     }
+
+    console.log("--- LLMInferenceService Web Verification ---");
 
     const testText = "Patient Name: Jane Doe\nDiagnosis: Hypertension\nPrescriptions: Lisinopril 10mg";
     
