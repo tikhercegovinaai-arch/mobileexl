@@ -6,6 +6,7 @@ import {
     ScrollView,
     LayoutRectangle,
     LayoutChangeEvent,
+    Platform,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
@@ -35,13 +36,21 @@ export const DropZoneColumn: React.FC<DropZoneColumnProps> = ({
         glowOpacity.value = withTiming(isHighlighted ? 1 : 0, { duration: 150 });
     }, [isHighlighted]);
 
-    const glowStyle = useAnimatedStyle(() => ({
-        borderColor: isHighlighted ? theme.primary : theme.border,
-        shadowOpacity: glowOpacity.value * 0.6,
-        shadowColor: theme.primary,
-        shadowRadius: 8,
-        elevation: glowOpacity.value * 6,
-    }), [isHighlighted, theme.primary, theme.border]);
+    const glowStyle = useAnimatedStyle(() => {
+        const opacityHex = Math.round((glowOpacity.value * 0.6) * 255).toString(16).padStart(2, '0');
+        return {
+            borderColor: isHighlighted ? theme.primary : theme.border,
+            ...(Platform.OS === 'web'
+                ? { boxShadow: `0px 4px 8px ${theme.primary}${opacityHex}` }
+                : {
+                    shadowOpacity: glowOpacity.value * 0.6,
+                    shadowColor: theme.primary,
+                    shadowRadius: 8,
+                    elevation: glowOpacity.value * 6,
+                }
+            )
+        };
+    }, [isHighlighted, theme.primary, theme.border]);
 
     const handleLayout = useCallback(
         (e: LayoutChangeEvent) => {

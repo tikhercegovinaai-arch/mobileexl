@@ -7,6 +7,7 @@ import {
     ScrollView,
     TouchableOpacity,
     LayoutRectangle,
+    Platform,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -67,17 +68,25 @@ function DraggableSourceCard({ field, onDropped }: DraggableSourceCardProps) {
             ty.value = withSpring(0);
         });
 
-    const animStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateX: tx.value },
-            { translateY: ty.value },
-            { scale: dragging.value ? 1.06 : 1 },
-        ],
-        zIndex: dragging.value ? 999 : 1,
-        shadowOpacity: dragging.value ? 0.4 : 0,
-        shadowRadius: dragging.value ? 12 : 0,
-        elevation: dragging.value ? 8 : 0,
-    }), []);
+    const animStyle = useAnimatedStyle(() => {
+        const opacityHex = dragging.value ? '66' : '00'; // 0.4 * 255
+        return {
+            transform: [
+                { translateX: tx.value },
+                { translateY: ty.value },
+                { scale: dragging.value ? 1.06 : 1 },
+            ],
+            zIndex: dragging.value ? 999 : 1,
+            ...(Platform.OS === 'web'
+                ? { boxShadow: dragging.value ? `0px 4px 12px ${theme.textPrimary}${opacityHex}` : 'none' }
+                : {
+                    shadowOpacity: dragging.value ? 0.4 : 0,
+                    shadowRadius: dragging.value ? 12 : 0,
+                    elevation: dragging.value ? 8 : 0,
+                }
+            )
+        };
+    }, [theme.textPrimary]);
 
     const confidenceColor =
         field.confidence >= 0.9 ? theme.success
