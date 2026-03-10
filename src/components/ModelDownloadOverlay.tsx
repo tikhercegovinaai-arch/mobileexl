@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { useTheme } from '../context/ThemeContext';
 import { Spacing, shadow } from '../constants/theme';
@@ -21,13 +21,13 @@ export default function ModelDownloadOverlay() {
                 toValue: 0,
                 friction: 8,
                 tension: 40,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             }).start();
         } else {
             Animated.timing(slideAnim, {
                 toValue: 200,
                 duration: 300,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             }).start();
         }
     }, [isVisible]);
@@ -36,18 +36,18 @@ export default function ModelDownloadOverlay() {
 
     const progressPercent = Math.round(modelDownload.progress);
     const mbDownloaded = (modelDownload.bytesWritten / (1024 * 1024)).toFixed(1);
-    const mbTotal = modelDownload.contentLength 
+    const mbTotal = modelDownload.contentLength
         ? (modelDownload.contentLength / (1024 * 1024)).toFixed(1)
         : '??';
 
     return (
-        <Animated.View 
+        <Animated.View
             style={[
-                styles.container, 
-                { 
-                    backgroundColor: theme.surface, 
+                styles.container,
+                {
+                    backgroundColor: theme.surface,
                     borderColor: theme.border,
-                    transform: [{ translateY: slideAnim }] 
+                    transform: [{ translateY: slideAnim }]
                 }
             ]}
         >
@@ -63,14 +63,14 @@ export default function ModelDownloadOverlay() {
             </View>
 
             <View style={[styles.progressBg, { backgroundColor: theme.surfaceAlt }]}>
-                <View 
+                <View
                     style={[
-                        styles.progressFill, 
-                        { 
-                            backgroundColor: theme.primary, 
-                            width: `${modelDownload.progress}%` 
+                        styles.progressFill,
+                        {
+                            backgroundColor: theme.primary,
+                            width: `${modelDownload.progress}%`
                         }
-                    ]} 
+                    ]}
                 />
             </View>
 
@@ -79,7 +79,7 @@ export default function ModelDownloadOverlay() {
                     DL_SIZE: {mbDownloaded}MB / {mbTotal}MB
                 </Text>
                 <View style={styles.actionGroup}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.actionButton, { borderColor: theme.border }]}
                         onPress={() => updateModelDownload({ isPaused: !modelDownload.isPaused, isDownloading: !!modelDownload.isPaused })}
                     >
@@ -87,7 +87,7 @@ export default function ModelDownloadOverlay() {
                             {modelDownload.isPaused ? 'RESUME' : 'PAUSE'}
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.actionButton, { borderColor: theme.error, marginLeft: Spacing.sm }]}
                         onPress={() => resetModelDownload()}
                     >

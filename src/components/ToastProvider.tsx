@@ -99,15 +99,15 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: str
     useEffect(() => {
         // Slide in
         Animated.parallel([
-            Animated.timing(translateY, { toValue: 0, duration: 250, useNativeDriver: true }),
-            Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+            Animated.timing(translateY, { toValue: 0, duration: 250, useNativeDriver: Platform.OS !== 'web' }),
+            Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: Platform.OS !== 'web' }),
         ]).start();
 
         // Auto-dismiss
         const timer = setTimeout(() => {
             Animated.parallel([
-                Animated.timing(translateY, { toValue: 80, duration: 200, useNativeDriver: true }),
-                Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+                Animated.timing(translateY, { toValue: 80, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+                Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
             ]).start(() => onDismiss(toast.id));
         }, toast.duration);
 
