@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
-import { Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { hapticSuccess, hapticError, hapticWarning, hapticLight } from '../utils/haptics';
 
@@ -20,7 +20,7 @@ interface ToastContextValue {
 }
 
 const ToastContext = createContext<ToastContextValue>({
-    show: () => {},
+    show: () => { },
 });
 
 export function useToast(): ToastContextValue {
@@ -157,11 +157,7 @@ const styles = StyleSheet.create({
         borderLeftWidth: 4,
         width: '100%',
         maxWidth: 400,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 6,
+        ...shadow('#000', 4, 8, 0.15, 6),
     },
     icon: {
         fontSize: Typography.fontSizeLG,

@@ -18,7 +18,7 @@ import Animated, {
     Easing,
 } from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
-import { Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Typography, Spacing, BorderRadius, shadow } from '../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -301,11 +301,7 @@ const styles = StyleSheet.create({
     scanline: {
         height: 2,
         width: '100%',
-        shadowColor: '#2196F3',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 10,
-        elevation: 5,
+        ...shadow('#2196F3', 0, 10, 0.8, 5),
     },
     labelWrapper: {
         position: 'absolute',
