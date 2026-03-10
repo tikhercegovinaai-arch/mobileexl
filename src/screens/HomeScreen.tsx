@@ -10,14 +10,10 @@ import {
     Animated,
     Platform
 } from 'react-native';
-import { Spacing, Typography, BorderRadius, shadow } from '../constants/theme';
+import { Spacing, shadow } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAppStore } from '../store/useAppStore';
-import AnalyticsScreen from './AnalyticsScreen';
-import HistoryScreen from './HistoryScreen';
-import ModelDownloadOverlay from '../components/ModelDownloadOverlay';
-import PermissionGate from '../components/PermissionGate';
-import ErrorBoundary from '../components/ErrorBoundary';
+import { Camera, Brain, FileSpreadsheet, Settings } from 'lucide-react-native';
 import { hapticMedium, hapticLight } from '../utils/haptics';
 import { enforceSecurityPolicy } from '../utils/security';
 import { TechnicalButton } from '../components/TechnicalButton';
@@ -33,17 +29,17 @@ interface HomeScreenProps {
 
 const FEATURES = [
     {
-        icon: '📷',
+        icon: Camera,
         title: 'Smart Capture',
         description: 'Auto-align and scan handwritten documents',
     },
     {
-        icon: '🤖',
+        icon: Brain,
         title: 'On-Device AI',
         description: 'Extract text privately — no internet required',
     },
     {
-        icon: '📊',
+        icon: FileSpreadsheet,
         title: 'Excel Export',
         description: 'Structured data into .xlsx files',
     },
@@ -88,30 +84,23 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
             {/* ── Header ───────────────────────────────────────────── */}
             <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                 <View>
-                    <Text style={[styles.appName, styles.monoText, { color: theme.textPrimary }]}>EXELENT_OS_1.0</Text>
-                    <Text style={[styles.tagline, styles.monoText, { color: theme.textMuted }]}>NEURAL_HANDWRITING_EXTRACTOR</Text>
+                    <Text style={[styles.appName, { color: theme.textPrimary }]}>Exelent</Text>
                 </View>
                 <TouchableOpacity style={[styles.settingsButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => { hapticLight(); onOpenSettings(); }} activeOpacity={0.7} testID="home-settings-button">
-                    <Text style={[styles.settingsIcon, { color: theme.textPrimary }]}>[CONFIG]</Text>
+                    <Settings size={20} color={theme.textPrimary} />
                 </TouchableOpacity>
             </Animated.View>
 
             {/* ── Hero area ─────────────────────────────────────────── */}
             <Animated.View style={[styles.hero, { opacity: fadeAnim, transform: [{ scale: fadeAnim }] }]}>
-                <View style={[styles.heroIconWrapper, { backgroundColor: theme.surfaceAlt, borderColor: theme.primary }]}>
-                    <View style={[styles.crosshair, styles.tl, { borderColor: theme.primary }]} />
-                    <View style={[styles.crosshair, styles.br, { borderColor: theme.primary }]} />
-                    <Text style={styles.heroIcon}>[AI]</Text>
-                </View>
-                <Text style={[styles.heroTitle, styles.monoText, { color: theme.textPrimary }]}>DATA_TRANSFORM_CORE</Text>
+                <Text style={[styles.heroTitle, { color: theme.textPrimary }]}>Transform handwriting into structured data</Text>
                 <Text style={[styles.heroSubtitle, { color: theme.textSecondary }]}>
-                    Capture handwritten logs. Execute neural extraction.
-                    Generate structured CSV/XLSX partitions.
+                    Capture logs, execute on-device neural extraction, and generate precise Excel partitions instantly.
                 </Text>
             </Animated.View>
 
             {/* ── Feature cards ─────────────────────────────────────── */}
-            <View style={styles.featureRow}>
+            <View style={styles.featureColumn}>
                 {FEATURES.map((f, i) => (
                     <Animated.View
                         key={f.title}
@@ -125,16 +114,23 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                             }
                         ]}
                     >
-                        <Text style={[styles.featureTitle, styles.monoText, { color: theme.primary }]}>{f.title.toUpperCase()}</Text>
-                        <Text style={[styles.featureDesc, { color: theme.textMuted }]}>{f.description}</Text>
+                        <View style={[styles.iconWrapper, { backgroundColor: theme.primary + '15' }]}>
+                            <f.icon size={24} color={theme.primary} />
+                        </View>
+                        <View style={styles.featureTextWrapper}>
+                            <Text style={[styles.featureTitle, { color: theme.textPrimary }]}>{f.title}</Text>
+                            <Text style={[styles.featureDesc, { color: theme.textMuted }]}>{f.description}</Text>
+                        </View>
                     </Animated.View>
                 ))}
             </View>
 
+            <View style={{ flex: 1 }} />
+
             {/* ── CTA ───────────────────────────────────────────────── */}
             <Animated.View style={[styles.ctaContainer, { opacity: fadeAnim, transform: [{ scale: buttonScale }] }]}>
                 <View style={styles.batchToggleContainer}>
-                    <Text style={[styles.batchToggleLabel, styles.monoText, { color: theme.textSecondary }]}>MODE_BATCH</Text>
+                    <Text style={[styles.batchToggleLabel, { color: theme.textSecondary }]}>BATCH MODE</Text>
                     <Switch
                         value={isBatchMode}
                         onValueChange={setIsBatchMode}
@@ -143,9 +139,8 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                         testID="home-batch-mode-switch"
                     />
                 </View>
-
                 <TechnicalButton
-                    label={isBatchMode ? '> EXECUTE_BATCH_SCAN' : '> EXECUTE_SCAN'}
+                    label="Start Extraction"
                     variant="primary"
                     onPress={async () => {
                         const isSecure = await enforceSecurityPolicy();
@@ -153,34 +148,21 @@ export default function HomeScreen({ onStartCapture, onOpenSettings, onUpload, o
                             onStartCapture(isBatchMode);
                         }
                     }}
-                    style={{ marginBottom: Spacing.lg }}
+                    style={{ marginBottom: Spacing.md }}
                     testID="home-execute-scan-button"
                 />
 
                 <TechnicalButton
-                    label="[IMPORT_EXTERNAL_DATA]"
+                    label="Import External Data"
                     variant="outline"
                     onPress={onUpload}
-                    style={{ marginBottom: Spacing.md }}
+                    style={{ marginBottom: Spacing.xl }}
                     testID="home-import-button"
-                />
-
-                <TechnicalButton
-                    label="[VIEW_SYSTEM_ANALYTICS]"
-                    variant="outline"
-                    onPress={onViewAnalytics}
-                    style={{ marginBottom: Spacing.md }}
-                />
-
-                <TechnicalButton
-                    label="[VIEW_EXTRACTION_HISTORY]"
-                    variant="outline"
-                    onPress={onViewHistory}
                 />
             </Animated.View>
 
             {/* ── Footer ───────────────────────────────────────────── */}
-            <Text style={[styles.footer, styles.monoText, { color: theme.textMuted }]}>STATUS: SECURE | NEURAL_LINK: ACTIVE | GDPR: [OK]</Text>
+            <Text style={[styles.footer, { color: theme.textMuted }]}>SECURE • ON-DEVICE • PRIVATE</Text>
         </SafeAreaView>
     );
 }
@@ -194,27 +176,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: Spacing.lg,
-        marginBottom: Spacing.xl,
+        paddingTop: Spacing.md,
+        marginBottom: Spacing.xxl,
     },
     appName: {
-        fontSize: 18,
-        fontWeight: '900',
-        letterSpacing: 2,
-    },
-    tagline: {
-        fontSize: 9,
-        marginTop: 4,
-        letterSpacing: 1,
+        fontSize: 24,
+        fontWeight: '800',
+        letterSpacing: -0.5,
     },
     settingsButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        padding: 10,
+        borderRadius: 12,
         borderWidth: 1,
-    },
-    settingsIcon: {
-        fontSize: 10,
-        fontWeight: '900',
     },
 
     // Hero
@@ -222,75 +195,55 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: Spacing.xl,
     },
-    heroIconWrapper: {
-        width: 80,
-        height: 80,
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: Spacing.md,
-        position: 'relative',
-    },
-    crosshair: {
-        position: 'absolute',
-        width: 10,
-        height: 10,
-    },
-    tl: {
-        top: -2,
-        left: -2,
-        borderTopWidth: 2,
-        borderLeftWidth: 2,
-    },
-    br: {
-        bottom: -2,
-        right: -2,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
-    },
-    heroIcon: {
-        fontSize: 20,
-        fontWeight: '900',
-        fontFamily: 'Courier',
-    },
     heroTitle: {
-        fontSize: 22,
-        fontWeight: '900',
-        marginBottom: Spacing.sm,
+        fontSize: 32,
+        fontWeight: '800',
+        marginBottom: Spacing.md,
         textAlign: 'center',
+        lineHeight: 40,
+        letterSpacing: -0.5,
     },
     heroSubtitle: {
-        fontSize: 12,
+        fontSize: 16,
         textAlign: 'center',
-        lineHeight: 18,
-        maxWidth: 280,
-        fontWeight: '600',
-        opacity: 0.8,
+        lineHeight: 24,
+        maxWidth: 320,
+        fontWeight: '500',
     },
 
     // Feature cards
-    featureRow: {
-        flexDirection: 'row',
-        gap: Spacing.sm,
+    featureColumn: {
+        flexDirection: 'column',
+        gap: Spacing.md,
         marginBottom: Spacing.xl,
     },
     featureCard: {
-        flex: 1,
-        borderRadius: 0,
+        flexDirection: 'row',
+        borderRadius: 16,
         padding: Spacing.md,
         borderWidth: 1,
-        marginBottom: Spacing.md,
-        gap: 4,
+        alignItems: 'center',
+    },
+    iconWrapper: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: Spacing.md,
+    },
+    featureTextWrapper: {
+        flex: 1,
     },
     featureTitle: {
-        fontSize: 10,
-        fontWeight: '900',
-        letterSpacing: 1,
+        fontSize: 16,
+        fontWeight: '700',
+        marginBottom: 4,
     },
     featureDesc: {
-        fontSize: 9,
-        lineHeight: 12,
-        fontWeight: '600',
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: '500',
     },
 
     // CTA
@@ -302,52 +255,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: Spacing.sm,
-        marginBottom: Spacing.lg,
+        marginBottom: Spacing.md,
     },
     batchToggleLabel: {
-        fontSize: 10,
-        fontWeight: '800',
-        letterSpacing: 1,
-    },
-    captureButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: Spacing.sm,
-        borderRadius: 0,
-        paddingVertical: 18,
-        marginBottom: Spacing.lg,
-    },
-    captureButtonText: {
         fontSize: 14,
-        fontWeight: '900',
-        color: 'white',
-        letterSpacing: 1,
+        fontWeight: '600',
+        letterSpacing: 0.5,
     },
-    uploadButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: Spacing.sm,
-        borderRadius: 0,
-        paddingVertical: 12,
-        borderWidth: 1,
-    },
-    uploadButtonText: {
-        fontSize: 11,
-        fontWeight: '900',
-        letterSpacing: 1,
-    },
-    monoText: {
-        fontFamily: 'Courier',
-        fontWeight: '700',
-    },
+
+    // Footer
     footer: {
+        fontSize: 12,
         textAlign: 'center',
-        fontSize: 9,
-        fontWeight: '800',
+        paddingBottom: Spacing.lg,
+        fontWeight: '700',
         letterSpacing: 1,
-        marginBottom: Spacing.lg,
     },
 });
-

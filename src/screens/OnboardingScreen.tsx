@@ -36,27 +36,27 @@ interface Slide {
 const slides: Slide[] = [
     {
         id: '1',
-        label: 'DOC_SCAN_01',
+        label: 'Step 01',
         title: 'Precision Capture',
-        description: 'Industrial-grade edge detection for handwritten logs, invoices, and blueprints. Local processing only.',
+        description: 'Effortlessly capture handwritten logs, invoices, and blueprints. Processed locally on your device.',
     },
     {
         id: '2',
-        label: 'AI_EXTRACT_02',
+        label: 'Step 02',
         title: 'Neural Parsing',
-        description: 'Advanced on-device neural networks transform ink to data. Zero latency, 100% privacy.',
+        description: 'Advanced on-device AI transforms your handwritten notes into structured data instantly. Complete privacy.',
     },
     {
         id: '3',
-        label: 'DATA_VALID_03',
+        label: 'Step 03',
         title: 'Smart Validation',
-        description: 'Confidence-scored field review. Verify and refine extracted data with surgical precision.',
+        description: 'Review and refine extracted data with confidence scores. Ensure 100% accuracy.',
     },
     {
         id: '4',
-        label: 'SYS_EXPORT_04',
+        label: 'Step 04',
         title: 'System Export',
-        description: 'Seamless integration with your ecosystem. Export to XLSX, CSV, or JSON in seconds.',
+        description: 'Seamlessly export to Excel, CSV, or JSON and integrate with your existing workflow.',
     },
 ];
 
@@ -165,12 +165,12 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                     <BackgroundGrid />
                     <Crosshair />
                     <Scanline active={isActive} />
-                    <View style={styles.labelWrapper}>
+                    <View style={[styles.labelWrapper, { backgroundColor: theme.primary + '15' }]}>
                         <Text style={[styles.monoLabel, { color: theme.primary }]}>{item.label}</Text>
                     </View>
                 </View>
                 <View style={styles.textContainer}>
-                    <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>{item.title.toUpperCase()}</Text>
+                    <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>{item.title}</Text>
                     <Text style={[styles.slideDescription, { color: theme.textSecondary }]}>{item.description}</Text>
                 </View>
             </View>
@@ -182,10 +182,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.header}>
-                <Text style={[styles.headerLogo, { color: theme.textPrimary }]}>EXELENT // 2026</Text>
+                <Text style={[styles.headerLogo, { color: theme.textPrimary }]}>Exelent</Text>
                 {!isLastSlide && (
                     <TouchableOpacity onPress={handleSkip} testID="onboarding-skip-button">
-                        <Text style={[styles.skipText, { color: theme.textMuted }]}>SKIP_LGC</Text>
+                        <Text style={[styles.skipText, { color: theme.textMuted }]}>Skip</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -216,7 +216,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                     testID="onboarding-continue-button"
                 >
                     <Text style={[styles.ctaText, { color: theme.textInverse }]}>
-                        {isLastSlide ? 'INITIALIZE_SYSTEM' : 'CONTINUE_NAV'}
+                        {isLastSlide ? 'Get Started' : 'Continue'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -236,14 +236,13 @@ const styles = StyleSheet.create({
         paddingTop: Spacing.md,
     },
     headerLogo: {
-        fontSize: 12,
-        fontWeight: '700',
-        letterSpacing: 2,
+        fontSize: 18,
+        fontWeight: '800',
+        letterSpacing: -0.5,
     },
     skipText: {
-        fontSize: 12,
+        fontSize: 16,
         fontWeight: '600',
-        letterSpacing: 1,
     },
     flatList: {
         flex: 1,
@@ -256,15 +255,16 @@ const styles = StyleSheet.create({
     visualContainer: {
         width: SCREEN_WIDTH * 0.8,
         height: SCREEN_WIDTH * 0.8,
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: 'rgba(0,0,0,0.05)',
+        borderRadius: 32,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(0,0,0,0.05)',
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
     },
     gridContainer: {
-        opacity: 0.5,
+        opacity: 0.3,
     },
     gridLineV: {
         position: 'absolute',
@@ -286,52 +286,55 @@ const styles = StyleSheet.create({
     },
     crosshairH: {
         width: '100%',
-        height: 1,
+        height: 2,
         position: 'absolute',
+        borderRadius: 1,
     },
     crosshairV: {
-        width: 1,
+        width: 2,
         height: '100%',
         position: 'absolute',
+        borderRadius: 1,
     },
     scanlineWindow: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'transparent',
     },
     scanline: {
-        height: 2,
+        height: 3,
         width: '100%',
-        ...shadow('#2196F3', 0, 10, 0.8, 5),
+        ...shadow('#3B82F6', 0, 10, 0.8, 5),
     },
     labelWrapper: {
         position: 'absolute',
-        bottom: 10,
-        left: 10,
-        padding: 4,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        top: 24,
+        left: 24,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 100,
     },
     monoLabel: {
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: '700',
-        fontFamily: 'Courier',
     },
     textContainer: {
-        marginTop: Spacing.xxl,
+        marginTop: Spacing.xl,
         paddingHorizontal: Spacing.xl,
         alignItems: 'center',
     },
     slideTitle: {
-        fontSize: 22,
+        fontSize: 32,
         fontWeight: '800',
-        letterSpacing: 1,
-        marginBottom: Spacing.md,
+        letterSpacing: -0.5,
+        marginBottom: Spacing.sm,
         textAlign: 'center',
     },
     slideDescription: {
-        fontSize: 15,
+        fontSize: 16,
         textAlign: 'center',
-        lineHeight: 22,
+        lineHeight: 24,
         opacity: 0.8,
+        fontWeight: '500',
     },
     footer: {
         paddingBottom: Spacing.xxl,
@@ -344,18 +347,19 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     dot: {
-        height: 4,
-        borderRadius: 2,
+        height: 8,
+        borderRadius: 4,
     },
     ctaBtn: {
         marginHorizontal: Spacing.xl,
-        paddingVertical: Spacing.lg,
-        borderRadius: 2, // Sharp corners for industrial feel
+        paddingVertical: 18,
+        borderRadius: 16,
         alignItems: 'center',
+        ...shadow('#3B82F6', 4, 12, 0.3),
     },
     ctaText: {
-        fontSize: 13,
-        fontWeight: '900',
-        letterSpacing: 2,
+        fontSize: 16,
+        fontWeight: '700',
+        letterSpacing: 0.5,
     },
 });
